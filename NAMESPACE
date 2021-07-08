@@ -1,0 +1,24 @@
+export("get_ARPA_Lombardia_AQ_data","get_ARPA_Lombardia_W_data","get_ARPA_Lombardia_AQ_municipal_data",
+       "get_ARPA_Lombardia_AQ_registry","get_ARPA_Lombardia_W_registry","get_ARPA_Lombardia_AQ_municipal_registry",
+       "get_ARPA_Lombardia_zoning","get_Lombardia_geospatial",
+       "is_ARPALdf", "is_ARPALdf_AQ", "is_ARPALdf_AQ_mun", "is_ARPALdf_W",
+       "map_Lombardia_stations", "Time_aggregate","ARPALdf_Summary","ARPALdf_Summary_map")
+import("tidyverse","readr", "ggplot2")
+importFrom("stats", "quantile")
+importFrom("dplyr", "filter", "bind_rows", "case_when","recode")
+importFrom("utils", "data", "download.file","unzip")
+importFrom("magrittr", "%>%")
+importFrom("rlang", ".data")
+importFrom("lubridate", "ymd", "dmy_hms", "ymd_hms")
+importFrom("stringi","stri_escape_unicode","stri_trans_general")
+importFrom("stringr","str_to_title")
+importFrom("readr", "read_csv")
+importFrom("eurostat", "get_eurostat_geospatial")
+importFrom("sf", "st_as_sf")
+importFrom("aweek","week2date","date2week")
+importFrom("data.table","fread")
+importFrom("doParallel","registerDoParallel")
+importFrom("parallel","makeCluster","detectCores","clusterExport","stopCluster","parLapply")
+importFrom("tibble","tibble","rownames_to_column")
+importFrom("stats", "mad", "median", "sd","cor")
+importFrom("tm", "removePunctuation", "removeNumbers", "stripWhitespace")
