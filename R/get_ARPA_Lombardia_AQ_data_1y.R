@@ -56,16 +56,16 @@ get_ARPA_Lombardia_AQ_data_1y <-
     if (by_sensor %in% c(1,TRUE)) {
       Aria <- Aria %>%
         dplyr::filter(!is.na(.data$Date)) %>%
-        dplyr::mutate_all(list( ~ dplyr::na_if(., -9999))) %>%
-        dplyr::mutate_all(list( ~ dplyr::na_if(., NaN))) %>%
+        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,-9999))) %>%
+        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,NaN))) %>%
         dplyr::select(.data$Date,.data$IDStation,.data$NameStation,.data$IDSensor,
                       .data$Pollutant,.data$Value)
     } else if (by_sensor %in% c(0,FALSE)) {
       Aria <- Aria %>%
         dplyr::filter(!is.na(.data$Date)) %>%
         dplyr::select(-c(.data$IDSensor)) %>%
-        dplyr::mutate_all(list( ~ dplyr::na_if(., -9999))) %>%
-        dplyr::mutate_all(list( ~ dplyr::na_if(., NaN))) %>%
+        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,-9999))) %>%
+        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,NaN))) %>%
         tidyr::pivot_wider(names_from = .data$Pollutant, values_from = .data$Value,
                            values_fn = function(x) mean(x,na.rm=T)) # Mean (without NA) of a NA vector = NaN
     }

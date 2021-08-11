@@ -59,7 +59,7 @@ get_ARPA_Lombardia_AQ_municipal_data <-
     } else {
       cl <- parallel::makeCluster(parallel::detectCores()/2, type = 'PSOCK')
       doParallel::registerDoParallel(cl)
-      parallel::clusterExport(cl, varlist = c("get_ARPA_Lombardia_AQ_data_1y",
+      parallel::clusterExport(cl, varlist = c("get_ARPA_Lombardia_AQ_municipal_data_1y",
                                               "Time_aggregate",
                                               "AQ_metadata_reshape",
                                               "url_dataset_year",
@@ -70,7 +70,7 @@ get_ARPA_Lombardia_AQ_municipal_data <-
       }
       Aria <- dplyr::bind_rows(parallel::parLapply(cl = cl,
                                                    X = Year,
-                                                   fun = get_ARPA_Lombardia_AQ_data_1y,
+                                                   fun = get_ARPA_Lombardia_AQ_municipal_data_1y,
                                                    ID_station = ID_station,
                                                    Var_vec = Var_vec))
       if (verbose==T) {

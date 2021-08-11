@@ -58,7 +58,7 @@ ARPALdf_Summary_map <- function(Data, Title_main, Title_legend = "Variable", Var
     Data$var <- as.numeric(dplyr::pull(Data[,Variable]))
     Data <- dplyr::left_join(Data,Lombardia,by=c("NameStation"="City"))
     Data <- Data %>%
-      sf::st_as_sf(crs = 4326)
+      sf::st_as_sf()
 
     geo_plot <- Data %>%
       ggplot2::ggplot() +
