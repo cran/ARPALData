@@ -82,8 +82,8 @@ get_ARPA_Lombardia_AQ_municipal_data_1y <-
         dplyr::mutate(Pollutant = paste0(.data$Pollutant,"_",.data$Operator)) %>%
         dplyr::filter(!is.na(.data$Date)) %>%
         dplyr::select(-c(.data$Operator)) %>%
-        dplyr::mutate_all(list( ~ dplyr::na_if(., -9999))) %>%
-        dplyr::mutate_all(list( ~ dplyr::na_if(., NaN))) %>%
+        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,-9999))) %>%
+        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,NaN))) %>%
         dplyr::select(.data$Date,.data$IDStation,.data$NameStation,.data$IDSensor,
                       .data$Pollutant,.data$Value)
     } else if (by_sensor %in% c(0,FALSE)) {
@@ -91,8 +91,8 @@ get_ARPA_Lombardia_AQ_municipal_data_1y <-
         dplyr::mutate(Pollutant = paste0(.data$Pollutant,"_",.data$Operator)) %>%
         dplyr::filter(!is.na(.data$Date)) %>%
         dplyr::select(-c(.data$IDSensor,.data$Operator)) %>%
-        dplyr::mutate_all(list( ~ dplyr::na_if(., -9999))) %>%
-        dplyr::mutate_all(list( ~ dplyr::na_if(., NaN))) %>%
+        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,-9999))) %>%
+        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,NaN))) %>%
         tidyr::pivot_wider(names_from = .data$Pollutant, values_from = .data$Value,
                            values_fn = function(x) mean(x,na.rm=T)) # Mean (without NA) of a NA vector = NaN
     }

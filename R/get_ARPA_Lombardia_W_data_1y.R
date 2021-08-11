@@ -54,7 +54,9 @@ get_ARPA_Lombardia_W_data_1y <-
                                                  TRUE ~ as.character(.data$Measure))) %>%
         dplyr::select(-c(.data$Operator)) %>%
         dplyr::select(.data$Date,.data$IDStation,.data$NameStation,.data$IDSensor,
-                      .data$Measure,.data$Value)
+                      .data$Measure,.data$Value) %>%
+        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,-9999))) %>%
+        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,NaN)))
     } else if (by_sensor %in% c(0,FALSE)) {
       Meteo <- Meteo %>%
         dplyr::filter(!is.na(.data$Date)) %>%
@@ -69,9 +71,9 @@ get_ARPA_Lombardia_W_data_1y <-
         dplyr::select(-c(.data$IDSensor, .data$Operator)) %>%
         tidyr::pivot_wider(names_from = .data$Measure, values_from = .data$Value,
                            values_fn = function(x) mean(x,na.rm=T)) %>%
-        dplyr::mutate(Wind_direction = round(.data$Wind_direction,0),
-                      Wind_direction_max = round(.data$Wind_direction_max,0)) %>%
-        dplyr::mutate_all(list( ~ dplyr::na_if(., -9999)))
+        dplyr::mutate(dplyr::across(dplyr::matches(c("Wind_direction","Wind_direction_max")), ~ round(.x,0))) %>%
+        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,-9999))) %>%
+        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,NaN)))
     }
 
     Meteo[is.na(Meteo)] <- NA

@@ -319,8 +319,8 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = 1, co
       dplyr::summarise(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric) &
                                        !tidyselect::vars_select_helpers$where(is.integer), ~ Hampel_flt(.x))) %>%
       list()
-    hampel <- matrix(NA,nrow = dim(out[[1]])[1], ncol = 5)
-    for (i in 1:dim(out[[1]])[1]) {
+    hampel <- matrix(NA,nrow = dim(out[[1]])[2], ncol = 5)
+    for (i in 1:dim(out[[1]])[2]) {
       hampel[,1] <- names(out[[1]])
       hampel[i,2] <- as.numeric(out[[1]][[i]]$I_low)
       hampel[i,3] <- round(length(out[[1]][[i]]$outlier_ind_low)/dim(Data)[1]*100,2)

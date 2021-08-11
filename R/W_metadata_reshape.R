@@ -13,7 +13,6 @@ W_metadata_reshape <-
       dplyr::mutate(Altitude = as.numeric(.data$Altitude),
                     DateStart = lubridate::ymd(.data$DateStart),
                     DateStop = lubridate::ymd(.data$DateStop),
-                    NameStation = stringi::stri_escape_unicode(.data$NameStation),
                     Measure = stringi::stri_escape_unicode(.data$Measure)) %>%
       dplyr::select(.data$IDSensor, .data$IDStation, .data$Measure, .data$NameStation, .data$Altitude,
                     .data$Province, .data$DateStart, .data$DateStop, .data$Latitude, .data$Longitude) %>%
@@ -26,6 +25,18 @@ W_metadata_reshape <-
                                             "Temperatura" = "Temperature",
                                             "Umidit\\u00e0 Relativa" = "Relative_humidity",
                                             "Velocit\\u00e0 Vento" = "Wind_speed"))
+
+    ### Name stations
+    Metadata <- Metadata %>%
+      dplyr::mutate(dplyr::across(c(.data$NameStation), ~ stringi::stri_trans_general(str = .x, id="Latin-ASCII")),
+                    dplyr::across(c(.data$NameStation), toupper),
+                    dplyr::across(c(.data$NameStation), ~ gsub("\\-", " ", .x)),
+                    dplyr::across(c(.data$NameStation), ~ stringr::str_replace_all(.x, c("S\\."="San ","s\\."="San ",
+                                                                                         "V\\."="Via ","v\\."="Via "))),
+                    dplyr::across(c(.data$NameStation), tm::removePunctuation),
+                    dplyr::across(c(.data$NameStation), tm::removeNumbers),
+                    dplyr::across(c(.data$NameStation), tm::stripWhitespace),
+                    dplyr::across(c(.data$NameStation), stringr::str_to_title))
 
     return(Metadata)
   }

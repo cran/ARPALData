@@ -7,6 +7,9 @@ function() {
                   Altitude = .data$quota, Province = .data$provincia, City = .data$comune,
                   DateStart = .data$datastart, DateStop = .data$datastop,
                   Latitude = .data$lat, Longitude = .data$lng) %>%
+    dplyr::mutate(Altitude = readr::parse_number(.data$Altitude, na = c("NA", "NULL")),
+                  DateStart = lubridate::ymd(.data$DateStart),
+                  DateStop = lubridate::ymd(.data$DateStop)) %>%
     dplyr::mutate(Altitude = as.numeric(.data$Altitude),
                   DateStart = lubridate::ymd(.data$DateStart),
                   DateStop = lubridate::ymd(.data$DateStop)) %>%
@@ -31,6 +34,19 @@ function() {
                                             "Particelle sospese PM2.5" = "PM2.5",
                                             "Particolato Totale Sospeso" = "PM_tot",
                                             "Piombo" = "Lead"))
+
+  ### Name stations
+  Metadata <- Metadata %>%
+    dplyr::mutate(dplyr::across(c(.data$NameStation,.data$City), ~ stringi::stri_trans_general(str = .x, id="Latin-ASCII")),
+                  dplyr::across(c(.data$NameStation,.data$City), toupper),
+                  dplyr::across(c(.data$NameStation,.data$City), ~ gsub("\\-", " ", .x)),
+                  dplyr::across(c(.data$NameStation,.data$City), ~ stringr::str_replace_all(.x, c("S\\."="San ","s\\."="San ",
+                                                                                                  "V\\."="Via ","v\\."="Via "))),
+                  dplyr::across(c(.data$NameStation,.data$City), tm::removePunctuation),
+                  dplyr::across(c(.data$NameStation,.data$City), tm::removeNumbers),
+                  dplyr::across(c(.data$NameStation,.data$City), tm::stripWhitespace),
+                  dplyr::across(c(.data$NameStation,.data$City), stringr::str_to_title))
+
 
   ### Add extra information from ARPA offices (uploaded on Paolo Maranzano's GitHub page)
   # ARPA_zone = ARPA Lombardia zoning of the region: https://www.arpalombardia.it/Pages/Aria/Rete-di-rilevamento/Zonizzazione.aspx
