@@ -36,7 +36,9 @@ AQ_municipal_metadata_reshape <-
                     dplyr::across(c(.data$NameStation), toupper),
                     dplyr::across(c(.data$NameStation), ~ gsub("\\-", " ", .x)),
                     dplyr::across(c(.data$NameStation), ~ stringr::str_replace_all(.x, c("S\\."="San ","s\\."="San ",
-                                                                                         "V\\."="Via ","v\\."="Via "))),
+                                                                                         "V\\."="Via ","v\\."="Via ",
+                                                                                         " D\\`" = " D\\' ", " D\\` " = " D\\'",
+                                                                                         "D\\`" = " D\\'", "D\\'" = " D\\' "))),
                     dplyr::across(c(.data$NameStation), tm::removePunctuation),
                     dplyr::across(c(.data$NameStation), tm::removeNumbers),
                     dplyr::across(c(.data$NameStation), tm::stripWhitespace)) %>%
@@ -47,24 +49,8 @@ AQ_municipal_metadata_reshape <-
                                                 "PUEGNAGO DEL GARDA" = "PUEGNAGO SUL GARDA",
                                                 "FELONICA" = "SERMIDE E FELONICA",
                                                 "GERRE DE CAPRIOLI" = "GERRE DECAPRIOLI")) %>%
-      dplyr::mutate(dplyr::across(c(.data$NameStation), stringr::str_to_title))
-
-    # ### Name stations (Municipalities)
-    # Metadata <- Metadata %>%
-    #   dplyr::mutate(NameStation = stringi::stri_trans_general(str=.data$NameStation, id="Latin-ASCII"),
-    #                 NameStation = toupper(.data$NameStation),
-    #                 NameStation = gsub("\\-", " ",.data$NameStation),
-    #                 NameStation = tm::removePunctuation(.data$NameStation),
-    #                 NameStation = tm::removeNumbers(.data$NameStation),
-    #                 NameStation = tm::stripWhitespace(.data$NameStation),
-    #                 NameStation = dplyr::recode(.data$NameStation,
-    #                                             "CASASCO DINTELVI" = "CASASCO INTELVI",
-    #                                             "CERANO DINTELVI" = "CERANO INTELVI",
-    #                                             "SAN GIORGIO BIGARELLO" = "BIGARELLO",
-    #                                             "PUEGNAGO DEL GARDA" = "PUEGNAGO SUL GARDA",
-    #                                             "FELONICA" = "SERMIDE E FELONICA",
-    #                                             "GERRE DE CAPRIOLI" = "GERRE DECAPRIOLI"),
-    #                 NameStation = stringr::str_to_title(.data$NameStation))
+      dplyr::mutate(dplyr::across(c(.data$NameStation), stringr::str_to_title),
+                    dplyr::across(c(.data$NameStation), ~ stringr::str_replace_all(.x, c(" D " = " D\\'"))))
 
     structure(list(Metadata = Metadata))
     attr(Metadata, "class") <- c("ARPALdf","tbl_df","tbl","data.frame")

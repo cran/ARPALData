@@ -1,7 +1,7 @@
-7bf0048463c3c6edc36043c8b57983f5 *DESCRIPTION
+5f5ad5f593c23703c6aae0b8638631a6 *DESCRIPTION
 f32358576435092a7bba102eea054cfb *NAMESPACE
-e13f6742b7a44d0979860df15d66fc93 *R/AQ_metadata_reshape.R
-9fe437f7f690002bc0f440707a5f56ac *R/AQ_municipal_metadata_reshape.R
+218a1ae3c9aabd9cbcc569cf45575a4b *R/AQ_metadata_reshape.R
+4cac0019bbcd51f90537de17143d1f24 *R/AQ_municipal_metadata_reshape.R
 86def1cec41e4fd71eb6dd75c68b98fe *R/ARPALData.R
 e0dec7af73c1aa5b35bc919ce71f6948 *R/ARPALdf_Summary.R
 be70fd25be892651bfd9f24200360b11 *R/ARPALdf_Summary_map.R
@@ -9,7 +9,7 @@ be70fd25be892651bfd9f24200360b11 *R/ARPALdf_Summary_map.R
 8b0e40984af12b9369438cbb6a9971b7 *R/Excess_na_converter.R
 8f0081ebdedb580ca10e200f48304a91 *R/Hampel_flt.R
 57ac109e55e624d01492a28565d510b1 *R/Time_aggregate.R
-3f74f8595110e7e81560e64b427a652a *R/W_metadata_reshape.R
+662f37be455cfd1c15a4ef7eb77644e7 *R/W_metadata_reshape.R
 81bab12e3a15bf03522f641599c6f9c1 *R/Wind_averaging.R
 a48030ef28301f26a93d81ae26573958 *R/get_ARPA_Lombardia_AQ_data.R
 987f2b91da7a01d8b86f96e17575df78 *R/get_ARPA_Lombardia_AQ_data_1y.R
@@ -19,7 +19,7 @@ a48030ef28301f26a93d81ae26573958 *R/get_ARPA_Lombardia_AQ_data.R
 0c4fd1dc93f447a676c260b7ed99db36 *R/get_ARPA_Lombardia_AQ_registry.R
 dcb7795fae32174303cd184051948121 *R/get_ARPA_Lombardia_W_data.R
 b6855f927af6034f588c4d2bf96ed1e2 *R/get_ARPA_Lombardia_W_data_1y.R
-e2ee156ab753d21e9b34c0980bcb5bb0 *R/get_ARPA_Lombardia_W_registry.R
+2e2f8c524108103a481d4eae6f659e5d *R/get_ARPA_Lombardia_W_registry.R
 f45f9779e1b69957df8d3347d439e007 *R/get_ARPA_Lombardia_zoning.R
 177f409f672d26e05dac47e0f8dee995 *R/get_Lombardia_geospatial.R
 48bbdacf668d06779eb2623906cb3a1a *R/is.infinite_df.R
@@ -44,7 +44,7 @@ fe070d945a0801b2fb66e20e09b2d1be *man/get_ARPA_Lombardia_AQ_municipal_data.Rd
 054f4d2a55afc2f1d7a9996474be93dd *man/get_ARPA_Lombardia_AQ_municipal_registry.Rd
 38f41922111ff93a72854296d80863c1 *man/get_ARPA_Lombardia_AQ_registry.Rd
 44360ac25fc338719feee1808a865d4e *man/get_ARPA_Lombardia_W_data.Rd
-d90bc026130c9b499123e4a9a3965c63 *man/get_ARPA_Lombardia_W_registry.Rd
+d8c81d22dc8733487a3011028da901fa *man/get_ARPA_Lombardia_W_registry.Rd
 23e5f724a2ea489beb916091b5d104cb *man/get_ARPA_Lombardia_zoning.Rd
 dd5febf401048c1b88d1538ae92c9d19 *man/get_Lombardia_geospatial.Rd
 49af68cb8e4bd8f33c95c40cf87ab9e2 *man/is_ARPALdf.Rd

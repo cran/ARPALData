@@ -22,4 +22,5 @@ https://www.dati.lombardia.it/Ambiente/Stazioni-Meteorologiche/nf78-nj6b
 \examples{
 get_ARPA_Lombardia_W_registry()
 
+
 }
