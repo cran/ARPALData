@@ -10,9 +10,6 @@ function() {
     dplyr::mutate(Altitude = readr::parse_number(.data$Altitude, na = c("NA", "NULL")),
                   DateStart = lubridate::ymd(.data$DateStart),
                   DateStop = lubridate::ymd(.data$DateStop)) %>%
-    dplyr::mutate(Altitude = as.numeric(.data$Altitude),
-                  DateStart = lubridate::ymd(.data$DateStart),
-                  DateStop = lubridate::ymd(.data$DateStop)) %>%
     dplyr::select(.data$IDSensor, .data$IDStation, .data$Pollutant, .data$NameStation, .data$Altitude,
                   .data$Province, .data$City, .data$DateStart, .data$DateStop, .data$Latitude, .data$Longitude) %>%
     dplyr::mutate(Pollutant = dplyr::recode(.data$Pollutant,
@@ -41,11 +38,14 @@ function() {
                   dplyr::across(c(.data$NameStation,.data$City), toupper),
                   dplyr::across(c(.data$NameStation,.data$City), ~ gsub("\\-", " ", .x)),
                   dplyr::across(c(.data$NameStation,.data$City), ~ stringr::str_replace_all(.x, c("S\\."="San ","s\\."="San ",
-                                                                                                  "V\\."="Via ","v\\."="Via "))),
+                                                                                                  "V\\."="Via ","v\\."="Via ",
+                                                                                                  " D\\`" = " D\\' ", " D\\` " = " D\\'",
+                                                                                                  "D\\`" = " D\\'", "D\\'" = " D\\' "))),
                   dplyr::across(c(.data$NameStation,.data$City), tm::removePunctuation),
                   dplyr::across(c(.data$NameStation,.data$City), tm::removeNumbers),
                   dplyr::across(c(.data$NameStation,.data$City), tm::stripWhitespace),
-                  dplyr::across(c(.data$NameStation,.data$City), stringr::str_to_title))
+                  dplyr::across(c(.data$NameStation,.data$City), stringr::str_to_title),
+                  dplyr::across(c(.data$NameStation,.data$City), ~ stringr::str_replace_all(.x, c(" D " = " D\\'"))))
 
 
   ### Add extra information from ARPA offices (uploaded on Paolo Maranzano's GitHub page)

@@ -12,8 +12,7 @@ W_metadata_reshape <-
                     Latitude = .data$lat, Longitude = .data$lng) %>%
       dplyr::mutate(Altitude = as.numeric(.data$Altitude),
                     DateStart = lubridate::ymd(.data$DateStart),
-                    DateStop = lubridate::ymd(.data$DateStop),
-                    Measure = stringi::stri_escape_unicode(.data$Measure)) %>%
+                    DateStop = lubridate::ymd(.data$DateStop)) %>%
       dplyr::select(.data$IDSensor, .data$IDStation, .data$Measure, .data$NameStation, .data$Altitude,
                     .data$Province, .data$DateStart, .data$DateStop, .data$Latitude, .data$Longitude) %>%
       dplyr::mutate(Measure = dplyr::recode(.data$Measure,
@@ -22,9 +21,9 @@ W_metadata_reshape <-
                                             "Livello Idrometrico" = "Water_height",
                                             "Precipitazione" = "Rainfall",
                                             "Radiazione Globale" = "Global_radiation",
-                                            "Temperatura" = "Temperature",
-                                            "Umidit\\u00e0 Relativa" = "Relative_humidity",
-                                            "Velocit\\u00e0 Vento" = "Wind_speed"))
+                                            "Temperatura" = "Temperature"),
+                    Measure = ifelse(.data$Measure == rlang::as_utf8_character("Umidit\u00e0 Relativa"),"Relative_humidity",.data$Measure),
+                    Measure = ifelse(.data$Measure == rlang::as_utf8_character("Velocit\u00e0 Vento"),"Relative_humidity",.data$Measure))
 
     ### Name stations
     Metadata <- Metadata %>%
@@ -32,11 +31,14 @@ W_metadata_reshape <-
                     dplyr::across(c(.data$NameStation), toupper),
                     dplyr::across(c(.data$NameStation), ~ gsub("\\-", " ", .x)),
                     dplyr::across(c(.data$NameStation), ~ stringr::str_replace_all(.x, c("S\\."="San ","s\\."="San ",
-                                                                                         "V\\."="Via ","v\\."="Via "))),
+                                                                                         "V\\."="Via ","v\\."="Via ",
+                                                                                         " D\\`" = " D\\' ", " D\\` " = " D\\'",
+                                                                                         "D\\`" = " D\\'", "D\\'" = " D\\' "))),
                     dplyr::across(c(.data$NameStation), tm::removePunctuation),
                     dplyr::across(c(.data$NameStation), tm::removeNumbers),
                     dplyr::across(c(.data$NameStation), tm::stripWhitespace),
-                    dplyr::across(c(.data$NameStation), stringr::str_to_title))
+                    dplyr::across(c(.data$NameStation), stringr::str_to_title),
+                    dplyr::across(c(.data$NameStation), ~ stringr::str_replace_all(.x, c(" D " = " D\\'"))))
 
     return(Metadata)
   }

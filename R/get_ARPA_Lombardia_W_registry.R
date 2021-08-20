@@ -11,7 +11,9 @@
 #'
 #' @return A data frame of class 'data.frame' and 'ARPALdf'. The object is fully compatible with Tidyverse.
 #'
-#' @examples get_ARPA_Lombardia_W_registry()
+#' @examples
+#' get_ARPA_Lombardia_W_registry()
+#'
 #'
 #' @export
 
