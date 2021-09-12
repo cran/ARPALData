@@ -121,7 +121,8 @@ get_ARPA_Lombardia_AQ_data <-
                                     Frequency == "monthly" ~ "months",
                                     Frequency == "yearly" ~ "years")
       Aria <- Aria %>%
-        dplyr::arrange(.data$Date)
+        dplyr::arrange(.data$Date) %>% ### new
+        dplyr::filter(lubridate::year(.data$Date) %in% Year)
       dt <- seq(min(Aria$Date),max(Aria$Date), by = freq_unit)
       st <- unique(Aria$IDStation)
       grid <- data.frame(tidyr::expand_grid(dt,st))

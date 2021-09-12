@@ -4,9 +4,18 @@
 get_ARPA_Lombardia_AQ_municipal_data_1y <-
   function(ID_station = NULL, Year = 2021, Var_vec = NULL, by_sensor = 0, verbose = T) {
 
+    ### Registry
     Metadata <- AQ_municipal_metadata_reshape()
     Metadata <- Metadata %>%
       dplyr::select(-c(.data$Province,.data$DateStart,.data$DateStop))
+
+    ### Checks if ID_station is valid (in the list of active stations)
+    '%notin%' <- Negate('%in%')
+    if (!is.null(ID_station) & all(ID_station %notin% Metadata$IDStation)) {
+      stop("ID_station NOT in the list of active stations. Change ID_station or use ID_station = NULL",
+           call. = FALSE)
+    }
+
     if (!is.null(ID_station)) {
       Metadata <- Metadata %>%
         dplyr::filter(.data$IDStation %in% ID_station)

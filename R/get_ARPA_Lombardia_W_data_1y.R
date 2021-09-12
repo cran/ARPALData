@@ -4,11 +4,40 @@
 get_ARPA_Lombardia_W_data_1y <-
   function(ID_station = NULL, Year = 2019, Var_vec = NULL, by_sensor = 0, verbose = T) {
 
+    ### Registry
     Metadata <- W_metadata_reshape()
     Metadata <- Metadata %>%
       dplyr::select(-c(.data$Altitude,.data$Province,
                        .data$DateStart,.data$DateStop,
                        .data$Latitude,.data$Longitude))
+
+    ### Files names (from ARPA database)
+    if (Year %in% 1989:2000) {
+      file_name <- "2000.csv"
+    }
+    if (Year %in% 2001:2005) {
+      file_name <- "2005.csv"
+    }
+    if (Year %in% 2006:2008) {
+      file_name <- "2008.csv"
+    }
+    if (Year %in% 2009:2010) {
+      file_name <- "2010.csv"
+    }
+    if (Year %in% 2011:2012) {
+      file_name <- "2012.csv"
+    }
+    if (Year >= 2013) {
+      file_name <- paste0(Year,".csv")
+    }
+
+    ### Checks if ID_station is valid (in the list of active stations)
+    '%notin%' <- Negate('%in%')
+    if (!is.null(ID_station) & all(ID_station %notin% Metadata$IDStation)) {
+      stop("ID_station NOT in the list of active stations. Change ID_station or use ID_station = NULL",
+           call. = FALSE)
+    }
+
     if (!is.null(ID_station)) {
       Metadata <- Metadata %>%
         dplyr::filter(.data$IDStation %in% ID_station)
@@ -28,7 +57,7 @@ get_ARPA_Lombardia_W_data_1y <-
     if (verbose==T) {
       cat("Importing data: started at", as.character(Sys.time()), "\n")
     }
-    Meteo <- tibble::tibble(data.table::fread(unzip(zip_file, files = paste0(Year,".csv"))))
+    Meteo <- tibble::tibble(data.table::fread(unzip(zip_file, files = file_name)))
     if (verbose==T) {
       cat("Processing data: started at", as.character(Sys.time()), "\n")
     }
@@ -37,7 +66,7 @@ get_ARPA_Lombardia_W_data_1y <-
                     Operator = .data$idOperatore) %>%
       dplyr::mutate(Date = lubridate::dmy_hms(.data$Date))
 
-    file.remove(paste0(Year,".csv"))
+    file.remove(file_name)
 
     Meteo <- dplyr::right_join(Meteo,Metadata, by = "IDSensor")
 

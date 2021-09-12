@@ -2,7 +2,8 @@ export("get_ARPA_Lombardia_AQ_data","get_ARPA_Lombardia_W_data","get_ARPA_Lombar
        "get_ARPA_Lombardia_AQ_registry","get_ARPA_Lombardia_W_registry","get_ARPA_Lombardia_AQ_municipal_registry",
        "get_ARPA_Lombardia_zoning","get_Lombardia_geospatial",
        "is_ARPALdf", "is_ARPALdf_AQ", "is_ARPALdf_AQ_mun", "is_ARPALdf_W",
-       "map_Lombardia_stations", "Time_aggregate","ARPALdf_Summary","ARPALdf_Summary_map")
+       "map_Lombardia_stations", "Time_aggregate","ARPALdf_Summary","ARPALdf_Summary_map",
+       "registry_KNN_dist")
 import("tidyverse","readr", "ggplot2")
 importFrom("stats", "quantile")
 importFrom("dplyr", "filter", "bind_rows", "case_when","recode")
