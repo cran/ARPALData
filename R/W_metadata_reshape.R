@@ -23,7 +23,7 @@ W_metadata_reshape <-
                                             "Radiazione Globale" = "Global_radiation",
                                             "Temperatura" = "Temperature"),
                     Measure = ifelse(.data$Measure == rlang::as_utf8_character("Umidit\u00e0 Relativa"),"Relative_humidity",.data$Measure),
-                    Measure = ifelse(.data$Measure == rlang::as_utf8_character("Velocit\u00e0 Vento"),"Relative_humidity",.data$Measure))
+                    Measure = ifelse(.data$Measure == rlang::as_utf8_character("Velocit\u00e0 Vento"),"Wind_speed",.data$Measure))
 
     ### Name stations
     Metadata <- Metadata %>%
