@@ -1,4 +1,4 @@
-#' Download air quality data from ARPA Lombardia website
+#' Download metadata (registry) on air quality monitoring stations at municipal level from ARPA Lombardia website
 #'
 #' @description 'get_ARPA_Lombardia_AQ_municipal_registry' returns the registry (list) of all the air quality sensors
 #' owned by ARPA Lombardia for each municipality of Lombardy. The information reported are: ID of each sensor and

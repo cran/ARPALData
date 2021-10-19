@@ -2,7 +2,7 @@
 % Please edit documentation in R/ARPALdf_Summary_map.R
 \name{ARPALdf_Summary_map}
 \alias{ARPALdf_Summary_map}
-\title{Generate a map of the selected stations}
+\title{Generate a map of summary statistics for a given ARPALdf data.frame}
 \usage{
 ARPALdf_Summary_map(
   Data,

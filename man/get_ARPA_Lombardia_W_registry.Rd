@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_ARPA_Lombardia_W_registry.R
 \name{get_ARPA_Lombardia_W_registry}
 \alias{get_ARPA_Lombardia_W_registry}
-\title{Download weather data from ARPA Lombardia website}
+\title{Download metadata (registry) on weather monitoring stations from ARPA Lombardia website}
 \usage{
 get_ARPA_Lombardia_W_registry()
 }

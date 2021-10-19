@@ -4,7 +4,7 @@
 url_dataset_year <-
   function(Stat_type, Year) {
     url <- switch(Stat_type,
-                  W = dplyr::case_when(Year == 2021 ~ "https://www.dati.lombardia.it/api/odata/v4/647i-nhxk",
+                  W = dplyr::case_when(Year == 2021 ~ "https://www.dati.lombardia.it/download/49n9-866s/application%2Fzip",
                                        Year == 2020 ~ "https://www.dati.lombardia.it/download/erjn-istm/application%2Fzip",
                                        Year == 2019 ~ "https://www.dati.lombardia.it/download/wrhf-6ztd/application%2Fzip",
                                        Year == 2018 ~ "https://www.dati.lombardia.it/download/sfbe-yqe8/application%2Fzip",

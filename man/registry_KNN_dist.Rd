@@ -2,8 +2,9 @@
 % Please edit documentation in R/registry_KNN_dist.R
 \name{registry_KNN_dist}
 \alias{registry_KNN_dist}
-\title{For each element included in reg_X, it dentifies the k-nearest neighbours (among those included in reg_Y)
-according to an Euclidean distance metric}
+\title{Identifies the K-nearest-neighbours (stations) to all the monitoring sites included in a given ARPALdf
+registry data.frame. The neighbours are identified computing the Euclidean distance among the sites'
+coordinates.}
 \usage{
 registry_KNN_dist(reg_X, reg_Y, k = 1)
 }

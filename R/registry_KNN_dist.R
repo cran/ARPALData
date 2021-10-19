@@ -1,5 +1,6 @@
-#' For each element included in reg_X, it dentifies the k-nearest neighbours (among those included in reg_Y)
-#' according to an Euclidean distance metric
+#' Identifies the K-nearest-neighbours (stations) to all the monitoring sites included in a given ARPALdf
+#' registry data.frame. The neighbours are identified computing the Euclidean distance among the sites'
+#' coordinates.
 #'
 #' @description # For each element included in reg_X, it dentifies the k-nearest neighbours locations
 #' (among those included in reg_Y) according to an Euclidean distance metric. reg_X and reg_Y
@@ -26,6 +27,9 @@
 #' @export
 
 registry_KNN_dist <- function(reg_X,reg_Y,k=1){
+
+  # For each element included in reg_X, it dentifies the k-nearest neighbours (among those included in reg_Y)
+  # according to an Euclidean distance metric
 
   reg_X <- reg_X %>%
     dplyr::distinct(.data$IDStation,.data$NameStation,.data$Longitude,.data$Latitude) %>%

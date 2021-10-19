@@ -1,4 +1,4 @@
-#' Download weather data from ARPA Lombardia website
+#' Download metadata (registry) on weather monitoring stations from ARPA Lombardia website
 #'
 #' @description 'get_ARPA_Lombardia_W_registry' returns the registry (list) of all the weather sensors
 #' and stations belonging to the ARPA Lombardia network. The information reported are: ID of each sensor and

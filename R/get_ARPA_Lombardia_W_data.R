@@ -1,4 +1,4 @@
-#' Download air quality data from ARPA Lombardia website
+#' Download weather/meteorological data from ARPA Lombardia website
 #'
 #' More detailed description.
 #'
@@ -47,7 +47,7 @@ get_ARPA_Lombardia_W_data <-
       Meteo <- get_ARPA_Lombardia_W_data_1y(ID_station = ID_station, Year = Year, Var_vec = Var_vec, verbose=verbose)
       attr(Meteo, "class") <- c("ARPALdf","ARPALdf_W","tbl_df","tbl","data.frame")
     } else {
-      cl <- parallel::makeCluster(parallel::detectCores()/2-2, type = 'PSOCK')
+      cl <- parallel::makeCluster(parallel::detectCores()/2, type = 'PSOCK')
       doParallel::registerDoParallel(cl)
       parallel::clusterExport(cl, varlist = c("get_ARPA_Lombardia_W_data_1y",
                                               "Time_aggregate",

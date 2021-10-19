@@ -12,21 +12,11 @@ get_ARPA_Lombardia_AQ_data_1y <-
                        .data$ARPA_zone,.data$ARPA_stat_type))
 
     ### Files names (from ARPA database)
-    if (Year %in% 1996:2000) {
-      file_name <- "2000.csv"
-    }
-    if (Year %in% 2001:2004) {
-      file_name <- "2004.csv"
-    }
-    if (Year %in% 2005:2007) {
-      file_name <- "2007.csv"
-    }
-    if (Year %in% 2008:2010) {
-      file_name <- "2010.csv"
-    }
-    if (Year >= 2011) {
-      file_name <- paste0(Year,".csv")
-    }
+    file_name <- dplyr::case_when(Year >= 2011 ~ paste0(Year,".csv"),
+                                  Year %in% 2008:2010 ~ "2010.csv",
+                                  Year %in% 2005:2007 ~ "2007.csv",
+                                  Year %in% 2001:2004 ~ "2004.csv",
+                                  Year %in% 1996:2000 ~ "2000.csv")
 
     ### Checks if ID_station is valid (in the list of active stations)
     '%notin%' <- Negate('%in%')

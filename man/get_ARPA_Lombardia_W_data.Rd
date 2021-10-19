@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_ARPA_Lombardia_W_data.R
 \name{get_ARPA_Lombardia_W_data}
 \alias{get_ARPA_Lombardia_W_data}
-\title{Download air quality data from ARPA Lombardia website}
+\title{Download weather/meteorological data from ARPA Lombardia website}
 \usage{
 get_ARPA_Lombardia_W_data(
   ID_station = NULL,
