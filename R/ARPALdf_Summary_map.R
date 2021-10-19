@@ -1,4 +1,4 @@
-#' Generate a map of the selected stations
+#' Generate a map of summary statistics for a given ARPALdf data.frame
 #'
 #' @description 'ARPALdf_Summary_map' represents on a map (polygon of Lombardy) the data contained in a data frame
 #' of class 'ARPALdf' containing the values or the descriptive statistics by station. Data can be either

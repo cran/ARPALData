@@ -2,7 +2,7 @@
 % Please edit documentation in R/Time_aggregate.R
 \name{Time_aggregate}
 \alias{Time_aggregate}
-\title{Aggregate ARPALdf data to hourly, daily, weekly and mothly aggregations}
+\title{Aggregate ARPALdf data to hourly, daily, weekly, mothly and yearly aggregations}
 \usage{
 Time_aggregate(Dataset, Frequency, Var_vec = NULL, Fns_vec = NULL, verbose = T)
 }
@@ -28,8 +28,9 @@ A data frame
 \description{
 'Time_aggregate' returns an ARPALdf object aggregating observations by hourly,
 daily, weekly and mothly periods. The function can be applied only to ARPALdf objects.
-User can indicate specific variables to aggregate and an aggregation function (mean,sum,min,max)
-for each variable.It is possible to specify different aggregation functions on the same variable
+User can indicate specific variables to aggregate and an aggregation function among
+mean,median,sum (cumulated),min,max and quantile for each variable.
+It is possible to specify different aggregation functions on the same variable
 by repeating the name of the variable in Var_vec and specifying the functions in Fns_vec.
 }
 \examples{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_ARPA_Lombardia_AQ_municipal_registry.R
 \name{get_ARPA_Lombardia_AQ_municipal_registry}
 \alias{get_ARPA_Lombardia_AQ_municipal_registry}
-\title{Download air quality data from ARPA Lombardia website}
+\title{Download metadata (registry) on air quality monitoring stations at municipal level from ARPA Lombardia website}
 \usage{
 get_ARPA_Lombardia_AQ_municipal_registry()
 }

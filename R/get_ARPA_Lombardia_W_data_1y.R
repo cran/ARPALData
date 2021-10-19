@@ -12,24 +12,12 @@ get_ARPA_Lombardia_W_data_1y <-
                        .data$Latitude,.data$Longitude))
 
     ### Files names (from ARPA database)
-    if (Year %in% 1989:2000) {
-      file_name <- "2000.csv"
-    }
-    if (Year %in% 2001:2005) {
-      file_name <- "2005.csv"
-    }
-    if (Year %in% 2006:2008) {
-      file_name <- "2008.csv"
-    }
-    if (Year %in% 2009:2010) {
-      file_name <- "2010.csv"
-    }
-    if (Year %in% 2011:2012) {
-      file_name <- "2012.csv"
-    }
-    if (Year >= 2013) {
-      file_name <- paste0(Year,".csv")
-    }
+    file_name <- dplyr::case_when(Year >= 2013 ~ paste0(Year,".csv"),
+                                  Year %in% 2011:2012 ~ "2012.csv",
+                                  Year %in% 2009:2010 ~ "2010.csv",
+                                  Year %in% 2006:2008 ~ "2008.csv",
+                                  Year %in% 2001:2005 ~ "2005.csv",
+                                  Year %in% 1989:2000 ~ "2000.csv")
 
     ### Checks if ID_station is valid (in the list of active stations)
     '%notin%' <- Negate('%in%')
@@ -49,22 +37,46 @@ get_ARPA_Lombardia_W_data_1y <-
 
     url <- url_dataset_year(Stat_type = "W", Year = Year)
 
-    if (verbose==T) {
-      cat("Downloading data from ARPA Lombardia: started at", as.character(Sys.time()), "\n")
+    if (Year != 2021) {
+      if (verbose==T) {
+        cat("Downloading data from ARPA Lombardia: started at", as.character(Sys.time()), "\n")
+      }
+      zip_file <- tempfile(fileext = ".zip")
+      download.file(url = url, destfile = zip_file, mode = "wb")
+      if (verbose==T) {
+        cat("Importing data: started at", as.character(Sys.time()), "\n")
+      }
+      Meteo <- tibble::tibble(data.table::fread(unzip(zip_file, files = file_name)))
+      if (verbose==T) {
+        cat("Processing data: started at", as.character(Sys.time()), "\n")
+      }
+      Meteo <- Meteo %>%
+        dplyr::select(IDSensor = .data$IdSensore, Date = .data$Data, Value = .data$Valore,
+                      Operator = .data$idOperatore) %>%
+        dplyr::mutate(Date = lubridate::dmy_hms(.data$Date))
+    } else {
+      if (verbose==T) {
+        cat("Downloading data from ARPA Lombardia: started at", as.character(Sys.time()), "\n")
+      }
+      Meteo_last_month <- RSocrata::read.socrata("https://www.dati.lombardia.it/api/odata/v4/647i-nhxk")
+      zip_file <- tempfile(fileext = ".zip")
+      download.file(url = url, destfile = zip_file, mode = "wb")
+      if (verbose==T) {
+        cat("Importing data: started at", as.character(Sys.time()), "\n")
+      }
+      Meteo <- tibble::tibble(data.table::fread(unzip(zip_file, files = file_name)))
+      if (verbose==T) {
+        cat("Processing data: started at", as.character(Sys.time()), "\n")
+      }
+      Meteo <- Meteo %>%
+        dplyr::select(IDSensor = .data$IdSensore, Date = .data$Data, Value = .data$Valore,
+                      Operator = .data$idOperatore) %>%
+        dplyr::mutate(Date = lubridate::dmy_hms(.data$Date))
+      Meteo_last_month <- Meteo_last_month %>%
+        dplyr::select(IDSensor = .data$idsensore, Date = .data$data, Value = .data$valore,
+                      Operator = .data$idoperatore)
+      Meteo <- dplyr::bind_rows(Meteo,Meteo_last_month)
     }
-    zip_file <- tempfile(fileext = ".zip")
-    download.file(url = url, destfile = zip_file, mode = "wb")
-    if (verbose==T) {
-      cat("Importing data: started at", as.character(Sys.time()), "\n")
-    }
-    Meteo <- tibble::tibble(data.table::fread(unzip(zip_file, files = file_name)))
-    if (verbose==T) {
-      cat("Processing data: started at", as.character(Sys.time()), "\n")
-    }
-    Meteo <- Meteo %>%
-      dplyr::select(IDSensor = .data$IdSensore, Date = .data$Data, Value = .data$Valore,
-                    Operator = .data$idOperatore) %>%
-      dplyr::mutate(Date = lubridate::dmy_hms(.data$Date))
 
     file.remove(file_name)
 
