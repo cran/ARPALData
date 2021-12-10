@@ -8,7 +8,8 @@ Hampel_flt <- function(var) {
   outlier_ind_upp <- which(var > I_upp)
 
   return(list(I_low = I_low,I_upp = I_upp,
-              outlier_ind_upp = outlier_ind_upp,outlier_ind_low = outlier_ind_low))
+              outlier_ind_upp = outlier_ind_upp,
+              outlier_ind_low = outlier_ind_low))
 }
 
 # The Hampel Filter detects and removes the outliers of the input signal by using the Hampel

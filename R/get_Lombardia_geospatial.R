@@ -48,13 +48,25 @@ get_Lombardia_geospatial <- function(NUTS_level = "LAU") {
                                         .data$Prov_name == "MILANO" ~ "Milano",
                                         .data$Prov_name == "MONZA E DELLA BRIANZA" ~ "Monza e della Brianza")) %>%
     dplyr::select(.data$Prov_name, .data$City, .data$City_code_ISTAT, .data$geometry) %>%
-    dplyr::mutate(City = stringi::stri_trans_general(str = .data$City, id = "Latin-ASCII"),
-                  City = toupper(.data$City),
-                  City = gsub("\\-", " ", .data$City),
-                  City = tm::removePunctuation(.data$City),
-                  City = tm::removeNumbers(.data$City),
-                  City = tm::stripWhitespace(.data$City),
-                  City = stringr::str_to_title(.data$City))
+    dplyr::mutate(dplyr::across(c(.data$City), ~ stringi::stri_trans_general(str = .x, id="Latin-ASCII")),
+                  dplyr::across(c(.data$City), toupper),
+                  dplyr::across(c(.data$City), ~ gsub("\\-", " ", .x)),
+                  dplyr::across(c(.data$City), ~ stringr::str_replace_all(.x, c("S\\."="San ","s\\."="San ",
+                                                                                "V\\."="Via ","v\\."="Via ",
+                                                                                " D\\`" = " D\\' ", " D\\` " = " D\\'",
+                                                                                "D\\`" = " D\\'", "D\\'" = " D\\' "))),
+                  dplyr::across(c(.data$City), tm::removePunctuation),
+                  dplyr::across(c(.data$City), tm::removeNumbers),
+                  dplyr::across(c(.data$City), tm::stripWhitespace)) %>%
+    dplyr::mutate(City = dplyr::recode(.data$City,
+                                       "CASASCO DINTELVI" = "CASASCO INTELVI",
+                                       "CERANO DINTELVI" = "CERANO INTELVI",
+                                       "SAN GIORGIO BIGARELLO" = "BIGARELLO",
+                                       "PUEGNAGO DEL GARDA" = "PUEGNAGO SUL GARDA",
+                                       "FELONICA" = "SERMIDE E FELONICA",
+                                       "GERRE DE CAPRIOLI" = "GERRE DECAPRIOLI")) %>%
+    dplyr::mutate(dplyr::across(c(.data$City), stringr::str_to_title),
+                  dplyr::across(c(.data$City), ~ stringr::str_replace_all(.x, c(" D " = " D\\'"))))
 
   # Associating NUTS codes (from Eurostat) to each observation
   Eurostat <- eurostat::get_eurostat_geospatial(output_class = "sf",resolution = 60, nuts_level = 3, year = 2016)

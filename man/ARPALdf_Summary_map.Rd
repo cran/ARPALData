@@ -11,7 +11,8 @@ ARPALdf_Summary_map(
   Variable,
   prov_line_type = 1,
   prov_line_size = 1,
-  col_points = "blue",
+  col_scale = c("#00FF00", "#FFFF00", "#FF0000"),
+  val_midpoint = NULL,
   xlab = "Longitude",
   ylab = "Latitude"
 )
@@ -31,7 +32,11 @@ as summary descriptive statistic (from 'ARPALdf_Summary' command).}
 
 \item{prov_line_size}{Size of the line for Lombardy provinces. Default is 1.}
 
-\item{col_points}{Color of the points. Default is 'blue'.}
+\item{col_scale}{Vector indicating the minimum, the middle and the average point colors.
+Default is c("green","yellow","red").}
+
+\item{val_midpoint}{Numeric. Value associated to the middle-point scale color.
+Default is NULL (midpoint is set equal to the average of the variable to represent).}
 
 \item{xlab}{x-axis label. Default is 'Longitude'.}
 

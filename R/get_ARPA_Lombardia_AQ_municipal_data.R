@@ -18,8 +18,9 @@
 #' @param Frequency Temporal aggregation frequency. It can be "daily", "weekly", "monthly" or "yearly".
 #' Default is Frequency = "daily".
 #' @param Var_vec Character vector of variables to aggregate. If NULL (default) all the variables are averaged.
-#' @param Fns_vec Character vector of aggregation function to apply to the selected variables. Available functions
-#'  are mean, median, min, max, sum and qPP (for the PP-th percentile).
+#' @param Fns_vec Character vector of aggregation function to apply to the selected variables.
+#' Available functions are mean, median, min, max, sum, qPP (PP-th percentile), sd, var,
+#' vc (variability coefficient), skew (skewness) and kurt (kurtosis).
 #' @param by_sensor Boolean. If 'by_sensor=1', the function returns the observed concentrations by sensor code, while
 #' if 'by_sensor=0' (default) it returns the observed concentrations by station.
 #' @param verbose Logic value (T or F). Toggle warnings and messages. If 'verbose=T' (default) the function

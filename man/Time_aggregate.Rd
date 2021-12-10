@@ -16,7 +16,9 @@ Time_aggregate(Dataset, Frequency, Var_vec = NULL, Fns_vec = NULL, verbose = T)
 expect for 'Temperature' and 'Snow_height' which are summed.}
 
 \item{Fns_vec}{Vector of aggregation function to apply to the selected variables. Available functions
-are mean, median, min, max, sum and qXX for the XX_th percentile.}
+are mean, median, min, max, sum, qPP (PP-th percentile), sd, var, vc (variability coefficient),
+skew (skewness) and kurt (kurtosis). Attention: for Wind Speed and Wind Speed Gust only mean, min
+and max are available; for Wind Direction and Wind Direction Gust only mean is available.}
 
 \item{verbose}{Logic value (T or F). Toggle warnings and messages. If 'verbose=T' (default) the function
 prints on the screen some messages describing the progress of the tasks. If 'verbose=F' any message about

@@ -6,20 +6,23 @@
 #' ARPA Lombardia ground detection system for Lombardy region in Northern Italy.
 #' Available meteorological variables are: temperature (Celsius degrees), rainfall (cm), wind speed (m/s),
 #' wind direction (degrees), relative humidity (%), global_radiation (W/m2)and snow height (cm).
-#' Data are available from 2011 and are updated up to the current date.
+#' Data are available from 1989 and are updated up to the current date.
 #' For more information about the municipal data visit the section 'Monitoraggio aria' at the webpage:
 #' https://www.dati.lombardia.it/stories/s/auv9-c2sj
 #'
 #' @param ID_station Numeric value. ID of the station to consider. Using ID_station = NULL, all the available
 #' stations are selected. Default is ID_station = NULL.
-#' @param Year Numeric vector. Year(s) of interest. Default is Year = 2019. Specifying more than one year the
+#' @param Year Numeric vector. Year(s) of interest. Default is Year = 2020. Specifying more than one year the
 #' code works in parallel computing (half of the available cores) using parLapply() function.
 #' @param Frequency Temporal aggregation frequency. It can be "10mins", "hourly", "daily", "weekly",
 #' "monthly". Default is Frequency = "10mins"
 #' @param Var_vec Character vector of variables to aggregate. If NULL (default) all the variables are averaged,
-#' expect for 'Temperature' and 'Snow_height' which are summed.
-#' @param Fns_vec Character vector of aggregation function to apply to the selected variables. Available functions
-#'  are mean, median, min, max, sum and qPP (for the PP-th percentile).
+#' except for 'Temperature' and 'Snow_height', which are cumulated.
+#' @param Fns_vec Character vector of aggregation function to apply to the selected variables.
+#' Available functions are mean, median, min, max, sum, qPP (PP-th percentile), sd, var,
+#' vc (variability coefficient), skew (skewness) and kurt (kurtosis). Attention: for Wind Speed and
+#' Wind Speed Gust only mean, min and max are available; for Wind Direction and Wind Direction Gust
+#' only mean is available.
 #' @param by_sensor Logic value (0 or 1). If 'by_sensor=1', the function returns the observed concentrations
 #' by sensor code, while if 'by_sensor=0' (default) it returns the observed concentrations by station.
 #' @param verbose Logic value (T or F). Toggle warnings and messages. If 'verbose=T' (default) the function
@@ -41,8 +44,34 @@
 #' @export
 
 get_ARPA_Lombardia_W_data <-
-  function(ID_station = NULL, Year = 2019, Frequency = "10mins", Var_vec = NULL, Fns_vec = NULL,by_sensor = 0,verbose=T) {
+  function(ID_station = NULL, Year = 2020, Frequency = "10mins", Var_vec = NULL, Fns_vec = NULL,by_sensor = 0,verbose=T) {
 
+    ##### Define %notin%
+    '%notin%' <- Negate('%in%')
+
+    ##### Control checks on Var_vec and Fns_vec
+    # Wind_speed and Wind_direction must be selected together
+    if (!is.na(match("Wind_speed",Var_vec)) & is.na(match("Wind_direction",Var_vec))) {
+      stop("It's not possible to select only Wind_speed: also Wind_direction must be included in the list of selected variables! Change the values of 'Var_vec' and 'Var_funs'",
+           call. = FALSE)
+    }
+    if (is.na(match("Wind_speed",Var_vec)) & !is.na(match("Wind_direction",Var_vec))) {
+      stop("It's not possible to select only Wind_direction: also Wind_speed must be included in the list of selected variables! Change the values of 'Var_vec' and 'Var_funs'",
+           call. = FALSE)
+    }
+    # Wind direction can only be averaged
+    if(sum(Var_vec %in% c("Wind_direction","Wind_direction_gust") & Fns_vec != "mean") > 0) {
+      stop("Error: on Wind_direction and Wind_direction_gust is possible to calculate only the average value. Use 'mean' in 'Fns_vec.'",
+           call. = FALSE)
+    }
+    # Wind speed can only be averaged, maximized or minimized
+    if(sum(Var_vec %in% c("Wind_speed","Wind_speed_gust") & Fns_vec %notin% c("mean","min","max")) > 0) {
+      stop("Error: on Wind_speed and Wind_speed_gust is possible to calculate only mean, max or min values. Use 'mean' or 'max' or 'min' in 'Fns_vec.'",
+           call. = FALSE)
+    }
+
+
+    ##### Downloading data
     if (length(Year) == 1) {
       Meteo <- get_ARPA_Lombardia_W_data_1y(ID_station = ID_station, Year = Year, Var_vec = Var_vec, verbose=verbose)
       attr(Meteo, "class") <- c("ARPALdf","ARPALdf_W","tbl_df","tbl","data.frame")
