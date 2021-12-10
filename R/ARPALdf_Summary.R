@@ -69,6 +69,10 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = 1, co
       cat("Attention! NA values of the statistics indicate that data don't exist for a specific Year \n")}
   }
 
+  ### Fix IDStation to integer
+  Data <- Data %>%
+    dplyr::mutate(IDStation = as.integer(.data$IDStation))
+
 
   ### Overall statistics
   NA_count <- Data %>%
@@ -225,8 +229,8 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = 1, co
     }
     vars <- Data %>%
       dplyr::select(tidyselect::vars_select_helpers$where(is.double) &
-                      tidyselect::vars_select_helpers$where(is.numeric),
-                    -.data$IDStation) %>%
+                      tidyselect::vars_select_helpers$where(is.numeric) &
+                      !tidyselect::vars_select_helpers$where(is.integer)) %>%
       colnames()
     gap_length <- vector("list", length = length(vars))
     for (v in 1:length(vars)) {
@@ -236,17 +240,16 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = 1, co
         dplyr::filter(!is.na(.data$var)) %>%
         dplyr::group_by(.data$IDStation,.data$NameStation) %>%
         dplyr::summarise(.groups = "keep",
-                         min_gap = min(diff.Date(.data$Date)),
-                         q25_gap = as.difftime(as.vector(quantile(diff.Date(.data$Date),probs = 0.25)),
-                                               units = units(.data$min_gap)),
-                         mean_gap = round(mean(diff.Date(.data$Date)),3),
-                         median_gap = as.difftime(as.vector(quantile(diff.Date(.data$Date),probs = 0.50)),
-                                                  units = units(.data$min_gap)),
-                         q75_gap = as.difftime(as.vector(quantile(diff.Date(.data$Date),probs = 0.75)),
-                                               units = units(.data$min_gap)),
-                         max_gap = max(diff.Date(.data$Date)),
-                         sd_gap_length = round(as.difftime(sd(diff.Date(.data$Date)),
-                                                           units = units(.data$min_gap)),3)) %>%
+                         gap = diff.Date(.data$Date)-1) %>%
+        dplyr::filter(.data$gap > 0) %>%
+        dplyr::summarise(.groups = "keep",
+                         min_gap = min(.data$gap),
+                         q25_gap = quantile(.data$gap,probs = 0.25),
+                         mean_gap = round(mean(.data$gap),3),
+                         median_gap = quantile(.data$gap,probs = 0.50),
+                         q75_gap = quantile(.data$gap,probs = 0.75),
+                         max_gap = max(.data$gap),
+                         sd_gap_length = round(sd(.data$gap),3)) %>%
         as.data.frame()
       colnames(gl) <- c("IDStation","NameStation",
                         paste0(var,"_min_gap"),paste0(var,"_q25_gap"),
@@ -321,14 +324,14 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = 1, co
       list()
     hampel <- matrix(NA,nrow = dim(out[[1]])[2], ncol = 5)
     for (i in 1:dim(out[[1]])[2]) {
-      hampel[,1] <- names(out[[1]])
-      hampel[i,2] <- as.numeric(out[[1]][[i]]$I_low)
+      hampel[i,2] <- round(as.numeric(out[[1]][[i]]$I_low),2)
       hampel[i,3] <- round(length(out[[1]][[i]]$outlier_ind_low)/dim(Data)[1]*100,2)
-      hampel[i,4] <- as.numeric(out[[1]][[i]]$I_upp)
+      hampel[i,4] <- round(as.numeric(out[[1]][[i]]$I_upp),2)
       hampel[i,5] <- round(length(out[[1]][[i]]$outlier_ind_upp)/dim(Data)[1]*100,2)
     }
     hampel <- data.frame(hampel)
-    colnames(hampel) <- c("Variable","I_low_count","I_low_%","I_upp","I_upp_%")
+    hampel[,1] <- names(out[[1]])
+    colnames(hampel) <- c("Variable","I_low_count","I_low_perc","I_upp","I_upp_perc")
     if (is_ARPALdf_AQ(Data = Data) == T) {
       attr(hampel, "class") <- c("ARPALdf","ARPALdf_AQ","tbl_df","tbl","data.frame")
     } else if (is_ARPALdf_W(Data = Data) == T) {

@@ -13,7 +13,10 @@
 #' @param Variable Summary variable to represent
 #' @param prov_line_type Linetype for Lombardy provinces. Default is 1.
 #' @param prov_line_size Size of the line for Lombardy provinces. Default is 1.
-#' @param col_points Color of the points. Default is 'blue'.
+#' @param col_scale Vector indicating the minimum, the middle and the average point colors.
+#' Default is c("green","yellow","red").
+#' @param val_midpoint Numeric. Value associated to the middle-point scale color.
+#' Default is NULL (midpoint is set equal to the average of the variable to represent).
 #' @param xlab x-axis label. Default is 'Longitude'.
 #' @param ylab y-axis label. Default is 'Latitude'.
 #'
@@ -33,8 +36,9 @@
 #' @export
 
 ARPALdf_Summary_map <- function(Data, Title_main, Title_legend = "Variable", Variable,
-                                prov_line_type = 1, prov_line_size = 1, col_points = "blue",
-                                xlab = "Longitude", ylab = "Latitude") {
+                                prov_line_type = 1, prov_line_size = 1,
+                                col_scale = c("#00FF00","#FFFF00","#FF0000"),
+                                val_midpoint = NULL,xlab = "Longitude", ylab = "Latitude") {
 
   ### Checks
   stopifnot("Data is not of class ARPALdf or it does not contains the column IDStation" = is_ARPALdf(Data = Data) == T &
@@ -54,8 +58,13 @@ ARPALdf_Summary_map <- function(Data, Title_main, Title_legend = "Variable", Var
     Stats <- get_ARPA_Lombardia_W_registry()
   }
 
+
   if (is_ARPALdf_AQ_mun(Data = Data) == T) {
     Data$var <- as.numeric(dplyr::pull(Data[,Variable]))
+    ### Scale color midpoint
+    if (is.null(val_midpoint)==T) {
+      val_midpoint <- mean(Data$var,na.rm=T)
+    }
     Data <- dplyr::left_join(Data,Lombardia,by=c("NameStation"="City"))
     Data <- Data %>%
       sf::st_as_sf()
@@ -63,7 +72,11 @@ ARPALdf_Summary_map <- function(Data, Title_main, Title_legend = "Variable", Var
     geo_plot <- Data %>%
       ggplot2::ggplot() +
       ggplot2::geom_sf(aes(fill = .data$var)) +
-      ggplot2::scale_fill_gradient(Title_legend,low = "yellow", high = "red", na.value = NA) +
+      ggplot2::scale_fill_gradient2(Title_legend, na.value = NA,
+                                    low = col_scale[1],
+                                    mid = col_scale[2],
+                                    midpoint = val_midpoint,
+                                    high = col_scale[3]) +
       ggplot2::guides(size = FALSE) +
       ggplot2::labs(title = Title_main)
 
@@ -73,6 +86,10 @@ ARPALdf_Summary_map <- function(Data, Title_main, Title_legend = "Variable", Var
       dplyr::distinct(.data$IDStation,.data$Latitude,.data$Longitude)
     Data <- dplyr::left_join(Data,Stats,by=c("IDStation"))
     Data$var <- as.numeric(dplyr::pull(Data[,Variable]))
+    ### Scale color midpoint
+    if (is.null(val_midpoint)==T) {
+      val_midpoint <- mean(Data$var,na.rm=T)
+    }
     Data <- Data %>%
       sf::st_as_sf(coords = c("Longitude", "Latitude"),crs = 4326)
 
@@ -80,7 +97,11 @@ ARPALdf_Summary_map <- function(Data, Title_main, Title_legend = "Variable", Var
       ggplot2::ggplot() +
       ggplot2::geom_sf(linetype = prov_line_type, size = prov_line_size) +
       ggplot2::geom_sf(data = Data, aes(size = .data$var, col = .data$var)) +
-      ggplot2::scale_colour_gradient(Title_legend,low = "yellow", high = "red", na.value = NA) +
+      ggplot2::scale_color_gradient2(Title_legend, na.value = NA,
+                                    low = col_scale[1],
+                                    mid = col_scale[2],
+                                    midpoint = val_midpoint,
+                                    high = col_scale[3]) +
       ggplot2::guides(size = FALSE) +
       ggplot2::labs(title = Title_main)
   }

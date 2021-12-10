@@ -32,7 +32,7 @@ get_ARPA_Lombardia_W_data_1y <-
     }
     if (!is.null(Var_vec)) {
       Metadata <- Metadata %>%
-        dplyr::filter(.data$Pollutant %in% Var_vec)
+        dplyr::filter(.data$Measure %in% Var_vec)
     }
 
     url <- url_dataset_year(Stat_type = "W", Year = Year)
@@ -90,8 +90,8 @@ get_ARPA_Lombardia_W_data_1y <-
                                                   .data$Measure == "Temperature" & .data$Operator == 3 ~ 1,
                                                   .data$Measure == "Temperature" & .data$Operator == 2 ~ 1,
                                                   TRUE ~ as.numeric(.data$Operator)),
-                      Measure = dplyr::case_when(.data$Measure == "Wind_direction" & .data$Operator == 3 ~ "Wind_direction_max",
-                                                 .data$Measure == "Wind_speed" & .data$Operator == 3 ~ "Wind_speed_max",
+                      Measure = dplyr::case_when(.data$Measure == "Wind_direction" & .data$Operator == 3 ~ "Wind_direction_gust",
+                                                 .data$Measure == "Wind_speed" & .data$Operator == 3 ~ "Wind_speed_gust",
                                                  TRUE ~ as.character(.data$Measure))) %>%
         dplyr::select(-c(.data$Operator)) %>%
         dplyr::select(.data$Date,.data$IDStation,.data$NameStation,.data$IDSensor,
@@ -106,8 +106,8 @@ get_ARPA_Lombardia_W_data_1y <-
                                                   .data$Measure == "Temperature" & .data$Operator == 3 ~ 1,
                                                   .data$Measure == "Temperature" & .data$Operator == 2 ~ 1,
                                                   TRUE ~ as.numeric(.data$Operator)),
-                      Measure = dplyr::case_when(.data$Measure == "Wind_direction" & .data$Operator == 3 ~ "Wind_direction_max",
-                                                 .data$Measure == "Wind_speed" & .data$Operator == 3 ~ "Wind_speed_max",
+                      Measure = dplyr::case_when(.data$Measure == "Wind_direction" & .data$Operator == 3 ~ "Wind_direction_gust",
+                                                 .data$Measure == "Wind_speed" & .data$Operator == 3 ~ "Wind_speed_gust",
                                                  TRUE ~ as.character(.data$Measure))) %>%
         dplyr::select(-c(.data$IDSensor, .data$Operator)) %>%
         tidyr::pivot_wider(names_from = .data$Measure, values_from = .data$Value,

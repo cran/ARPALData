@@ -4,20 +4,20 @@
 #' ARPA Lombardia ground detection system for Lombardy region in Northern Italy.
 #' Available airborne pollutant concentrations are: NO2, NOx, PM10, PM2.5, Ozone, Arsenic, Benzene,
 #' Benzo-a-pirene, Ammonia, Sulfur Dioxide, Black Carbon, CO, Nikel, Cadmium and Lead.
-#' Data are available from 2011 and are updated up to the current date.
+#' Data are available from 1996 and are updated up to the current date.
 #' For more information about the municipal data visit the section 'Monitoraggio aria' at the webpage:
 #' https://www.dati.lombardia.it/stories/s/auv9-c2sj
 #'
 #' @param ID_station Numeric value. ID of the station to consider. Using ID_station = NULL, all the available
 #' stations are selected. Default is ID_station = NULL.
-#' @param Year Numeric vector. Year(s) of interest. Default is Year = 2019. Specifying more than one year the
+#' @param Year Numeric vector. Year(s) of interest. Default is Year = 2020. Specifying more than one year the
 #' code works in parallel computing (half of the available cores) using parLapply() function.
 #' @param Frequency Temporal aggregation frequency. It can be "hourly", "daily", "weekly", "monthly" or "yearly".
-#' Default is Frequency = "hourly"
-#' @param Var_vec Character vector of variables to aggregate. If NULL (default) all the variables are averaged,
-#' expect for 'Temperature' and 'Snow_height' which are summed.
-#' @param Fns_vec Character vector of aggregation function to apply to the selected variables. Available functions
-#'  are mean, median, min, max, sum and qPP (for the PP-th percentile).
+#' Default is Frequency = "hourly".
+#' @param Var_vec Character vector of variables to aggregate. If NULL (default) all the variables are averaged.
+#' @param Fns_vec Character vector of aggregation function to apply to the selected variables.
+#' Available functions are mean, median, min, max, sum, qPP (PP-th percentile), sd, var,
+#' vc (variability coefficient), skew (skewness) and kurt (kurtosis).
 #' @param by_sensor Logic value (0 or 1). If 'by_sensor=1', the function returns the observed concentrations
 #' by sensor code, while if 'by_sensor=0' (default) it returns the observed concentrations by station.
 #' @param verbose Logic value (T or F). Toggle warnings and messages. If 'verbose=T' (default) the function
@@ -43,7 +43,7 @@
 #' @export
 
 get_ARPA_Lombardia_AQ_data <-
-  function(ID_station = NULL, Year = 2019, Frequency = "hourly", Var_vec = NULL, Fns_vec = NULL, by_sensor = 0, verbose = T) {
+  function(ID_station = NULL, Year = 2020, Frequency = "hourly", Var_vec = NULL, Fns_vec = NULL, by_sensor = 0, verbose = T) {
 
     if (length(Year) == 1) {
       Aria <- get_ARPA_Lombardia_AQ_data_1y(ID_station = ID_station, Year = Year, Var_vec = Var_vec,
