@@ -23,6 +23,9 @@
 #' vc (variability coefficient), skew (skewness) and kurt (kurtosis).
 #' @param by_sensor Boolean. If 'by_sensor=1', the function returns the observed concentrations by sensor code, while
 #' if 'by_sensor=0' (default) it returns the observed concentrations by station.
+#' @param parallel Logic value (T or F). If 'parallel=T' (default), data downloading is performed using parallel computing
+#' (socketing), while if 'parallel=F' (default) the download is performed serially. 'parallel=T' works only when
+#' 'Year' is a vector with multiple values, i.e. for a single year the serial computing is performed.
 #' @param verbose Logic value (T or F). Toggle warnings and messages. If 'verbose=T' (default) the function
 #' prints on the screen some messages describing the progress of the tasks. If 'verbose=F' any message about
 #' the progression is suppressed.
@@ -49,37 +52,38 @@
 #' @export
 
 get_ARPA_Lombardia_AQ_municipal_data <-
-  function(ID_station = NULL, Year = 2020, Frequency = "daily", Var_vec = NULL, Fns_vec = NULL,by_sensor = 0,verbose=T) {
+  function(ID_station = NULL, Year = 2020, Frequency = "daily", Var_vec = NULL, Fns_vec = NULL,by_sensor = F,parallel=T,verbose=T) {
 
     ### Checks
     stopifnot("Frequency cannot be hourly as municipal estimates are provided on a daily basis" = (Frequency != "hourly") == T)
 
     if (length(Year) == 1) {
       Aria <- get_ARPA_Lombardia_AQ_municipal_data_1y(ID_station = ID_station, Year = Year, Var_vec = Var_vec, verbose=verbose)
-      attr(Aria, "class") <- c("ARPALdf","ARPALdf_AQ","tbl_df","tbl","data.frame")
     } else {
-      cl <- parallel::makeCluster(parallel::detectCores()/2, type = 'PSOCK')
-      doParallel::registerDoParallel(cl)
-      parallel::clusterExport(cl, varlist = c("get_ARPA_Lombardia_AQ_municipal_data_1y",
-                                              "Time_aggregate",
-                                              "AQ_metadata_reshape",
-                                              "url_dataset_year",
-                                              "%>%"),
-                              envir=environment())
-      if (verbose==T) {
-        cat("Parallel (",parallel::detectCores()/2,"cores) download, import and process of ARPA Lombardia data: started at", as.character(Sys.time()), "\n")
+      if (parallel == T) {
+        cl <- parallel::makeCluster(min(length(Year),parallel::detectCores()/2), type = 'PSOCK')
+        doParallel::registerDoParallel(cl)
+        parallel::clusterExport(cl, varlist = c("get_ARPA_Lombardia_AQ_municipal_data_1y",
+                                                "Time_aggregate",
+                                                "AQ_metadata_reshape",
+                                                "url_dataset_year",
+                                                "%>%"),
+                                envir=environment())
+        if (verbose==T) {
+          cat("Parallel (",min(length(Year),parallel::detectCores()/2),"cores) download, import and process of ARPA Lombardia data: started at", as.character(Sys.time()), "\n")
+        }
+        Aria <- dplyr::bind_rows(parallel::parLapply(cl = cl,
+                                                     X = Year,
+                                                     fun = get_ARPA_Lombardia_AQ_municipal_data_1y,
+                                                     ID_station = ID_station,
+                                                     Var_vec = Var_vec))
+        if (verbose==T) {
+          cat("Parallel download, import and process of ARPA Lombardia data: ended at", as.character(Sys.time()), "\n")
+        }
+        parallel::stopCluster(cl)
       }
-      Aria <- dplyr::bind_rows(parallel::parLapply(cl = cl,
-                                                   X = Year,
-                                                   fun = get_ARPA_Lombardia_AQ_municipal_data_1y,
-                                                   ID_station = ID_station,
-                                                   Var_vec = Var_vec))
-      if (verbose==T) {
-        cat("Parallel download, import and process of ARPA Lombardia data: ended at", as.character(Sys.time()), "\n")
-      }
-      parallel::stopCluster(cl)
-      attr(Aria, "class") <- c("ARPALdf","ARPALdf_AQ","tbl_df","tbl","data.frame")
     }
+    attr(Aria, "class") <- c("ARPALdf","ARPALdf_AQ","tbl_df","tbl","data.frame")
 
     if (is.null(Var_vec) & is.null(Fns_vec)) {
       vv <- c("NO2_mean","NO2_max_day","Ozone_max_8h","Ozone_max_day","PM10_mean","PM2.5_mean")

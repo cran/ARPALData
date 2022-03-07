@@ -10,7 +10,8 @@ get_ARPA_Lombardia_AQ_data(
   Frequency = "hourly",
   Var_vec = NULL,
   Fns_vec = NULL,
-  by_sensor = 0,
+  by_sensor = F,
+  parallel = T,
   verbose = T
 )
 }
@@ -30,8 +31,12 @@ Default is Frequency = "hourly".}
 Available functions are mean, median, min, max, sum, qPP (PP-th percentile), sd, var,
 vc (variability coefficient), skew (skewness) and kurt (kurtosis).}
 
-\item{by_sensor}{Logic value (0 or 1). If 'by_sensor=1', the function returns the observed concentrations
-by sensor code, while if 'by_sensor=0' (default) it returns the observed concentrations by station.}
+\item{by_sensor}{Logic value (T or F). If 'by_sensor=T', the function returns the observed concentrations
+by sensor code, while if 'by_sensor=F' (default) it returns the observed concentrations by station.}
+
+\item{parallel}{Logic value (T or F). If 'parallel=T' (default), data downloading is performed using parallel computing
+(socketing), while if 'parallel=F' (default) the download is performed serially. 'parallel=T' works only when
+'Year' is a vector with multiple values, i.e. for a single year the serial computing is performed.}
 
 \item{verbose}{Logic value (T or F). Toggle warnings and messages. If 'verbose=T' (default) the function
 prints on the screen some messages describing the progress of the tasks. If 'verbose=F' any message about
@@ -60,7 +65,7 @@ get_ARPA_Lombardia_AQ_data(ID_station=NULL,Year=2020,Frequency="monthly",
    Var_vec=c("NOx","NO2"),Fns_vec=c("q25","max"),by_sensor = 0)
 ## Download hourly air quality data for 2020 at station 501.
 ## Data are reported by sensor.
-get_ARPA_Lombardia_AQ_data(ID_station=501,Year=2020,by_sensor = 1)
+get_ARPA_Lombardia_AQ_data(ID_station=501,Year=2020,by_sensor = TRUE)
 }
 
 }

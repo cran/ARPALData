@@ -10,7 +10,8 @@ get_ARPA_Lombardia_AQ_municipal_data(
   Frequency = "daily",
   Var_vec = NULL,
   Fns_vec = NULL,
-  by_sensor = 0,
+  by_sensor = F,
+  parallel = T,
   verbose = T
 )
 }
@@ -32,6 +33,10 @@ vc (variability coefficient), skew (skewness) and kurt (kurtosis).}
 
 \item{by_sensor}{Boolean. If 'by_sensor=1', the function returns the observed concentrations by sensor code, while
 if 'by_sensor=0' (default) it returns the observed concentrations by station.}
+
+\item{parallel}{Logic value (T or F). If 'parallel=T' (default), data downloading is performed using parallel computing
+(socketing), while if 'parallel=F' (default) the download is performed serially. 'parallel=T' works only when
+'Year' is a vector with multiple values, i.e. for a single year the serial computing is performed.}
 
 \item{verbose}{Logic value (T or F). Toggle warnings and messages. If 'verbose=T' (default) the function
 prints on the screen some messages describing the progress of the tasks. If 'verbose=F' any message about

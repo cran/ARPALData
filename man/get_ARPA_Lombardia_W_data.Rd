@@ -10,7 +10,8 @@ get_ARPA_Lombardia_W_data(
   Frequency = "10mins",
   Var_vec = NULL,
   Fns_vec = NULL,
-  by_sensor = 0,
+  by_sensor = F,
+  parallel = T,
   verbose = T
 )
 }
@@ -33,8 +34,12 @@ vc (variability coefficient), skew (skewness) and kurt (kurtosis). Attention: fo
 Wind Speed Gust only mean, min and max are available; for Wind Direction and Wind Direction Gust
 only mean is available.}
 
-\item{by_sensor}{Logic value (0 or 1). If 'by_sensor=1', the function returns the observed concentrations
-by sensor code, while if 'by_sensor=0' (default) it returns the observed concentrations by station.}
+\item{by_sensor}{Logic value (T or F). If 'by_sensor=T', the function returns the observed concentrations
+by sensor code, while if 'by_sensor=F' (default) it returns the observed concentrations by station.}
+
+\item{parallel}{Logic value (T or F). If 'parallel=T' (default), data downloading is performed using parallel computing
+(socketing), while if 'parallel=F' (default) the download is performed serially. 'parallel=T' works only when
+'Year' is a vector with multiple values, i.e. for a single year the serial computing is performed.}
 
 \item{verbose}{Logic value (T or F). Toggle warnings and messages. If 'verbose=T' (default) the function
 prints on the screen some messages describing the progress of the tasks. If 'verbose=F' any message about
@@ -61,7 +66,7 @@ More detailed description.
 get_ARPA_Lombardia_W_data(ID_station = 100, Year = 2020, Frequency = "10mins")
 ## Download all the weather measurements at station 100 during 2020. Data have 10 minutes frequency.
 ## Data are reported by sensor.
-get_ARPA_Lombardia_W_data(ID_station = 100, Year = 2020, by_sensor = 1)
+get_ARPA_Lombardia_W_data(ID_station = 100, Year = 2020, by_sensor = TRUE)
 }
 
 }

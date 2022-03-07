@@ -2,7 +2,7 @@
 #' @noRd
 
 get_ARPA_Lombardia_W_data_1y <-
-  function(ID_station = NULL, Year = 2019, Var_vec = NULL, by_sensor = 0, verbose = T) {
+  function(ID_station = NULL, Year = 2019, Var_vec = NULL, by_sensor = F, verbose = T) {
 
     ### Registry
     Metadata <- W_metadata_reshape()
@@ -37,7 +37,7 @@ get_ARPA_Lombardia_W_data_1y <-
 
     url <- url_dataset_year(Stat_type = "W", Year = Year)
 
-    if (Year != 2021) {
+    if (Year != 2022) {
       if (verbose==T) {
         cat("Downloading data from ARPA Lombardia: started at", as.character(Sys.time()), "\n")
       }
@@ -53,7 +53,8 @@ get_ARPA_Lombardia_W_data_1y <-
       Meteo <- Meteo %>%
         dplyr::select(IDSensor = .data$IdSensore, Date = .data$Data, Value = .data$Valore,
                       Operator = .data$idOperatore) %>%
-        dplyr::mutate(Date = lubridate::dmy_hms(.data$Date))
+        dplyr::mutate(Date = lubridate::dmy_hms(.data$Date),
+                      IDSensor = as.numeric(.data$IDSensor))
     } else {
       if (verbose==T) {
         cat("Downloading data from ARPA Lombardia: started at", as.character(Sys.time()), "\n")
@@ -76,6 +77,8 @@ get_ARPA_Lombardia_W_data_1y <-
         dplyr::select(IDSensor = .data$idsensore, Date = .data$data, Value = .data$valore,
                       Operator = .data$idoperatore)
       Meteo <- dplyr::bind_rows(Meteo,Meteo_last_month)
+      Meteo <- Meteo %>%
+        dplyr::mutate(IDSensor = as.numeric(.data$IDSensor))
     }
 
     file.remove(file_name)

@@ -23,8 +23,11 @@
 #' vc (variability coefficient), skew (skewness) and kurt (kurtosis). Attention: for Wind Speed and
 #' Wind Speed Gust only mean, min and max are available; for Wind Direction and Wind Direction Gust
 #' only mean is available.
-#' @param by_sensor Logic value (0 or 1). If 'by_sensor=1', the function returns the observed concentrations
-#' by sensor code, while if 'by_sensor=0' (default) it returns the observed concentrations by station.
+#' @param by_sensor Logic value (T or F). If 'by_sensor=T', the function returns the observed concentrations
+#' by sensor code, while if 'by_sensor=F' (default) it returns the observed concentrations by station.
+#' @param parallel Logic value (T or F). If 'parallel=T' (default), data downloading is performed using parallel computing
+#' (socketing), while if 'parallel=F' (default) the download is performed serially. 'parallel=T' works only when
+#' 'Year' is a vector with multiple values, i.e. for a single year the serial computing is performed.
 #' @param verbose Logic value (T or F). Toggle warnings and messages. If 'verbose=T' (default) the function
 #' prints on the screen some messages describing the progress of the tasks. If 'verbose=F' any message about
 #' the progression is suppressed.
@@ -38,13 +41,13 @@
 #' get_ARPA_Lombardia_W_data(ID_station = 100, Year = 2020, Frequency = "10mins")
 #' ## Download all the weather measurements at station 100 during 2020. Data have 10 minutes frequency.
 #' ## Data are reported by sensor.
-#' get_ARPA_Lombardia_W_data(ID_station = 100, Year = 2020, by_sensor = 1)
+#' get_ARPA_Lombardia_W_data(ID_station = 100, Year = 2020, by_sensor = TRUE)
 #' }
 #'
 #' @export
 
 get_ARPA_Lombardia_W_data <-
-  function(ID_station = NULL, Year = 2020, Frequency = "10mins", Var_vec = NULL, Fns_vec = NULL,by_sensor = 0,verbose=T) {
+  function(ID_station = NULL, Year = 2020, Frequency = "10mins", Var_vec = NULL, Fns_vec = NULL,by_sensor = F,parallel = T,verbose=T) {
 
     ##### Define %notin%
     '%notin%' <- Negate('%in%')
@@ -74,30 +77,38 @@ get_ARPA_Lombardia_W_data <-
     ##### Downloading data
     if (length(Year) == 1) {
       Meteo <- get_ARPA_Lombardia_W_data_1y(ID_station = ID_station, Year = Year, Var_vec = Var_vec, verbose=verbose)
-      attr(Meteo, "class") <- c("ARPALdf","ARPALdf_W","tbl_df","tbl","data.frame")
     } else {
-      cl <- parallel::makeCluster(parallel::detectCores()/2, type = 'PSOCK')
-      doParallel::registerDoParallel(cl)
-      parallel::clusterExport(cl, varlist = c("get_ARPA_Lombardia_W_data_1y",
-                                              "Time_aggregate",
-                                              "W_metadata_reshape",
-                                              "url_dataset_year",
-                                              "%>%"),
-                              envir=environment())
-      if (verbose==T) {
-        cat("Parallel (",parallel::detectCores()/2-2,"cores) download, import and process of ARPA Lombardia data: started at", as.character(Sys.time()), "\n")
+      if (parallel == T) {
+        cl <- parallel::makeCluster(min(length(Year),parallel::detectCores()/2), type = 'PSOCK')
+        doParallel::registerDoParallel(cl)
+        parallel::clusterExport(cl, varlist = c("get_ARPA_Lombardia_W_data_1y",
+                                                "Time_aggregate",
+                                                "W_metadata_reshape",
+                                                "url_dataset_year",
+                                                "%>%"),
+                                envir=environment())
+        if (verbose==T) {
+          cat("Parallel (",min(length(Year),parallel::detectCores()/2),"cores) download, import and process of ARPA Lombardia data: started at", as.character(Sys.time()), "\n")
+        }
+        Meteo <- dplyr::bind_rows(parallel::parLapply(cl = cl,
+                                                      X = Year,
+                                                      fun = get_ARPA_Lombardia_W_data_1y,
+                                                      ID_station = ID_station,
+                                                      Var_vec = Var_vec))
+        if (verbose==T) {
+          cat("Parallel download, import and process of ARPA data: ended at", as.character(Sys.time()), "\n")
+        }
+        parallel::stopCluster(cl)
+      } else {
+        Meteo_d <- vector("list", length = length(Year))
+        for (j in 1:length(Year)) {
+          Meteo_d[[j]] <- get_ARPA_Lombardia_W_data_1y(ID_station = ID_station, Year = Year[j], Var_vec = Var_vec,
+                                                       by_sensor = by_sensor, verbose = verbose)
+        }
+        Meteo <- dplyr::bind_rows(Meteo_d)
       }
-      Meteo <- dplyr::bind_rows(parallel::parLapply(cl = cl,
-                                                    X = Year,
-                                                    fun = get_ARPA_Lombardia_W_data_1y,
-                                                    ID_station = ID_station,
-                                                    Var_vec = Var_vec))
-      if (verbose==T) {
-        cat("Parallel download, import and process of ARPA data: ended at", as.character(Sys.time()), "\n")
-      }
-      parallel::stopCluster(cl)
-      attr(Meteo, "class") <- c("ARPALdf","ARPALdf_W","tbl_df","tbl","data.frame")
     }
+    attr(Meteo, "class") <- c("ARPALdf","ARPALdf_W","tbl_df","tbl","data.frame")
 
     if (is.null(Var_vec) & is.null(Fns_vec)) {
       vv <- c("Rainfall","Temperature","Relative_humidity","Global_radiation","Water_height",
@@ -116,7 +127,6 @@ get_ARPA_Lombardia_W_data <-
     }
 
     # Checks if by_sensor setup properly
-    '%notin%' <- Negate('%in%')
     if (by_sensor %notin% c(0,1,FALSE,TRUE)) {
       stop("Wrong setup for 'by_sensor'. Use 1 or 0 or TRUE or FALSE.",
            call. = FALSE)
@@ -146,17 +156,17 @@ get_ARPA_Lombardia_W_data <-
                                     Frequency == "daily" ~ "days",
                                     Frequency == "weekly" ~ "weeks",
                                     Frequency == "monthly" ~ "months")
+
       Meteo <- Meteo %>%
-        dplyr::arrange(.data$Date)
-      dt <- seq(min(Meteo$Date),max(Meteo$Date), by = freq_unit)
-      st <- unique(Meteo$IDStation)
-      grid <- data.frame(tidyr::expand_grid(dt,st))
-      st_n <- Meteo %>%
-        dplyr::distinct(.data$IDStation,.data$NameStation) %>%
-        dplyr::filter(!is.na(.data$IDStation),!is.na(.data$NameStation))
-      colnames(grid) <- c("Date","IDStation")
-      grid <- dplyr::left_join(grid,st_n,by="IDStation")
-      Meteo <- dplyr::left_join(grid,Meteo, by=c("Date","IDStation","NameStation"))
+        dplyr::arrange(.data$Date) %>%
+        dplyr::filter(lubridate::year(.data$Date) %in% Year) %>%
+        tidyr::pivot_longer(cols = -c(.data$Date,.data$IDStation,.data$NameStation),
+                            names_to = "Measure", values_to = "Value") %>%
+        tidyr::pivot_wider(names_from = .data$Date, values_from = .data$Value) %>%
+        tidyr::pivot_longer(cols = -c(.data$Measure,.data$IDStation,.data$NameStation),
+                            names_to = "Date", values_to = "Value") %>%
+        tidyr::pivot_wider(names_from = .data$Measure, values_from = .data$Value)
+
 
       if (verbose==T) {
         cat("Processing ARPA Lombardia data: ended at", as.character(Sys.time()), "\n")

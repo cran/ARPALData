@@ -2,7 +2,7 @@
 #' @noRd
 
 get_ARPA_Lombardia_AQ_data_1y <-
-  function(ID_station = NULL, Year = 2019, Var_vec = NULL, by_sensor = 0, verbose = T) {
+  function(ID_station = NULL, Year = 2019, Var_vec = NULL, by_sensor = F, verbose = T) {
 
     ### Registry
     Metadata <- AQ_metadata_reshape()
@@ -36,7 +36,7 @@ get_ARPA_Lombardia_AQ_data_1y <-
 
     url <- url_dataset_year(Stat_type = "AQ", Year = Year)
 
-    if (Year != 2021) {
+    if (Year %notin% c(2022)) {
       if (verbose==T) {
         cat("Downloading data from ARPA Lombardia: started at", as.character(Sys.time()), "\n")
       }
