@@ -2,7 +2,7 @@
 #' @noRd
 
 get_ARPA_Lombardia_AQ_municipal_data_1y <-
-  function(ID_station = NULL, Year = 2021, Var_vec = NULL, by_sensor = 0, verbose = T) {
+  function(ID_station = NULL, Year = 2021, Var_vec = NULL, by_sensor = F, verbose = T) {
 
     ### Registry
     Metadata <- AQ_municipal_metadata_reshape()
@@ -23,7 +23,7 @@ get_ARPA_Lombardia_AQ_municipal_data_1y <-
 
     url <- url_dataset_year(Stat_type = "AQ_municipal", Year = Year)
 
-    if (Year != 2021) {
+    if (Year != 2022) {
       if (verbose==T) {
         cat("Downloading data from ARPA Lombardia: started at", as.character(Sys.time()), "\n")
       }
@@ -49,7 +49,7 @@ get_ARPA_Lombardia_AQ_municipal_data_1y <-
         cat("Downloading and importing data from ARPA Lombardia: started at", as.character(Sys.time()), "\n")
       }
       ## Current month
-      Aria_curr_month <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/ysm5-jwrn.csv")
+      Aria_curr_month <- RSocrata::read.socrata("https://www.dati.lombardia.it/api/odata/v4/ysm5-jwrn")
       Aria_curr_month <- Aria_curr_month %>%
         dplyr::select(IDSensor = .data$idsensore, Date = .data$data, Value = .data$valore,
                       Operator = .data$idoperatore) %>%

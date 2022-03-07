@@ -240,7 +240,8 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = 1, co
         dplyr::filter(!is.na(.data$var)) %>%
         dplyr::group_by(.data$IDStation,.data$NameStation) %>%
         dplyr::summarise(.groups = "keep",
-                         gap = diff.Date(.data$Date)-1) %>%
+                         gap = lubridate::interval(.data$Date,.data$Date[-1])) %>%
+        dplyr::mutate(gap = lubridate::time_length(.data$gap,unit = attributes(Data)$units)) %>%
         dplyr::filter(.data$gap > 0) %>%
         dplyr::summarise(.groups = "keep",
                          min_gap = min(.data$gap),
@@ -250,7 +251,9 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = 1, co
                          q75_gap = quantile(.data$gap,probs = 0.75),
                          max_gap = max(.data$gap),
                          sd_gap_length = round(sd(.data$gap),3)) %>%
-        as.data.frame()
+        as.data.frame() %>%
+        dplyr::mutate(dplyr::across(dplyr::contains("gap"),
+                                    ~ mondate::as.difftime(.x,units = attributes(Data)$units)))
       colnames(gl) <- c("IDStation","NameStation",
                         paste0(var,"_min_gap"),paste0(var,"_q25_gap"),
                         paste0(var,"_mean_gap"),paste0(var,"_median_gap"),
@@ -322,16 +325,18 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = 1, co
       dplyr::summarise(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric) &
                                        !tidyselect::vars_select_helpers$where(is.integer), ~ Hampel_flt(.x))) %>%
       list()
-    hampel <- matrix(NA,nrow = dim(out[[1]])[2], ncol = 5)
+    hampel <- matrix(NA,nrow = dim(out[[1]])[2], ncol = 7)
     for (i in 1:dim(out[[1]])[2]) {
       hampel[i,2] <- round(as.numeric(out[[1]][[i]]$I_low),2)
-      hampel[i,3] <- round(length(out[[1]][[i]]$outlier_ind_low)/dim(Data)[1]*100,2)
-      hampel[i,4] <- round(as.numeric(out[[1]][[i]]$I_upp),2)
-      hampel[i,5] <- round(length(out[[1]][[i]]$outlier_ind_upp)/dim(Data)[1]*100,2)
+      hampel[i,3] <- round(length(out[[1]][[i]]$outlier_ind_low),2)
+      hampel[i,4] <- round(length(out[[1]][[i]]$outlier_ind_low)/dim(Data)[1]*100,2)
+      hampel[i,5] <- round(as.numeric(out[[1]][[i]]$I_upp),2)
+      hampel[i,6] <- round(length(out[[1]][[i]]$outlier_ind_upp),2)
+      hampel[i,7] <- round(length(out[[1]][[i]]$outlier_ind_upp)/dim(Data)[1]*100,2)
     }
     hampel <- data.frame(hampel)
     hampel[,1] <- names(out[[1]])
-    colnames(hampel) <- c("Variable","I_low_count","I_low_perc","I_upp","I_upp_perc")
+    colnames(hampel) <- c("Variable","Lower_bound","Obs_below_low_count","Obs_below_low_perc","Upper_bound","Obs_above_upp_count","Obs_above_upp_perc")
     if (is_ARPALdf_AQ(Data = Data) == T) {
       attr(hampel, "class") <- c("ARPALdf","ARPALdf_AQ","tbl_df","tbl","data.frame")
     } else if (is_ARPALdf_W(Data = Data) == T) {

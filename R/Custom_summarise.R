@@ -37,8 +37,8 @@ Custom_summarise <- function(grouped_data,var_vec,fns_vec) {
                      dplyr::across(var_vec[vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & grepl('\\bq[0-9]+$',fns_vec)],
                                      list(!!!quantilep(.data$.x,fns_vec[vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & grepl('\\bq[0-9]+$',fns_vec)])),
                                    .names = "{.col}_{.fn}"),
-                     dplyr::across(var_vec[!vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & grepl('\\bq[0-9]+$',fns_vec)], ~
-                                     quantilep(.x,fns_vec[!vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & grepl('\\bq[0-9]+$',fns_vec)])),
+                     dplyr::across(var_vec[!vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & grepl('\\bq[0-9]+$',fns_vec)],
+                                     list(!!!quantilep(.data$.x,fns_vec[!vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & grepl('\\bq[0-9]+$',fns_vec)]))),
                      dplyr::across(var_vec[vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & fns_vec=="sum"], ~ sum(.x, na.rm=T),.names = "{.col}_cum"),
                      dplyr::across(var_vec[!vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & fns_vec=="sum"], ~ sum(.x, na.rm=T)),
                      dplyr::across(var_vec[vv_vec & var_vec %notin% c("Wind_direction","Wind_direction_gust") & fns_vec=="min"], ~ min(.x, na.rm=T),.names = "{.col}_min"),

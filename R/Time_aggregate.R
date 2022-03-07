@@ -89,8 +89,10 @@ Time_aggregate <- function(Dataset, Frequency, Var_vec = NULL, Fns_vec = NULL, v
                           data.frame() %>%
                           dplyr::mutate(Y = lubridate::year(.data$Date),
                                         M = lubridate::month(.data$Date),
-                                        W = aweek::date2week(.data$Date, factor = T),
-                                        D = lubridate::day(.data$Date)) %>%
+                                        D = lubridate::day(.data$Date),
+                                        W = aweek::date2week(ISOdate(year = .data$Y,
+                                                                     month = .data$M,
+                                                                     day = .data$D),factor = T)) %>%
                           dplyr::group_by(.data$W, .data$NameStation, .data$IDStation) %>%
                           Custom_summarise(vv, fv) %>%
                           dplyr::ungroup() %>%
@@ -98,6 +100,7 @@ Time_aggregate <- function(Dataset, Frequency, Var_vec = NULL, Fns_vec = NULL, v
                                         Date = lubridate::make_datetime(year = lubridate::year(.data$Date),
                                                                         month = lubridate::month(.data$Date),
                                                                         day = lubridate::day(.data$Date))) %>%
+                          dplyr::select(-c(.data$W)) %>%
                           dplyr::relocate(.data$Date,.data$IDStation) %>%
                           dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
                                                       ~ ifelse(is.nan(.), NA, .))) %>%
@@ -143,6 +146,14 @@ Time_aggregate <- function(Dataset, Frequency, Var_vec = NULL, Fns_vec = NULL, v
                                                       ~ ifelse(is.nan(.), NA, .))) %>%
                           dplyr::mutate(dplyr::across(dplyr::matches(c("Wind_direction","Wind_direction_max")), ~ round(.x,0)))})
 
+  attr(data_aggr, "frequency") <- Frequency
+  freq_unit <- dplyr::case_when(Frequency == "hourly" ~ "hours",
+                                Frequency == "daily" ~ "days",
+                                Frequency == "weekly" ~ "weeks",
+                                Frequency == "monthly" ~ "months",
+                                Frequency == "yearly" ~ "years")
+  attr(data_aggr, "units") <- freq_unit
+
   structure(list(data_aggr = data_aggr))
   if (is_ARPALdf_AQ(Dataset)==T) {
     attr(data_aggr, "class") <- c("ARPALdf","ARPALdf_AQ","tbl_df","tbl","data.frame")
@@ -153,5 +164,6 @@ Time_aggregate <- function(Dataset, Frequency, Var_vec = NULL, Fns_vec = NULL, v
   if (is_ARPALdf_W(Dataset)==T) {
     attr(data_aggr, "class") <- c("ARPALdf","ARPALdf_W","tbl_df","tbl","data.frame")
   }
+
   return(data_aggr)
 }
