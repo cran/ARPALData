@@ -33,14 +33,14 @@
 #' \donttest{
 #' ## Download hourly air quality data for 2020 at station 501 .
 #' get_ARPA_Lombardia_AQ_data(ID_station=501,Year=2020,Frequency="hourly",by_sensor = 0)
-#' ## Download monthly data for NOx and NO2 observed during 2020 for all the stations
+#' ## Download monthly data for NOx and NO2 observed during 2021 for all the stations
 #' ## active on the network. For NOx is computed the 25th percentile, while for NO2 is
 #' ## computed the maximum concentration observed.
-#' get_ARPA_Lombardia_AQ_data(ID_station=NULL,Year=2020,Frequency="monthly",
+#' get_ARPA_Lombardia_AQ_data(ID_station=NULL,Year=2021,Frequency="monthly",
 #'    Var_vec=c("NOx","NO2"),Fns_vec=c("q25","max"),by_sensor = 0)
-#' ## Download hourly air quality data for 2020 at station 501.
+#' ## Download hourly air quality data for 2022 at station 501.
 #' ## Data are reported by sensor.
-#' get_ARPA_Lombardia_AQ_data(ID_station=501,Year=2020,by_sensor = TRUE)
+#' get_ARPA_Lombardia_AQ_data(ID_station=501,Year=2022,by_sensor = TRUE)
 #' }
 #'
 #' @export

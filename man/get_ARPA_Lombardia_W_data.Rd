@@ -62,11 +62,10 @@ More detailed description.
 }
 \examples{
 \donttest{
-## Download all the weather measurements at station 100 during 2020. Data have 10 minutes frequency.
-get_ARPA_Lombardia_W_data(ID_station = 100, Year = 2020, Frequency = "10mins")
-## Download all the weather measurements at station 100 during 2020. Data have 10 minutes frequency.
-## Data are reported by sensor.
-get_ARPA_Lombardia_W_data(ID_station = 100, Year = 2020, by_sensor = TRUE)
+## Download all the (10 minutes frequency) weather measurements at station 100 during 2022.
+get_ARPA_Lombardia_W_data(ID_station = 100, Year = 2022, Frequency = "10mins")
+## Download all the (daily frequency) weather measurements at station 100 during 2022.
+get_ARPA_Lombardia_W_data(ID_station = 100, Year = 2022, Frequency = "daily")
 }
 
 }

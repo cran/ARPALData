@@ -3,9 +3,9 @@
 
 Excess_na_converter <- function(grouped_data,verbose=T) {
   grouped_data2 <- grouped_data %>%
-    dplyr::mutate(dplyr::across(dplyr::contains(c("NO2","NOx","NO","Ozone","CO")), ~
-                                  dplyr::case_when(mean(is.na(.x)) >= 0.75 ~ NA_real_,
-                                                   mean(is.na(.x)) < 0.75 ~ .x)))
+    dplyr::mutate(dplyr::across(tidyselect::contains(c("NO2","NOx","NO","Ozone","CO")), ~
+                                  dplyr::case_when(mean(is.na(.x)) >= 0.25 ~ NA_real_,
+                                                   mean(is.na(.x)) < 0.25 ~ .x)))
 
   if (verbose==T) {
     cat("Before aggregation: converting to NA all the obs. belonging to a group with more than 75% missing values \n")

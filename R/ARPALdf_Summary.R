@@ -37,8 +37,8 @@
 #'
 #' @export
 
-ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = 1, correlation = 1,
-                            histogram = 0, density = 0, outlier = 0, verbose=T) {
+ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, correlation = T,
+                            histogram = F, density = F, outlier = F, verbose=T) {
 
   ### Checks
   stopifnot("histogram must be 1 or 0" = histogram == 0 | histogram == 1)
@@ -250,14 +250,19 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = 1, co
                          median_gap = quantile(.data$gap,probs = 0.50),
                          q75_gap = quantile(.data$gap,probs = 0.75),
                          max_gap = max(.data$gap),
-                         sd_gap_length = round(sd(.data$gap),3)) %>%
+                         sd_gap_length = round(sd(.data$gap),3),
+                         # Va sistemato per versione CRAN
+                         Length1 = sum(.data$gap == 1),
+                         Length2 = sum(.data$gap == 2),
+                         Length24 = sum(.data$gap == 24)) %>%
         as.data.frame() %>%
-        dplyr::mutate(dplyr::across(dplyr::contains("gap"),
+        dplyr::mutate(dplyr::across(tidyselect::contains("gap"),
                                     ~ mondate::as.difftime(.x,units = attributes(Data)$units)))
       colnames(gl) <- c("IDStation","NameStation",
                         paste0(var,"_min_gap"),paste0(var,"_q25_gap"),
                         paste0(var,"_mean_gap"),paste0(var,"_median_gap"),
-                        paste0(var,"_q75_gap"),paste0(var,"_max_gap"),paste0(var,"_sd_gap"))
+                        paste0(var,"_q75_gap"),paste0(var,"_max_gap"),paste0(var,"_sd_gap"),
+                        paste0(var,"_freq_gap1"),paste0(var,"_freq_gap2"),paste0(var,"_freq_gap24"))
       if (is_ARPALdf_AQ(Data = Data) == T) {
         attr(gl, "class") <- c("ARPALdf","ARPALdf_AQ","tbl_df","tbl","data.frame")
       } else if (is_ARPALdf_W(Data = Data) == T) {

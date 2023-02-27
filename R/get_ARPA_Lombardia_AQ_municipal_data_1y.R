@@ -23,7 +23,7 @@ get_ARPA_Lombardia_AQ_municipal_data_1y <-
 
     url <- url_dataset_year(Stat_type = "AQ_municipal", Year = Year)
 
-    if (Year != 2022) {
+    if (Year != 2023) {
       if (verbose==T) {
         cat("Downloading data from ARPA Lombardia: started at", as.character(Sys.time()), "\n")
       }

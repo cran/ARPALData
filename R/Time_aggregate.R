@@ -66,7 +66,7 @@ Time_aggregate <- function(Dataset, Frequency, Var_vec = NULL, Fns_vec = NULL, v
                           dplyr::relocate(.data$Date,.data$IDStation) %>%
                           dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
                                                       ~ ifelse(is.nan(.), NA, .))) %>%
-                          dplyr::mutate(dplyr::across(dplyr::matches(c("Wind_direction","Wind_direction_max")), ~ round(.x,0)))},
+                          dplyr::mutate(dplyr::across(tidyselect::matches(c("Wind_direction","Wind_direction_max")), ~ round(.x,0)))},
                       monthly = {
                         # Aggregation to monthly data
                         Dataset %>%
@@ -82,7 +82,7 @@ Time_aggregate <- function(Dataset, Frequency, Var_vec = NULL, Fns_vec = NULL, v
                           dplyr::relocate(.data$Date,.data$IDStation) %>%
                           dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
                                                       ~ ifelse(is.nan(.), NA, .))) %>%
-                          dplyr::mutate(dplyr::across(dplyr::matches(c("Wind_direction","Wind_direction_max")), ~ round(.x,0)))},
+                          dplyr::mutate(dplyr::across(tidyselect::matches(c("Wind_direction","Wind_direction_max")), ~ round(.x,0)))},
                       weekly = {
                         # Aggregation to weekly data
                         Dataset %>%
@@ -104,7 +104,7 @@ Time_aggregate <- function(Dataset, Frequency, Var_vec = NULL, Fns_vec = NULL, v
                           dplyr::relocate(.data$Date,.data$IDStation) %>%
                           dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
                                                       ~ ifelse(is.nan(.), NA, .))) %>%
-                          dplyr::mutate(dplyr::across(dplyr::matches(c("Wind_direction","Wind_direction_max")), ~ round(.x,0)))},
+                          dplyr::mutate(dplyr::across(tidyselect::matches(c("Wind_direction","Wind_direction_max")), ~ round(.x,0)))},
                       # Aggregation to daily data
                       daily = {
                         Dataset %>%
@@ -123,7 +123,7 @@ Time_aggregate <- function(Dataset, Frequency, Var_vec = NULL, Fns_vec = NULL, v
                           dplyr::relocate(.data$Date,.data$IDStation) %>%
                           dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
                                                       ~ ifelse(is.nan(.), NA, .))) %>%
-                          dplyr::mutate(dplyr::across(dplyr::matches(c("Wind_direction","Wind_direction_max")), ~ round(.x,0)))},
+                          dplyr::mutate(dplyr::across(tidyselect::matches(c("Wind_direction","Wind_direction_max")), ~ round(.x,0)))},
                       # Aggregation to hourly data
                       hourly = {
                         Dataset %>%
@@ -144,7 +144,7 @@ Time_aggregate <- function(Dataset, Frequency, Var_vec = NULL, Fns_vec = NULL, v
                           dplyr::relocate(.data$Date,.data$IDStation) %>%
                           dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
                                                       ~ ifelse(is.nan(.), NA, .))) %>%
-                          dplyr::mutate(dplyr::across(dplyr::matches(c("Wind_direction","Wind_direction_max")), ~ round(.x,0)))})
+                          dplyr::mutate(dplyr::across(tidyselect::matches(c("Wind_direction","Wind_direction_max")), ~ round(.x,0)))})
 
   attr(data_aggr, "frequency") <- Frequency
   freq_unit <- dplyr::case_when(Frequency == "hourly" ~ "hours",
