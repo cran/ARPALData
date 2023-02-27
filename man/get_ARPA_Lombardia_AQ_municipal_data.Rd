@@ -66,13 +66,13 @@ More detailed description.
 ## for all the cities in Lombardy
 get_ARPA_Lombardia_AQ_municipal_data(ID_station=NULL,Year=2020,
      Frequency="daily")
-## Download monthly concentrations of NO2 (average and maximum) observed in 2020
+## Download monthly concentrations of NO2 (average and maximum) observed in 2021
 ## at city number 100451.
-get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451,Year=2020,
+get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451,Year=2021,
       Frequency="monthly",Var_vec=c("NO2_mean","NO2_mean"),Fns_vec=c("mean","max"))
-## Download daily concentrations observed in 2020 at city number 100451.
+## Download daily concentrations observed in 2021 at city number 100451.
 ## Data are reported by sensor.
-get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451,Year=2020,by_sensor = 1)
+get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451,Year=2021,by_sensor = 1)
 }
 
 }

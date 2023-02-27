@@ -8,11 +8,11 @@ ARPALdf_Summary(
   Data,
   by_IDStat = 1,
   by_Year = 1,
-  gap_length = 1,
-  correlation = 1,
-  histogram = 0,
-  density = 0,
-  outlier = 0,
+  gap_length = T,
+  correlation = T,
+  histogram = F,
+  density = F,
+  outlier = F,
   verbose = T
 )
 }
