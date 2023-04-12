@@ -2,12 +2,17 @@
 #' @noRd
 
 get_ARPA_Lombardia_AQ_municipal_data_1y <-
-  function(ID_station = NULL, Year = 2021, Var_vec = NULL, by_sensor = F, verbose = T) {
+  function(ID_station = NULL, Year = 2022, Var_vec = NULL, by_sensor = F, verbose = T) {
 
     ### Registry
     Metadata <- AQ_municipal_metadata_reshape()
     Metadata <- Metadata %>%
       dplyr::select(-c(.data$Province,.data$DateStart,.data$DateStop))
+
+    ### Files names (from ARPA database)
+    file_name <- dplyr::case_when(Year %in% 2022 ~ paste0("Dati_stime_comunali_",Year,".csv"),
+                                  Year %in% c(2017:2021,2023) ~ paste0("dati_stime_comunali_",Year,".csv"),
+                                  Year %in% 2011:2016 ~ "dati_stime_comunali_2011-2016.csv")
 
     ### Checks if ID_station is valid (in the list of active stations)
     '%notin%' <- Negate('%in%')
@@ -32,7 +37,7 @@ get_ARPA_Lombardia_AQ_municipal_data_1y <-
       if (verbose==T) {
         cat("Importing data: started at", as.character(Sys.time()), "\n")
       }
-      Aria <- tibble::tibble(data.table::fread(unzip(zip_file, files = paste0("dati_stime_comunali_",Year,".csv"))))
+      Aria <- tibble::tibble(data.table::fread(unzip(zip_file, files = file_name)))
       if (verbose==T) {
         cat("Processing data: started at", as.character(Sys.time()), "\n")
       }
@@ -66,7 +71,7 @@ get_ARPA_Lombardia_AQ_municipal_data_1y <-
       if (verbose==T) {
         cat("Importing data: started at", as.character(Sys.time()), "\n")
       }
-      Aria <- tibble::tibble(data.table::fread(unzip(zip_file, files = paste0("dati_stime_comunali_",Year,".csv"))))
+      Aria <- tibble::tibble(data.table::fread(unzip(zip_file, files = file_name)))
       if (verbose==T) {
         cat("Processing data: started at", as.character(Sys.time()), "\n")
       }
@@ -82,7 +87,7 @@ get_ARPA_Lombardia_AQ_municipal_data_1y <-
         dplyr::arrange(.data$Date)
     }
 
-    file.remove(paste0("dati_stime_comunali_",Year,".csv"))
+    file.remove(file_name)
 
     Aria <- dplyr::right_join(Aria,Metadata, by = "IDSensor")
 
@@ -91,8 +96,10 @@ get_ARPA_Lombardia_AQ_municipal_data_1y <-
         dplyr::mutate(Pollutant = paste0(.data$Pollutant,"_",.data$Operator)) %>%
         dplyr::filter(!is.na(.data$Date)) %>%
         dplyr::select(-c(.data$Operator)) %>%
-        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,-9999))) %>%
-        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,NaN))) %>%
+        dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
+                                    ~ dplyr::na_if(.,-9999))) %>%
+        dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
+                                    ~ dplyr::na_if(.,NaN))) %>%
         dplyr::select(.data$Date,.data$IDStation,.data$NameStation,.data$IDSensor,
                       .data$Pollutant,.data$Value)
     } else if (by_sensor %in% c(0,FALSE)) {
@@ -100,8 +107,10 @@ get_ARPA_Lombardia_AQ_municipal_data_1y <-
         dplyr::mutate(Pollutant = paste0(.data$Pollutant,"_",.data$Operator)) %>%
         dplyr::filter(!is.na(.data$Date)) %>%
         dplyr::select(-c(.data$IDSensor,.data$Operator)) %>%
-        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,-9999))) %>%
-        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,NaN))) %>%
+        dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
+                                    ~ dplyr::na_if(.,-9999))) %>%
+        dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
+                                    ~ dplyr::na_if(.,NaN))) %>%
         tidyr::pivot_wider(names_from = .data$Pollutant, values_from = .data$Value,
                            values_fn = function(x) mean(x,na.rm=T)) # Mean (without NA) of a NA vector = NaN
     }

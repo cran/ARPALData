@@ -6,7 +6,7 @@
 \usage{
 get_ARPA_Lombardia_W_data(
   ID_station = NULL,
-  Year = 2020,
+  Year = 2022,
   Frequency = "10mins",
   Var_vec = NULL,
   Fns_vec = NULL,
@@ -19,7 +19,7 @@ get_ARPA_Lombardia_W_data(
 \item{ID_station}{Numeric value. ID of the station to consider. Using ID_station = NULL, all the available
 stations are selected. Default is ID_station = NULL.}
 
-\item{Year}{Numeric vector. Year(s) of interest. Default is Year = 2020. Specifying more than one year the
+\item{Year}{Numeric vector. Year(s) of interest. Default is Year = 2022. Specifying more than one year the
 code works in parallel computing (half of the available cores) using parLapply() function.}
 
 \item{Frequency}{Temporal aggregation frequency. It can be "10mins", "hourly", "daily", "weekly",
@@ -64,8 +64,8 @@ More detailed description.
 \donttest{
 ## Download all the (10 minutes frequency) weather measurements at station 100 during 2022.
 get_ARPA_Lombardia_W_data(ID_station = 100, Year = 2022, Frequency = "10mins")
-## Download all the (daily frequency) weather measurements at station 100 during 2022.
-get_ARPA_Lombardia_W_data(ID_station = 100, Year = 2022, Frequency = "daily")
+## Download all the (daily frequency) weather measurements at station 100 during 2023.
+get_ARPA_Lombardia_W_data(ID_station = 100, Year = 2023, Frequency = "daily")
 }
 
 }

@@ -6,7 +6,7 @@
 \usage{
 get_ARPA_Lombardia_AQ_municipal_data(
   ID_station = NULL,
-  Year = 2020,
+  Year = 2022,
   Frequency = "daily",
   Var_vec = NULL,
   Fns_vec = NULL,
@@ -19,7 +19,7 @@ get_ARPA_Lombardia_AQ_municipal_data(
 \item{ID_station}{Numeric value. ID of the station to consider. Using ID_station = NULL, all the available
 stations are selected. Default is ID_station = NULL.}
 
-\item{Year}{Numeric vector. Year(s) of interest. Default is Year = 2020. Specifying more than one year the
+\item{Year}{Numeric vector. Year(s) of interest. Default is Year = 2022 Specifying more than one year the
 code works in parallel computing (half of the available cores) using parLapply() function.}
 
 \item{Frequency}{Temporal aggregation frequency. It can be "daily", "weekly", "monthly" or "yearly".
@@ -53,7 +53,7 @@ ARPA Lombardia using a physico-chemical model which simulates air quality based 
 variables. For each municipality of Lombardy, ARPA estimates the average (NO2_mean) and maximum daily (NO2_max_day)
 level of NO2, the daily maximum (Ozone_max_day) and the 8-hours moving window maximum (Ozone_max_8h) of Ozone
 and the average levels of PM10 (PM10_mean) and PM2.5 (PM2.5_mean).
-Data are available from 2017 and are updated up to the current date.
+Data are available from 2011 and are updated up to the current date.
 For more information about the municipal data visit the section 'Stime comunali dell'aria' at the webpage:
 https://www.dati.lombardia.it/stories/s/auv9-c2sj
 }
