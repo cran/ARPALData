@@ -37,7 +37,7 @@ get_ARPA_Lombardia_W_data_1y <-
 
     url <- url_dataset_year(Stat_type = "W", Year = Year)
 
-    if (Year != 2022) {
+    if (Year != 2023) {
       if (verbose==T) {
         cat("Downloading data from ARPA Lombardia: started at", as.character(Sys.time()), "\n")
       }
@@ -59,7 +59,7 @@ get_ARPA_Lombardia_W_data_1y <-
       if (verbose==T) {
         cat("Downloading data from ARPA Lombardia: started at", as.character(Sys.time()), "\n")
       }
-      Meteo_last_month <- RSocrata::read.socrata("https://www.dati.lombardia.it/api/odata/v4/647i-nhxk")
+      Meteo_last_month <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/i95f-5avh.csv")
       zip_file <- tempfile(fileext = ".zip")
       download.file(url = url, destfile = zip_file, mode = "wb")
       if (verbose==T) {
@@ -99,8 +99,10 @@ get_ARPA_Lombardia_W_data_1y <-
         dplyr::select(-c(.data$Operator)) %>%
         dplyr::select(.data$Date,.data$IDStation,.data$NameStation,.data$IDSensor,
                       .data$Measure,.data$Value) %>%
-        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,-9999))) %>%
-        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,NaN)))
+        dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
+                                    ~ dplyr::na_if(.,-9999))) %>%
+        dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
+                                    ~ dplyr::na_if(.,NaN)))
     } else if (by_sensor %in% c(0,FALSE)) {
       Meteo <- Meteo %>%
         dplyr::filter(!is.na(.data$Date)) %>%
@@ -116,8 +118,10 @@ get_ARPA_Lombardia_W_data_1y <-
         tidyr::pivot_wider(names_from = .data$Measure, values_from = .data$Value,
                            values_fn = function(x) mean(x,na.rm=T)) %>%
         dplyr::mutate(dplyr::across(dplyr::matches(c("Wind_direction","Wind_direction_max")), ~ round(.x,0))) %>%
-        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,-9999))) %>%
-        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,NaN)))
+        dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
+                                    ~ dplyr::na_if(.,-9999))) %>%
+        dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
+                                    ~ dplyr::na_if(.,NaN)))
     }
 
     Meteo[is.na(Meteo)] <- NA

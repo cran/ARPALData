@@ -7,13 +7,13 @@
 #' variables. For each municipality of Lombardy, ARPA estimates the average (NO2_mean) and maximum daily (NO2_max_day)
 #' level of NO2, the daily maximum (Ozone_max_day) and the 8-hours moving window maximum (Ozone_max_8h) of Ozone
 #' and the average levels of PM10 (PM10_mean) and PM2.5 (PM2.5_mean).
-#' Data are available from 2017 and are updated up to the current date.
+#' Data are available from 2011 and are updated up to the current date.
 #' For more information about the municipal data visit the section 'Stime comunali dell'aria' at the webpage:
 #' https://www.dati.lombardia.it/stories/s/auv9-c2sj
 #'
 #' @param ID_station Numeric value. ID of the station to consider. Using ID_station = NULL, all the available
 #' stations are selected. Default is ID_station = NULL.
-#' @param Year Numeric vector. Year(s) of interest. Default is Year = 2020. Specifying more than one year the
+#' @param Year Numeric vector. Year(s) of interest. Default is Year = 2022 Specifying more than one year the
 #' code works in parallel computing (half of the available cores) using parLapply() function.
 #' @param Frequency Temporal aggregation frequency. It can be "daily", "weekly", "monthly" or "yearly".
 #' Default is Frequency = "daily".
@@ -52,7 +52,7 @@
 #' @export
 
 get_ARPA_Lombardia_AQ_municipal_data <-
-  function(ID_station = NULL, Year = 2020, Frequency = "daily", Var_vec = NULL, Fns_vec = NULL,by_sensor = F,parallel=T,verbose=T) {
+  function(ID_station = NULL, Year = 2022, Frequency = "daily", Var_vec = NULL, Fns_vec = NULL,by_sensor = F,parallel=T,verbose=T) {
 
     ### Checks
     stopifnot("Frequency cannot be hourly as municipal estimates are provided on a daily basis" = (Frequency != "hourly") == T)
@@ -131,7 +131,8 @@ get_ARPA_Lombardia_AQ_municipal_data <-
                                     Frequency == "monthly" ~ "months",
                                     Frequency == "yearly" ~ "years")
       Aria <- Aria %>%
-        dplyr::arrange(.data$Date)
+        dplyr::arrange(.data$Date) %>%
+        dplyr::filter(lubridate::year(.data$Date) %in% Year)
       dt <- seq(min(Aria$Date),max(Aria$Date), by = freq_unit)
       st <- unique(Aria$IDStation)
       grid <- data.frame(tidyr::expand_grid(dt,st))

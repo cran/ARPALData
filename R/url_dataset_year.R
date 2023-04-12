@@ -4,7 +4,7 @@
 url_dataset_year <-
   function(Stat_type, Year) {
     url <- switch(Stat_type,
-                  W = dplyr::case_when(Year == 2023 ~ "https://www.dati.lombardia.it/resource/i95f-5avh.csv",
+                  W = dplyr::case_when(Year == 2023 ~ "https://www.dati.lombardia.it/download/48xr-g9b9/application%2Fzip",
                                        Year == 2022 ~ "https://www.dati.lombardia.it/download/mvvc-nmzv/application%2Fzip",
                                        Year == 2021 ~ "https://www.dati.lombardia.it/download/49n9-866s/application%2Fzip",
                                        Year == 2020 ~ "https://www.dati.lombardia.it/download/erjn-istm/application%2Fzip",
@@ -22,7 +22,7 @@ url_dataset_year <-
                                        Year %in% 1989:2000 ~ "https://www.dati.lombardia.it/download/tj2h-b7vd/application%2Fzip"),
 
                   AQ = dplyr::case_when(Year == 2023 ~ "https://www.dati.lombardia.it/resource/nicp-bhqi.csv",
-                                        Year == 2022 ~ "https://www.dati.lombardia.it/api/odata/v4/nicp-bhqi",
+                                        Year == 2022 ~ "https://www.dati.lombardia.it/download/3vy4-yusn/application%2Fx-zip-compressed",
                                         Year == 2021 ~ "https://www.dati.lombardia.it/download/wzmx-9k7n/application%2Fx-zip-compressed",
                                         Year == 2020 ~ "https://www.dati.lombardia.it/download/88sp-5tmj/application%2Fzip",
                                         Year == 2019 ~ "https://www.dati.lombardia.it/api/views/j2mz-aium/files/f3d03850-4750-4168-a3a7-fdfb204bee14?filename=sensori_aria_2019.zip",
@@ -40,12 +40,13 @@ url_dataset_year <-
                                         Year %in% 1996:2000 ~ "https://www.dati.lombardia.it/download/wabv-jucw/application%2Fzip"),
 
                   AQ_municipal = dplyr::case_when(Year == 2023 ~ "https://www.dati.lombardia.it/download/kbhp-ej6g/application%2Fzip",
-                                                  Year == 2022 ~ "https://www.dati.lombardia.it/api/odata/v4/ysm5-jwrn",
+                                                  Year == 2022 ~ "https://www.dati.lombardia.it/download/d3yu-kwjr/application%2Fx-zip-compressed",
                                                   Year == 2021 ~ "https://www.dati.lombardia.it/download/56c9-hxta/application%2Fzip",
                                                   Year == 2020 ~ "https://www.dati.lombardia.it/download/ej5v-5krk/application%2Fzip",
                                                   Year == 2019 ~ "https://www.dati.lombardia.it/download/dupr-g65c/application%2Fzip",
                                                   Year == 2018 ~ "https://www.dati.lombardia.it/download/v75z-59qh/application%2Fzip",
-                                                  Year == 2017 ~ "https://www.dati.lombardia.it/download/a7tn-gnv9/application%2Fzip"))
+                                                  Year == 2017 ~ "https://www.dati.lombardia.it/download/a7tn-gnv9/application%2Fzip",
+                                                  Year %in% 2011:2016 ~ "https://www.dati.lombardia.it/download/yjvq-g3tp/application%2Fzip"))
 
     return(url)
   }

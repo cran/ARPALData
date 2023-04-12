@@ -12,7 +12,8 @@ get_ARPA_Lombardia_AQ_data_1y <-
                        .data$ARPA_zone,.data$ARPA_stat_type))
 
     ### Files names (from ARPA database)
-    file_name <- dplyr::case_when(Year >= 2011 ~ paste0(Year,".csv"),
+    file_name <- dplyr::case_when(Year %in% 2022:2023 ~ paste0("Aria_",Year,".csv"),
+                                  Year %in% 2011:2021 ~ paste0(Year,".csv"),
                                   Year %in% 2008:2010 ~ "2010.csv",
                                   Year %in% 2005:2007 ~ "2007.csv",
                                   Year %in% 2001:2004 ~ "2004.csv",
@@ -36,7 +37,7 @@ get_ARPA_Lombardia_AQ_data_1y <-
 
     url <- url_dataset_year(Stat_type = "AQ", Year = Year)
 
-    if (Year %notin% c(2022)) {
+    if (Year %notin% c(2023)) {
       if (verbose==T) {
         cat("Downloading data from ARPA Lombardia: started at", as.character(Sys.time()), "\n")
       }
@@ -73,16 +74,20 @@ get_ARPA_Lombardia_AQ_data_1y <-
     if (by_sensor %in% c(1,TRUE)) {
       Aria <- Aria %>%
         dplyr::filter(!is.na(.data$Date)) %>%
-        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,-9999))) %>%
-        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,NaN))) %>%
+        dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
+                                    ~ dplyr::na_if(.,-9999))) %>%
+        dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
+                                    ~ dplyr::na_if(.,NaN))) %>%
         dplyr::select(.data$Date,.data$IDStation,.data$NameStation,.data$IDSensor,
                       .data$Pollutant,.data$Value)
     } else if (by_sensor %in% c(0,FALSE)) {
       Aria <- Aria %>%
         dplyr::filter(!is.na(.data$Date)) %>%
         dplyr::select(-c(.data$IDSensor)) %>%
-        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,-9999))) %>%
-        dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(.,NaN))) %>%
+        dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
+                                    ~ dplyr::na_if(.,-9999))) %>%
+        dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
+                                    ~ dplyr::na_if(.,NaN))) %>%
         tidyr::pivot_wider(names_from = .data$Pollutant, values_from = .data$Value,
                            values_fn = function(x) mean(x,na.rm=T)) # Mean (without NA) of a NA vector = NaN
     }
