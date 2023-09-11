@@ -6,21 +6,25 @@
 \usage{
 get_ARPA_Lombardia_AQ_data(
   ID_station = NULL,
-  Year = 2022,
+  Date_begin = "2022-01-01",
+  Date_end = "2022-12-31",
   Frequency = "hourly",
   Var_vec = NULL,
   Fns_vec = NULL,
-  by_sensor = F,
-  parallel = T,
-  verbose = T
+  by_sensor = FALSE,
+  verbose = TRUE,
+  parallel = FALSE,
+  parworkers = NULL,
+  parfuturetype = "multisession"
 )
 }
 \arguments{
 \item{ID_station}{Numeric value. ID of the station to consider. Using ID_station = NULL, all the available
 stations are selected. Default is ID_station = NULL.}
 
-\item{Year}{Numeric vector. Year(s) of interest. Default is Year = 2020. Specifying more than one year the
-code works in parallel computing (half of the available cores) using parLapply() function.}
+\item{Date_begin}{Character vector of the first date-time to download. Format can be either "YYYY-MM-DD" or "YYYY-MM-DD hh:mm:ss". Default is Date_begin = "2022-01-01".}
+
+\item{Date_end}{Character vector of the last date-time to download. Format can be either "YYYY-MM-DD" or "YYYY-MM-DD hh:mm:ss". Default is Date_end = "2022-12-31".}
 
 \item{Frequency}{Temporal aggregation frequency. It can be "hourly", "daily", "weekly", "monthly" or "yearly".
 Default is Frequency = "hourly".}
@@ -31,16 +35,21 @@ Default is Frequency = "hourly".}
 Available functions are mean, median, min, max, sum, qPP (PP-th percentile), sd, var,
 vc (variability coefficient), skew (skewness) and kurt (kurtosis).}
 
-\item{by_sensor}{Logic value (T or F). If 'by_sensor=T', the function returns the observed concentrations
-by sensor code, while if 'by_sensor=F' (default) it returns the observed concentrations by station.}
+\item{by_sensor}{Logic value (TRUE or FALSE). If 'by_sensor = TRUE', the function returns the observed concentrations
+by sensor code, while if 'by_sensor = FALSE' (default) it returns the observed concentrations by station.}
 
-\item{parallel}{Logic value (T or F). If 'parallel=T' (default), data downloading is performed using parallel computing
-(socketing), while if 'parallel=F' (default) the download is performed serially. 'parallel=T' works only when
-'Year' is a vector with multiple values, i.e. for a single year the serial computing is performed.}
-
-\item{verbose}{Logic value (T or F). Toggle warnings and messages. If 'verbose=T' (default) the function
-prints on the screen some messages describing the progress of the tasks. If 'verbose=F' any message about
+\item{verbose}{Logic value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
+prints on the screen some messages describing the progress of the tasks. If 'verbose = FALSE' any message about
 the progression is suppressed.}
+
+\item{parallel}{Logic value (TRUE or FALSE). If 'parallel = FALSE' (default), data downloading is performed using a sequential/serial approach and additional parameters 'parworkers' and 'parfuturetype' are ignored.
+When 'parallel = TRUE', data downloading is performed using parallel computing through the Futureverse setting.
+More detailed information about parallel computing in the Futureverse can be found at the following webpages:
+https://future.futureverse.org/ and https://cran.r-project.org/web/packages/future.apply/vignettes/future.apply-1-overview.html}
+
+\item{parworkers}{Numeric integer value. If 'parallel = TRUE' (parallel mode active), the user can declare the number of parallel workers to be activated using 'parworkers = integer number'. By default ('parworkers = NULL'), the number of active workers is half of the available local cores.}
+
+\item{parfuturetype}{Character vector. If 'parallel = TRUE' (parallel mode active), the user can declare the parallel strategy to be used according to the Futureverse syntax through 'parfuturetype'. By default, the 'multisession' (background R sessions on local machine) is used. In alternative, the 'multicore' (forked R processes on local machine. Not supported by Windows and RStudio) setting can be used.}
 }
 \value{
 A data frame of class 'data.frame' and 'ARPALdf'. The object is fully compatible with Tidyverse.
@@ -50,21 +59,30 @@ A data frame of class 'data.frame' and 'ARPALdf'. The object is fully compatible
 ARPA Lombardia ground detection system for Lombardy region in Northern Italy.
 Available airborne pollutant concentrations are: NO2, NOx, PM10, PM2.5, Ozone, Arsenic, Benzene,
 Benzo-a-pirene, Ammonia, Sulfur Dioxide, Black Carbon, CO, Nikel, Cadmium and Lead.
-Data are available from 1996 and are updated up to the current date.
+Data are available from 1968 and are updated up to the current date (2023).
 For more information about the municipal data visit the section 'Monitoraggio aria' at the webpage:
 https://www.dati.lombardia.it/stories/s/auv9-c2sj
 }
 \examples{
 \donttest{
-## Download hourly air quality data for 2023 at station 501.
-get_ARPA_Lombardia_AQ_data(ID_station=501,Year=2023,Frequency="hourly",by_sensor = 0)
-## Download monthly data for NOx and NO2 observed during 2021 for all the stations
-## active on the network. For NOx is computed the 25th percentile, while for NO2 is
-## computed the maximum concentration observed.
-get_ARPA_Lombardia_AQ_data(ID_station=NULL,Year=2021,Frequency="monthly",
-   Var_vec=c("NOx","NO2"),Fns_vec=c("q25","max"),by_sensor = 0)
-## Download hourly air quality data by sensor for 2022 at station 501.
-get_ARPA_Lombardia_AQ_data(ID_station=501,Year=2022,by_sensor = TRUE)
+## Download hourly air quality data for 2022 at station 501.
+if (require("RSocrata")) {
+    get_ARPA_Lombardia_AQ_data(ID_station=501, Date_begin = "2022-01-01",
+        Date_end = "2022-12-31", Frequency="hourly", parallel = TRUE)
+}
+## Download (parallel) monthly data for NOx and NO2 observed between May and
+## August 2021 for all the stations active on the network. For NOx is computed
+## the 25th percentile, while for NO2 is computed the maximum concentration observed.
+if (require("RSocrata")) {
+    get_ARPA_Lombardia_AQ_data(ID_station=NULL,Date_begin = "2022-05-01",
+        Date_end = "2022-08-31", Frequency="monthly",Var_vec=c("NOx","NO2"),
+        Fns_vec=c("q25","max"), parallel = TRUE)
+}
+## Download hourly air quality data by sensor for January 2023 at station 501.
+if (require("RSocrata")) {
+    get_ARPA_Lombardia_AQ_data(ID_station=501,Date_begin = "2023-01-01 00:00:00",
+        Date_end = "2023-01-31 23:00:00", by_sensor = TRUE)
+}
 }
 
 }

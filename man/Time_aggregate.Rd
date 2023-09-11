@@ -37,8 +37,11 @@ by repeating the name of the variable in Var_vec and specifying the functions in
 }
 \examples{
 \donttest{
-## Download hourly observed concentrations from all the stations in the network during 2019.
-data <- get_ARPA_Lombardia_AQ_data(ID_station=NULL,Year=2020,Frequency="hourly")
+## Download hourly observed concentrations from all the stations in the network during 2020.
+if (require("RSocrata")) {
+    data <- get_ARPA_Lombardia_AQ_data(ID_station=NULL, Date_begin = "2020-01-01",
+                Date_end = "2020-12-31", Frequency="hourly")
+}
 ## Aggregate all the data to daily frequency
 Time_aggregate(Dataset=data,Frequency="daily",Var_vec=NULL,Fns_vec=NULL)
 ## Aggregate NO2 to weekly maximum concentrations and NOx to weekly minimum concentrations.

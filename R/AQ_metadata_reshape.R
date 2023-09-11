@@ -1,6 +1,16 @@
 AQ_metadata_reshape <-
 function() {
-  Metadata <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/ib47-atvt.csv")
+
+  ##### Check online availability for AQ metadata
+  temp <- tempfile()
+  res <- curl::curl_fetch_disk("https://www.dati.lombardia.it/resource/ib47-atvt.csv", temp)
+  if(res$status_code != 200) {
+    stop(paste0("The internet resource for air quality stations metadata is not available at the moment, try later.
+                  If the problem persists, please contact the package maintainer."))
+  } else {
+    Metadata <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/ib47-atvt.csv")
+  }
+
   Metadata <- Metadata %>%
     dplyr::rename(IDSensor = .data$idsensore, IDStation = .data$idstazione,
                   Pollutant = .data$nometiposensore, NameStation = .data$nomestazione,
@@ -51,7 +61,16 @@ function() {
   ### Add extra information from ARPA offices (uploaded on Paolo Maranzano's GitHub page)
   # ARPA_zone = ARPA Lombardia zoning of the region: https://www.arpalombardia.it/Pages/Aria/Rete-di-rilevamento/Zonizzazione.aspx
   # ARPA_stat_type = stations type: https://www.arpalombardia.it/Pages/Aria/Rete-di-rilevamento/Criteri-di-rilevamento/Tipologia-delle-stazioni.aspx?firstlevel=Ieri
-  Metadata_ARPA_url <- "https://raw.githubusercontent.com/PaoloMaranzano/ARPALData/main/AQ_stations_ARPA_Lombardia.csv"
+
+  ##### Check online availability for further AQ metadata from GitHub
+  temp <- tempfile()
+  res <- curl::curl_fetch_disk("https://raw.githubusercontent.com/PaoloMaranzano/ARPALData/main/AQ_stations_ARPA_Lombardia.csv", temp)
+  if(res$status_code != 200) {
+    stop(paste0("The internet resource for further air quality stations metadata (from GitHub) is not available at the moment, try later.
+                  If the problem persists, please contact the package maintainer."))
+  } else {
+    Metadata_ARPA_url <- "https://raw.githubusercontent.com/PaoloMaranzano/ARPALData/main/AQ_stations_ARPA_Lombardia.csv"
+  }
   Metadata_ARPA <- readr::read_csv(Metadata_ARPA_url)
   Metadata_ARPA <- Metadata_ARPA %>%
     dplyr::select(.data$IDStation,.data$ARPA_zone,ARPA_stat_type = .data$Type)
