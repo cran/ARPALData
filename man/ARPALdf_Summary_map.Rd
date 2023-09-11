@@ -54,7 +54,10 @@ statistic (from 'ARPALdf_Summary' command).
 \examples{
 \donttest{
 ## Download daily air quality data from all the stations for year 2020
-d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Year = 2020, Frequency = "daily")
+if (require("RSocrata")) {
+    d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Date_begin = "2020-01-01",
+              Date_end = "2020-12-31", Frequency = "daily")
+}
 ## Summarising observed data
 s <- ARPALdf_Summary(Data = d)
 ## Mapping of the average NO2 in 2020 at several stations

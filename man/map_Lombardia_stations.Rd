@@ -43,7 +43,10 @@ the stations contained in a data frame of class 'ARPALdf'. Data can be either a 
 \examples{
 \donttest{
 ## Download daily concentrations observed at all the stations in 2020.
-d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Year = 2020, Frequency = "daily")
+if (require("RSocrata")) {
+    d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Date_begin = "2020-01-01",
+            Date_end = "2020-12-31", Frequency = "daily")
+}
 ## Map the stations included in 'd'
 map_Lombardia_stations(data = d, title = "Air quality stations in Lombardy")
 }

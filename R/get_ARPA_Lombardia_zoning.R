@@ -28,6 +28,15 @@ get_ARPA_Lombardia_zoning <-
   function(plot_map = 1, title = "ARPA Lombardia zoning", line_type = 1,
            line_size = 1, xlab = "Longitude", ylab = "Latitude") {
 
+
+    ##### Check online availability for zoning metadata from GitHub
+    temp <- tempfile()
+    res <- curl::curl_fetch_disk("https://github.com/PaoloMaranzano/ARPALData/raw/main/ARPA_zoning_shape.zip", temp)
+    if(res$status_code != 200) {
+      stop(paste0("The internet resource for ARPA Lombardia zoninig (from GitHub) is not available at the moment, try later.
+                  If the problem persists, please contact the package maintainer."))
+    }
+
     # Dowload shape file for Lombardy municipalities
     temp1 <- tempfile()
     temp2 <- tempfile()

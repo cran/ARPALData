@@ -51,10 +51,10 @@ Custom_summarise <- function(grouped_data,var_vec,fns_vec) {
                      dplyr::across(var_vec[!vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & fns_vec=="var"], ~ var(.x, na.rm=T)),
                      dplyr::across(var_vec[vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & fns_vec=="vc"], ~ sd(.x, na.rm=T)/mean(.x, na.rm=T),.names = "{.col}_vc"),
                      dplyr::across(var_vec[!vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & fns_vec=="vc"], ~ sd(.x, na.rm=T)/mean(.x, na.rm=T)),
-                     dplyr::across(var_vec[vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & fns_vec=="skew"], ~ moments::skewness(.x, na.rm=T),.names = "{.col}_skew"),
-                     dplyr::across(var_vec[!vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & fns_vec=="skew"], ~ moments::skewness(.x, na.rm=T)),
-                     dplyr::across(var_vec[vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & fns_vec=="kurt"], ~ moments::kurtosis(.x, na.rm=T),.names = "{.col}_kurt"),
-                     dplyr::across(var_vec[!vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & fns_vec=="kurt"], ~ moments::kurtosis(.x, na.rm=T))) %>%
+                     dplyr::across(var_vec[vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & fns_vec=="skew"], ~ mom_skew(.x, na.rm=T),.names = "{.col}_skew"),
+                     dplyr::across(var_vec[!vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & fns_vec=="skew"], ~ mom_skew(.x, na.rm=T)),
+                     dplyr::across(var_vec[vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & fns_vec=="kurt"], ~ mom_kurt(.x, na.rm=T),.names = "{.col}_kurt"),
+                     dplyr::across(var_vec[!vv_vec & var_vec %notin% c("Wind_speed","Wind_direction","Wind_speed_gust","Wind_direction_gust") & fns_vec=="kurt"], ~ mom_kurt(.x, na.rm=T))) %>%
     dplyr::mutate(dplyr::across(tidyselect::vars_select_helpers$where(is.numeric), ~ ifelse(is.infinite(.x), NA, .x)))
 
   # Drop non-useful columns concerning the quantiles

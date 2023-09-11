@@ -6,37 +6,36 @@
 \usage{
 ARPALdf_Summary(
   Data,
-  by_IDStat = 1,
-  by_Year = 1,
-  gap_length = T,
-  correlation = T,
-  histogram = F,
-  density = F,
-  outlier = F,
-  verbose = T
+  by_IDStat = TRUE,
+  by_Year = TRUE,
+  gap_length = TRUE,
+  correlation = TRUE,
+  histogram = FALSE,
+  density = FALSE,
+  outlier = FALSE,
+  verbose = TRUE
 )
 }
 \arguments{
 \item{Data}{Dataset of class 'ARPALdf' containing the data to be summarised.}
 
-\item{by_IDStat}{Logic value (0 or 1). Use 1 to compute summary statistics by Station ID. Default is 1.}
+\item{by_IDStat}{Logic value (TRUE or FALSE). Use TRUE (default) to compute summary statistics by Station ID.}
 
-\item{by_Year}{Logic value (0 or 1). Use 1 to compute summary statistics by year. Default is 1.}
+\item{by_Year}{Logic value (TRUE or FALSE). Use TRUE (default) to compute summary statistics by year.}
 
-\item{gap_length}{Logic value (0 or 1). Use 1 to compute summary statistics for the gap length of each variable.
-Default is 1.}
+\item{gap_length}{Logic value (TRUE or FALSE). Use TRUE (default) to compute summary statistics for the gap length of each variable.}
 
-\item{correlation}{Logic value (0 or 1). Use 1 to compute linear correlation of available variables. Default is 1.}
+\item{correlation}{Logic value (TRUE or FALSE). Use TRUE (default) to compute linear correlation of available variables.}
 
-\item{histogram}{Logic value (0 or 1). Use 1 to plot the histogram of each variable. Default is 0.}
+\item{histogram}{Logic value (TRUE or FALSE). Use TRUE to plot the histogram of each variable. Default is FALSE.}
 
-\item{density}{Logic value (0 or 1). Use 1 to plot the kernel density plot of each variable. Default is 0.}
+\item{density}{Logic value (TRUE or FALSE). Use TRUE to plot the kernel density plot of each variable. Default is FALSE.}
 
-\item{outlier}{Logic value (0 or 1). Use 1 to analyse extreme values of each variable
-(boxplot and Hampel filter). Default is 0.}
+\item{outlier}{Logic value (TRUE or FALSE). Use TRUE to analyse extreme values of each variable
+(boxplot and Hampel filter). Default is FALSE.}
 
-\item{verbose}{Logic value (T or F). Toggle warnings and messages. If 'verbose=T' (default) the function
-prints on the screen some messages describing the progress of the tasks. If 'verbose=F' any message about
+\item{verbose}{Logic value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
+prints on the screen some messages describing the progress of the tasks. If 'verbose = FALSE' any message about
 the progression is suppressed.}
 }
 \value{
@@ -57,7 +56,10 @@ Hampel filter and boxplot). In addition, the function returns useful data-qualit
 \examples{
 \donttest{
 ## Download daily air quality data from all the stations for year 2020
-d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Year = 2020, Frequency = "daily")
+if (require("RSocrata")) {
+  d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Date_begin = "2020-01-01",
+            Date_end = "2020-12-31", Frequency = "daily")
+ }
 ## Summarising observed data
 sum_stats <- ARPALdf_Summary(Data = d)
 }

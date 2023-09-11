@@ -6,21 +6,25 @@
 \usage{
 get_ARPA_Lombardia_AQ_municipal_data(
   ID_station = NULL,
-  Year = 2022,
+  Date_begin = "2021-01-01",
+  Date_end = "2022-12-31",
   Frequency = "daily",
   Var_vec = NULL,
   Fns_vec = NULL,
-  by_sensor = F,
-  parallel = T,
-  verbose = T
+  by_sensor = FALSE,
+  verbose = TRUE,
+  parallel = FALSE,
+  parworkers = NULL,
+  parfuturetype = "multisession"
 )
 }
 \arguments{
 \item{ID_station}{Numeric value. ID of the station to consider. Using ID_station = NULL, all the available
 stations are selected. Default is ID_station = NULL.}
 
-\item{Year}{Numeric vector. Year(s) of interest. Default is Year = 2022 Specifying more than one year the
-code works in parallel computing (half of the available cores) using parLapply() function.}
+\item{Date_begin}{Character vector of the first date-time to download. Format can be either "YYYY-MM-DD" or "YYYY-MM-DD hh:mm:ss". Default is Date_begin = "2022-01-01".}
+
+\item{Date_end}{Character vector of the last date-time to download. Format can be either "YYYY-MM-DD" or "YYYY-MM-DD hh:mm:ss". Default is Date_end = "2022-12-31".}
 
 \item{Frequency}{Temporal aggregation frequency. It can be "daily", "weekly", "monthly" or "yearly".
 Default is Frequency = "daily".}
@@ -31,16 +35,21 @@ Default is Frequency = "daily".}
 Available functions are mean, median, min, max, sum, qPP (PP-th percentile), sd, var,
 vc (variability coefficient), skew (skewness) and kurt (kurtosis).}
 
-\item{by_sensor}{Boolean. If 'by_sensor=1', the function returns the observed concentrations by sensor code, while
-if 'by_sensor=0' (default) it returns the observed concentrations by station.}
+\item{by_sensor}{Logic value (TRUE or FALSE). If 'by_sensor = TRUE', the function returns the observed concentrations by sensor code, while
+if 'by_sensor = FALSE' (default) it returns the observed concentrations by station.}
 
-\item{parallel}{Logic value (T or F). If 'parallel=T' (default), data downloading is performed using parallel computing
-(socketing), while if 'parallel=F' (default) the download is performed serially. 'parallel=T' works only when
-'Year' is a vector with multiple values, i.e. for a single year the serial computing is performed.}
-
-\item{verbose}{Logic value (T or F). Toggle warnings and messages. If 'verbose=T' (default) the function
-prints on the screen some messages describing the progress of the tasks. If 'verbose=F' any message about
+\item{verbose}{Logic value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
+prints on the screen some messages describing the progress of the tasks. If 'verbose = FALSE' any message about
 the progression is suppressed.}
+
+\item{parallel}{Logic value (TRUE or FALSE). If 'parallel = FALSE' (default), data downloading is performed using a sequential/serial approach and additional parameters 'parworkers' and 'parfuturetype' are ignored.
+When 'parallel = TRUE', data downloading is performed using parallel computing through the Futureverse setting.
+More detailed information about parallel computing in the Futureverse can be found at the following webpages:
+https://future.futureverse.org/ and https://cran.r-project.org/web/packages/future.apply/vignettes/future.apply-1-overview.html}
+
+\item{parworkers}{Numeric integer value. If 'parallel = TRUE' (parallel mode active), the user can declare the number of parallel workers to be activated using 'parworkers = integer number'. By default ('parworkers = NULL'), the number of active workers is half of the available local cores.}
+
+\item{parfuturetype}{Character vector. If 'parallel = TRUE' (parallel mode active), the user can declare the parallel strategy to be used according to the Futureverse syntax through 'parfuturetype'. By default, the 'multisession' (background R sessions on local machine) is used. In alternative, the 'multicore' (forked R processes on local machine. Not supported by Windows and RStudio) setting can be used.}
 }
 \value{
 A data frame of class 'data.frame' and 'ARPALdf'. The object is fully compatible with Tidyverse.
@@ -63,16 +72,24 @@ More detailed description.
 \examples{
 \donttest{
 ## Download daily concentrations at municipal levels observed in 2020
-## for all the cities in Lombardy
-get_ARPA_Lombardia_AQ_municipal_data(ID_station=NULL,Year=2020,
-     Frequency="daily")
+## for all the municipalities in Lombardy
+if (require("RSocrata")) {
+    get_ARPA_Lombardia_AQ_municipal_data(ID_station=NULL,Date_begin = "2020-01-01",
+          Date_end = "2020-12-31", Frequency="daily")
+}
 ## Download monthly concentrations of NO2 (average and maximum) observed in 2021
 ## at city number 100451.
-get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451,Year=2021,
-      Frequency="monthly",Var_vec=c("NO2_mean","NO2_mean"),Fns_vec=c("mean","max"))
-## Download daily concentrations observed in 2021 at city number 100451.
+if (require("RSocrata")) {
+    get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451,Date_begin = "2021-01-01",
+          Date_end = "2021-12-31", Frequency="monthly",Var_vec=c("NO2_mean","NO2_mean"),
+          Fns_vec=c("mean","max"))
+}
+## Download daily concentrations observed in March and April 2022 at city number 100451.
 ## Data are reported by sensor.
-get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451,Year=2021,by_sensor = 1)
+if (require("RSocrata")) {
+    get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451, Date_begin = "2022-03-01",
+          Date_end = "2022-04-30", by_sensor = TRUE)
+}
 }
 
 }

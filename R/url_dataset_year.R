@@ -4,6 +4,7 @@
 url_dataset_year <-
   function(Stat_type, Year) {
     url <- switch(Stat_type,
+                  ##### Weather monitoring network
                   W = dplyr::case_when(Year == 2023 ~ "https://www.dati.lombardia.it/download/48xr-g9b9/application%2Fzip",
                                        Year == 2022 ~ "https://www.dati.lombardia.it/download/mvvc-nmzv/application%2Fzip",
                                        Year == 2021 ~ "https://www.dati.lombardia.it/download/49n9-866s/application%2Fzip",
@@ -21,32 +22,50 @@ url_dataset_year <-
                                        Year %in% 2001:2005 ~ "https://www.dati.lombardia.it/download/stys-ktts/application%2Fzip",
                                        Year %in% 1989:2000 ~ "https://www.dati.lombardia.it/download/tj2h-b7vd/application%2Fzip"),
 
-                  AQ = dplyr::case_when(Year == 2023 ~ "https://www.dati.lombardia.it/resource/nicp-bhqi.csv",
-                                        Year == 2022 ~ "https://www.dati.lombardia.it/download/3vy4-yusn/application%2Fx-zip-compressed",
-                                        Year == 2021 ~ "https://www.dati.lombardia.it/download/wzmx-9k7n/application%2Fx-zip-compressed",
-                                        Year == 2020 ~ "https://www.dati.lombardia.it/download/88sp-5tmj/application%2Fzip",
-                                        Year == 2019 ~ "https://www.dati.lombardia.it/api/views/j2mz-aium/files/f3d03850-4750-4168-a3a7-fdfb204bee14?filename=sensori_aria_2019.zip",
-                                        Year == 2018 ~ "https://www.dati.lombardia.it/api/views/4t9j-fd8z/files/01b6ae2f-85a8-4cf2-a558-d9c5ffa2e5e8?filename=sensori_aria_2018.zip",
-                                        Year == 2017 ~ "https://www.dati.lombardia.it/api/views/fdv6-2rbs/files/742fb7a8-2a58-4b08-a366-a75c358be1ed?filename=sensori_aria_2017.zip",
-                                        Year == 2016 ~ "https://www.dati.lombardia.it/api/views/7v3n-37f3/files/3b4f1e13-0e42-48bd-bfcc-ddc173a2c3d5?filename=sensori_aria_2016.zip",
-                                        Year == 2015 ~ "https://www.dati.lombardia.it/api/views/bpin-c7k8/files/e06bd244-03f6-4b19-9095-bed347eaf9cb?filename=sensori_aria_2015.zip",
-                                        Year == 2014 ~ "https://www.dati.lombardia.it/api/views/69yc-isbh/files/8d2f96b2-a5dc-441b-b791-9c82390d7f43?filename=sensori_aria_2014.zip",
-                                        Year == 2013 ~ "https://www.dati.lombardia.it/api/views/hsdm-3yhd/files/53344428-e917-4bb4-b6d2-24141b600f44?filename=sensori_aria_2013.zip",
-                                        Year == 2012 ~ "https://www.dati.lombardia.it/api/views/wr4y-c9ti/files/d6c78bb2-4fd1-4931-9b21-71e04bc6885e?filename=sensori_aria_2012.zip",
-                                        Year == 2011 ~ "https://www.dati.lombardia.it/api/views/5mut-i45n/files/aef76013-6b23-41fd-940d-02b08f27f2fd?filename=sensori_aria_2011.zip",
-                                        Year %in% 2008:2010 ~ "https://www.dati.lombardia.it/download/wp2f-5nw6/application%2Fzip",
-                                        Year %in% 2005:2007 ~ "https://www.dati.lombardia.it/download/h3i4-wm93/application%2Fzip",
-                                        Year %in% 2001:2004 ~ "https://www.dati.lombardia.it/download/5jdj-7x8y/application%2Fzip",
-                                        Year %in% 1996:2000 ~ "https://www.dati.lombardia.it/download/wabv-jucw/application%2Fzip"),
+                  ##### Web pages of the weather data
+                  W_check = dplyr::case_when(Year == 2023 ~ "https://www.dati.lombardia.it/download/48xr-g9b9/application%2Fzip",
+                                             Year == 2022 ~ "https://www.dati.lombardia.it/Ambiente/Dati-sensori-meteo-2022/mvvc-nmzv",
+                                             Year == 2021 ~ "https://www.dati.lombardia.it/Ambiente/Dati-sensori-meteo-2021/49n9-866s",
+                                             Year == 2020 ~ "https://www.dati.lombardia.it/Ambiente/Dati-sensori-meteo-2020/erjn-istm",
+                                             Year == 2019 ~ "https://www.dati.lombardia.it/Ambiente/Dati-sensori-meteo-2019/wrhf-6ztd",
+                                             Year == 2018 ~ "https://www.dati.lombardia.it/Ambiente/Dati-sensori-meteo-2018/sfbe-yqe8",
+                                             Year == 2017 ~ "https://www.dati.lombardia.it/Ambiente/Dati-sensori-meteo-2017/vx6g-atiu",
+                                             Year == 2016 ~ "https://www.dati.lombardia.it/Ambiente/Dati-sensori-meteo-2016/kgxu-frcw",
+                                             Year == 2015 ~ "https://www.dati.lombardia.it/Ambiente/Dati-sensori-meteo-2015/knr4-9ujq",
+                                             Year == 2014 ~ "https://www.dati.lombardia.it/Ambiente/Dati-sensori-meteo-2014/fn7i-6whe",
+                                             Year == 2013 ~ "https://www.dati.lombardia.it/Ambiente/Dati-sensori-meteo-2013/76wm-spny",
+                                             Year %in% 2011:2012 ~ "https://www.dati.lombardia.it/Ambiente/Dati-sensori-meteo-2011-2012/srpn-ykcs",
+                                             Year %in% 2009:2010 ~ "https://www.dati.lombardia.it/Ambiente/Dati-sensori-meteo-2009-2010/9nu5-ed8s",
+                                             Year %in% 2006:2008 ~ "https://www.dati.lombardia.it/Ambiente/Dati-sensori-meteo-2006-2008/6udq-c5ub",
+                                             Year %in% 2001:2005 ~ "https://www.dati.lombardia.it/Ambiente/Dati-sensori-meteo-2001-2005/stys-ktts",
+                                             Year %in% 1989:2000 ~ "https://www.dati.lombardia.it/Ambiente/Dati-sensori-meteo-1989-2000/tj2h-b7vd"),
 
-                  AQ_municipal = dplyr::case_when(Year == 2023 ~ "https://www.dati.lombardia.it/download/kbhp-ej6g/application%2Fzip",
+                  ##### Air quality from ground network
+                  AQ = dplyr::case_when(Year == 2023 ~ "https://www.dati.lombardia.it/resource/nicp-bhqi.json",
+                                        Year %in% 2018:2022 ~ "https://www.dati.lombardia.it/resource/g2hp-ar79.json",
+                                        Year %in% 2010:2017 ~ "https://www.dati.lombardia.it/resource/nr8w-tj77.json",
+                                        Year %in% 2000:2009 ~ "https://www.dati.lombardia.it/resource/cthp-zqrr.json",
+                                        Year %in% 1968:1999 ~ "https://www.dati.lombardia.it/resource/evzn-32bs.json"),
+
+                  ##### Municipal data
+                  AQ_municipal = dplyr::case_when(Year == 2023 ~ "https://www.dati.lombardia.it/download/d3yu-kwjr/application%2Fx-zip-compressed",
                                                   Year == 2022 ~ "https://www.dati.lombardia.it/download/d3yu-kwjr/application%2Fx-zip-compressed",
                                                   Year == 2021 ~ "https://www.dati.lombardia.it/download/56c9-hxta/application%2Fzip",
                                                   Year == 2020 ~ "https://www.dati.lombardia.it/download/ej5v-5krk/application%2Fzip",
                                                   Year == 2019 ~ "https://www.dati.lombardia.it/download/dupr-g65c/application%2Fzip",
                                                   Year == 2018 ~ "https://www.dati.lombardia.it/download/v75z-59qh/application%2Fzip",
                                                   Year == 2017 ~ "https://www.dati.lombardia.it/download/a7tn-gnv9/application%2Fzip",
-                                                  Year %in% 2011:2016 ~ "https://www.dati.lombardia.it/download/yjvq-g3tp/application%2Fzip"))
+                                                  Year %in% 2011:2016 ~ "https://www.dati.lombardia.it/download/yjvq-g3tp/application%2Fzip"),
+
+                  ##### Web pages of the municipal data
+                  AQ_municipal_check = dplyr::case_when(Year %in% 2022:2023 ~ "https://www.dati.lombardia.it/Ambiente/Dati-Stime-Comunali-2022-2023/d3yu-kwjr",
+                                                        Year == 2021 ~ "https://www.dati.lombardia.it/Ambiente/Dati-Stime-Comunali-2021/56c9-hxta",
+                                                        Year == 2020 ~ "https://www.dati.lombardia.it/Ambiente/Dati-Stime-Comunali-2020/ej5v-5krk",
+                                                        Year == 2019 ~ "https://www.dati.lombardia.it/Ambiente/Dati-Stime-Comunali-2019/dupr-g65c",
+                                                        Year == 2018 ~ "https://www.dati.lombardia.it/Ambiente/Dati-Stime-Comunali-2018/v75z-59qh",
+                                                        Year == 2017 ~ "https://www.dati.lombardia.it/Ambiente/Dati-Stime-Comunali-2017/a7tn-gnv9",
+                                                        Year %in% 2011:2016 ~ "https://www.dati.lombardia.it/Ambiente/Dati-Stime-Comunali-2011-2016/yjvq-g3tp")
+    )
 
     return(url)
   }

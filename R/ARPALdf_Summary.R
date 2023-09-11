@@ -9,17 +9,16 @@
 #' (i.e. number of missing observations for each variable by station and by year).
 #'
 #' @param Data Dataset of class 'ARPALdf' containing the data to be summarised.
-#' @param by_IDStat Logic value (0 or 1). Use 1 to compute summary statistics by Station ID. Default is 1.
-#' @param by_Year Logic value (0 or 1). Use 1 to compute summary statistics by year. Default is 1.
-#' @param gap_length Logic value (0 or 1). Use 1 to compute summary statistics for the gap length of each variable.
-#' Default is 1.
-#' @param correlation Logic value (0 or 1). Use 1 to compute linear correlation of available variables. Default is 1.
-#' @param histogram Logic value (0 or 1). Use 1 to plot the histogram of each variable. Default is 0.
-#' @param density Logic value (0 or 1). Use 1 to plot the kernel density plot of each variable. Default is 0.
-#' @param outlier Logic value (0 or 1). Use 1 to analyse extreme values of each variable
-#' (boxplot and Hampel filter). Default is 0.
-#' @param verbose Logic value (T or F). Toggle warnings and messages. If 'verbose=T' (default) the function
-#' prints on the screen some messages describing the progress of the tasks. If 'verbose=F' any message about
+#' @param by_IDStat Logic value (TRUE or FALSE). Use TRUE (default) to compute summary statistics by Station ID.
+#' @param by_Year Logic value (TRUE or FALSE). Use TRUE (default) to compute summary statistics by year.
+#' @param gap_length Logic value (TRUE or FALSE). Use TRUE (default) to compute summary statistics for the gap length of each variable.
+#' @param correlation Logic value (TRUE or FALSE). Use TRUE (default) to compute linear correlation of available variables.
+#' @param histogram Logic value (TRUE or FALSE). Use TRUE to plot the histogram of each variable. Default is FALSE.
+#' @param density Logic value (TRUE or FALSE). Use TRUE to plot the kernel density plot of each variable. Default is FALSE.
+#' @param outlier Logic value (TRUE or FALSE). Use TRUE to analyse extreme values of each variable
+#' (boxplot and Hampel filter). Default is FALSE.
+#' @param verbose Logic value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
+#' prints on the screen some messages describing the progress of the tasks. If 'verbose = FALSE' any message about
 #' the progression is suppressed.
 #'
 #' @return A list of data.frames containing summary descriptive statistics for a data frame of class 'ARPALdf'.
@@ -30,23 +29,26 @@
 #' @examples
 #' \donttest{
 #' ## Download daily air quality data from all the stations for year 2020
-#' d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Year = 2020, Frequency = "daily")
+#' if (require("RSocrata")) {
+#'   d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Date_begin = "2020-01-01",
+#'             Date_end = "2020-12-31", Frequency = "daily")
+#'  }
 #' ## Summarising observed data
 #' sum_stats <- ARPALdf_Summary(Data = d)
 #' }
 #'
 #' @export
 
-ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, correlation = T,
-                            histogram = F, density = F, outlier = F, verbose=T) {
+ARPALdf_Summary <- function(Data, by_IDStat = TRUE, by_Year = TRUE, gap_length = TRUE, correlation = TRUE,
+                            histogram = FALSE, density = FALSE, outlier = FALSE, verbose=TRUE) {
 
   ### Checks
-  stopifnot("histogram must be 1 or 0" = histogram == 0 | histogram == 1)
-  stopifnot("density must be 1 or 0" = density == 0 | density == 1)
-  stopifnot("by_IDStat must be 1 or 0" = by_IDStat == 0 | by_IDStat == 1)
-  stopifnot("by_Year must be 1 or 0" = by_Year == 0 | by_Year == 1)
-  stopifnot("gap_length must be 1 or 0" = gap_length == 0 | gap_length == 1)
-  stopifnot("Data is not of class 'ARPALdf'" = is_ARPALdf(Data = Data) == T)
+  stopifnot("histogram must be TRUE or FALSE" = histogram == FALSE | histogram == TRUE)
+  stopifnot("density must be TRUE or FALSE" = density == FALSE | density == TRUE)
+  stopifnot("by_IDStat must be TRUE or FALSE" = by_IDStat == FALSE | by_IDStat == TRUE)
+  stopifnot("by_Year must be TRUE or FALSE" = by_Year == FALSE | by_Year == TRUE)
+  stopifnot("gap_length must be TRUE or FALSE" = gap_length == FALSE | gap_length == TRUE)
+  stopifnot("Data is not of class 'ARPALdf'" = is_ARPALdf(Data = Data) == TRUE)
 
   ### Print message about dimensions
   n <- dim(Data)[1]
@@ -54,17 +56,17 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, co
   t <- length(unique(Data$Date))
   t1 <- min(Data$Date)
   t2 <- max(Data$Date)
-  if (verbose==T) {
+  if (verbose==TRUE) {
     cat("The dataset contains: \n")
     cat(paste0("   ** ",n," total observations \n"))
     cat(paste0("   ** ",m," stations/ground sites \n"))
     cat(paste0("   ** ",t," time stamps from ",t1," to ",t2,"\n"))
     cat("Inspect this object to obtain summary statistics: \n")
     cat("   ** on the whole sample (Descr) \n")
-    if (by_IDStat == 1) {
+    if (by_IDStat == TRUE) {
       cat("   ** by Station ID (Descr_by_IDStat) \n")
       cat("Attention! NA values of the statistics indicate that data don't exist for a specific Station \n")}
-    if (by_Year == 1) {
+    if (by_Year == TRUE) {
       cat("   ** by Year (Descr_by_year) \n")
       cat("Attention! NA values of the statistics indicate that data don't exist for a specific Year \n")}
   }
@@ -115,8 +117,8 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, co
 
 
   ### Statistics by Station ID
-  if (by_IDStat == 1) {
-    if (verbose==T) {
+  if (by_IDStat == TRUE) {
+    if (verbose==TRUE) {
       cat("Computing summary statistics by Station ID \n")
     }
     NA_count_stat <- Data %>%
@@ -159,9 +161,9 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, co
     for (i in 1:length(Descr_by_IDStat)) {
       Descr_by_IDStat[[i]][is.nan_df(Descr_by_IDStat[[i]])] <- NA
       Descr_by_IDStat[[i]][is.infinite_df(Descr_by_IDStat[[i]])] <- NA
-      if (is_ARPALdf_AQ(Data = Data) == T) {
+      if (is_ARPALdf_AQ(Data = Data) == TRUE) {
         attr(Descr_by_IDStat[[i]], "class") <- c("ARPALdf","ARPALdf_AQ","tbl_df","tbl","data.frame")
-      } else if (is_ARPALdf_W(Data = Data) == T) {
+      } else if (is_ARPALdf_W(Data = Data) == TRUE) {
         attr(Descr_by_IDStat[[i]], "class") <- c("ARPALdf","ARPALdf_W","tbl_df","tbl","data.frame")
       }
     }
@@ -169,8 +171,8 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, co
 
 
   ### Statistics by Year
-  if (by_Year == 1) {
-    if (verbose==T) {
+  if (by_Year == TRUE) {
+    if (verbose == TRUE) {
       cat("Computing summary statistics by Year \n")
     }
     NA_count_year <- Data %>%
@@ -213,9 +215,9 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, co
     for (i in 1:length(Descr_by_year)) {
       Descr_by_year[[i]][is.nan_df(Descr_by_year[[i]])] <- NA
       Descr_by_year[[i]][is.infinite_df(Descr_by_year[[i]])] <- NA
-      if (is_ARPALdf_AQ(Data = Data) == T) {
+      if (is_ARPALdf_AQ(Data = Data) == TRUE) {
         attr(Descr_by_year[[i]], "class") <- c("ARPALdf","ARPALdf_AQ","tbl_df","tbl","data.frame")
-      } else if (is_ARPALdf_W(Data = Data) == T) {
+      } else if (is_ARPALdf_W(Data = Data) == TRUE) {
         attr(Descr_by_year[[i]], "class") <- c("ARPALdf","ARPALdf_W","tbl_df","tbl","data.frame")
       }
     }
@@ -223,8 +225,8 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, co
 
 
   ### Gap length by variable
-  if (gap_length == 1) {
-    if (verbose==T) {
+  if (gap_length == TRUE) {
+    if (verbose == TRUE) {
       cat("Computing gap lengths statistics by variable \n")
     }
     vars <- Data %>%
@@ -257,15 +259,15 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, co
                          Length24 = sum(.data$gap == 24)) %>%
         as.data.frame() %>%
         dplyr::mutate(dplyr::across(tidyselect::contains("gap"),
-                                    ~ mondate::as.difftime(.x,units = attributes(Data)$units)))
+                                    ~ as_difftime(.x,units = attributes(Data)$units)))
       colnames(gl) <- c("IDStation","NameStation",
                         paste0(var,"_min_gap"),paste0(var,"_q25_gap"),
                         paste0(var,"_mean_gap"),paste0(var,"_median_gap"),
                         paste0(var,"_q75_gap"),paste0(var,"_max_gap"),paste0(var,"_sd_gap"),
                         paste0(var,"_freq_gap1"),paste0(var,"_freq_gap2"),paste0(var,"_freq_gap24"))
-      if (is_ARPALdf_AQ(Data = Data) == T) {
+      if (is_ARPALdf_AQ(Data = Data) == TRUE) {
         attr(gl, "class") <- c("ARPALdf","ARPALdf_AQ","tbl_df","tbl","data.frame")
-      } else if (is_ARPALdf_W(Data = Data) == T) {
+      } else if (is_ARPALdf_W(Data = Data) == TRUE) {
         attr(gl, "class") <- c("ARPALdf","ARPALdf_W","tbl_df","tbl","data.frame")
       }
       gap_length[[v]] <- gl
@@ -275,8 +277,8 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, co
 
 
   ### Histogram
-  if (histogram == 1) {
-    if (verbose==T) {
+  if (histogram == TRUE) {
+    if (verbose == TRUE) {
       cat("Graphics: plotting histogram of each variable \n")
     }
     hist_plot <- Data %>%
@@ -291,8 +293,8 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, co
 
 
   ### Kernel density plot
-  if (density == 1) {
-    if (verbose==T) {
+  if (density == TRUE) {
+    if (verbose == TRUE) {
       cat("Graphics: plotting density of each variable \n")
     }
     dens_plot <- Data %>%
@@ -307,8 +309,8 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, co
 
 
   ### Outlier analysis
-  if (outlier == 1) {
-    if (verbose==T) {
+  if (outlier == TRUE) {
+    if (verbose == TRUE) {
       cat("Computing outlier statisics for each variable \n")
     }
     Data_long <- Data %>%
@@ -322,7 +324,7 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, co
       labs(title = "Boxplot on the whole sample by variable") +
       theme(legend.position = "")
     print(boxp)
-    if (verbose==T) {
+    if (verbose == TRUE) {
       cat("Computing Hampel filter for each variable \n")
       cat("Reports the % of observations above +3*MAD and below -3*MAD \n")
     }
@@ -351,8 +353,8 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, co
 
 
   ### Correlation analysis
-  if (correlation == 1) {
-    if (verbose==T) {
+  if (correlation == TRUE) {
+    if (verbose == TRUE) {
       cat("Computing linear correlation analysis for available variable \n")
     }
     stz <- unique(Data$IDStation)
@@ -372,9 +374,9 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, co
         tidyr::pivot_wider(names_from = c("Var1","Var2"),values_from = "corr")
     }
     cor_matrix <- bind_rows(cor_matrix)
-    if (is_ARPALdf_AQ(Data = Data) == T) {
+    if (is_ARPALdf_AQ(Data = Data) == TRUE) {
       attr(cor_matrix, "class") <- c("ARPALdf","ARPALdf_AQ","tbl_df","tbl","data.frame")
-    } else if (is_ARPALdf_W(Data = Data) == T) {
+    } else if (is_ARPALdf_W(Data = Data) == TRUE) {
       attr(cor_matrix, "class") <- c("ARPALdf","ARPALdf_W","tbl_df","tbl","data.frame")
     }
   }
@@ -382,19 +384,19 @@ ARPALdf_Summary <- function(Data, by_IDStat = 1, by_Year = 1, gap_length = T, co
 
   ### Output list
   ret_list <- list(Descr = descriptives)
-  if (exists("Descr_by_IDStat", inherits = F)) {
+  if (exists("Descr_by_IDStat", inherits = FALSE)) {
     ret_list <- c(ret_list, Descr_by_IDStat = list(Descr_by_IDStat))
   }
-  if (exists("Descr_by_year", inherits = F)) {
+  if (exists("Descr_by_year", inherits = FALSE)) {
     ret_list <- c(ret_list, Descr_by_year = list(Descr_by_year))
   }
-  if (exists("hampel", inherits = F)) {
+  if (exists("hampel", inherits = FALSE)) {
     ret_list <- c(ret_list, Hampel = list(hampel))
   }
-  if (exists("gap_length", inherits = F)) {
+  if (exists("gap_length", inherits = FALSE)) {
     ret_list <- c(ret_list, Gap_length = list(gap_length))
   }
-  if (exists("cor_matrix", inherits = F)) {
+  if (exists("cor_matrix", inherits = FALSE)) {
     ret_list <- c(ret_list, Cor_matrix = list(cor_matrix))
   }
 

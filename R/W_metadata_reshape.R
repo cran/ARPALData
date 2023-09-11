@@ -3,7 +3,17 @@
 
 W_metadata_reshape <-
   function() {
-    Metadata <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/nf78-nj6b.csv")
+
+    ##### Check online availability for weather metadata
+    temp <- tempfile()
+    res <- curl::curl_fetch_disk("https://www.dati.lombardia.it/resource/nf78-nj6b.csv", temp)
+    if(res$status_code != 200) {
+      stop(paste0("The internet resource for weather stations metadata is not available at the moment, try later.
+                  If the problem persists, please contact the package maintainer."))
+    } else {
+      Metadata <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/nf78-nj6b.csv")
+    }
+
     Metadata <- Metadata %>%
       dplyr::rename(IDSensor = .data$idsensore, IDStation = .data$idstazione,
                     Measure = .data$tipologia, NameStation = .data$nomestazione,

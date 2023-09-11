@@ -19,6 +19,8 @@ of Lombardy. Shapefile are available at different NUTS levels: 'LAU' for the sha
 Lombardy, 'NUTS3' for the shapefile of provinces of Lombardy and 'NUTS2' for the shapefile of Lombardy.
 }
 \examples{
-# shape <- get_Lombardia_geospatial(NUTS_level = "LAU")
+\donttest{
+shape <- get_Lombardia_geospatial(NUTS_level = "LAU")
+}
 
 }

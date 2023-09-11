@@ -6,21 +6,25 @@
 \usage{
 get_ARPA_Lombardia_W_data(
   ID_station = NULL,
-  Year = 2022,
+  Date_begin = "2021-01-01",
+  Date_end = "2022-12-31",
   Frequency = "10mins",
   Var_vec = NULL,
   Fns_vec = NULL,
-  by_sensor = F,
-  parallel = T,
-  verbose = T
+  by_sensor = FALSE,
+  verbose = TRUE,
+  parallel = FALSE,
+  parworkers = NULL,
+  parfuturetype = "multisession"
 )
 }
 \arguments{
 \item{ID_station}{Numeric value. ID of the station to consider. Using ID_station = NULL, all the available
 stations are selected. Default is ID_station = NULL.}
 
-\item{Year}{Numeric vector. Year(s) of interest. Default is Year = 2022. Specifying more than one year the
-code works in parallel computing (half of the available cores) using parLapply() function.}
+\item{Date_begin}{Character vector of the first date-time to download. Format can be either "YYYY-MM-DD" or "YYYY-MM-DD hh:mm:ss". Default is Date_begin = "2022-01-01".}
+
+\item{Date_end}{Character vector of the last date-time to download. Format can be either "YYYY-MM-DD" or "YYYY-MM-DD hh:mm:ss". Default is Date_end = "2022-12-31".}
 
 \item{Frequency}{Temporal aggregation frequency. It can be "10mins", "hourly", "daily", "weekly",
 "monthly". Default is Frequency = "10mins"}
@@ -34,16 +38,21 @@ vc (variability coefficient), skew (skewness) and kurt (kurtosis). Attention: fo
 Wind Speed Gust only mean, min and max are available; for Wind Direction and Wind Direction Gust
 only mean is available.}
 
-\item{by_sensor}{Logic value (T or F). If 'by_sensor=T', the function returns the observed concentrations
-by sensor code, while if 'by_sensor=F' (default) it returns the observed concentrations by station.}
+\item{by_sensor}{Logic value (TRUE or FALSE). If 'by_sensor = TRUE', the function returns the observed concentrations
+by sensor code, while if 'by_sensor = FALSE' (default) it returns the observed concentrations by station.}
 
-\item{parallel}{Logic value (T or F). If 'parallel=T' (default), data downloading is performed using parallel computing
-(socketing), while if 'parallel=F' (default) the download is performed serially. 'parallel=T' works only when
-'Year' is a vector with multiple values, i.e. for a single year the serial computing is performed.}
-
-\item{verbose}{Logic value (T or F). Toggle warnings and messages. If 'verbose=T' (default) the function
-prints on the screen some messages describing the progress of the tasks. If 'verbose=F' any message about
+\item{verbose}{Logic value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
+prints on the screen some messages describing the progress of the tasks. If 'verbose = FALSE' any message about
 the progression is suppressed.}
+
+\item{parallel}{Logic value (TRUE or FALSE). If 'parallel = FALSE' (default), data downloading is performed using a sequential/serial approach and additional parameters 'parworkers' and 'parfuturetype' are ignored.
+When 'parallel = TRUE', data downloading is performed using parallel computing through the Futureverse setting.
+More detailed information about parallel computing in the Futureverse can be found at the following webpages:
+https://future.futureverse.org/ and https://cran.r-project.org/web/packages/future.apply/vignettes/future.apply-1-overview.html}
+
+\item{parworkers}{Numeric integer value. If 'parallel = TRUE' (parallel mode active), the user can declare the number of parallel workers to be activated using 'parworkers = integer number'. By default ('parworkers = NULL'), the number of active workers is half of the available local cores.}
+
+\item{parfuturetype}{Character vector. If 'parallel = TRUE' (parallel mode active), the user can declare the parallel strategy to be used according to the Futureverse syntax through 'parfuturetype'. By default, the 'multisession' (background R sessions on local machine) is used. In alternative, the 'multicore' (forked R processes on local machine. Not supported by Windows and RStudio) setting can be used.}
 }
 \value{
 A data frame of class 'data.frame' and 'ARPALdf'. The object is fully compatible with Tidyverse.
@@ -62,10 +71,17 @@ More detailed description.
 }
 \examples{
 \donttest{
-## Download all the (10 minutes frequency) weather measurements at station 100 during 2022.
-get_ARPA_Lombardia_W_data(ID_station = 100, Year = 2022, Frequency = "10mins")
-## Download all the (daily frequency) weather measurements at station 100 during 2023.
-get_ARPA_Lombardia_W_data(ID_station = 100, Year = 2023, Frequency = "daily")
+## Download all the (10 minutes frequency) weather measurements at station 100
+## between August 2021 and December 2022.
+if (require("RSocrata")) {
+    get_ARPA_Lombardia_W_data(ID_station = 100, Date_begin = "2021-08-01",
+          Date_end = "2022-12-31", Frequency = "10mins")
+}
+## Download all the (daily frequency) weather measurements at station 1974 during 2022
+if (require("RSocrata")) {
+    get_ARPA_Lombardia_W_data(ID_station = 1974, Date_begin = "2022-01-01",
+          Date_end = "2022-12-31", Frequency = "daily")
+}
 }
 
 }
