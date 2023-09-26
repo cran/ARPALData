@@ -4,8 +4,8 @@
 #'
 #' @description 'get_ARPA_Lombardia_W_data' returns observed air weather measurements collected by
 #' ARPA Lombardia ground detection system for Lombardy region in Northern Italy.
-#' Available meteorological variables are: temperature (Celsius degrees), rainfall (cm), wind speed (m/s),
-#' wind direction (degrees), relative humidity (%), global_radiation (W/m2)and snow height (cm).
+#' Available meteorological variables are: temperature (Celsius degrees), rainfall (mm), wind speed (m/s),
+#' wind direction (degrees), relative humidity (%), global solar radiation (W/m2), and snow height (cm).
 #' Data are available from 1989 and are updated up to the current date.
 #' For more information about the municipal data visit the section 'Monitoraggio aria' at the webpage:
 #' https://www.dati.lombardia.it/stories/s/auv9-c2sj
@@ -482,8 +482,17 @@ get_ARPA_Lombardia_W_data <-
         tidyr::pivot_wider(names_from = .data$Date, values_from = .data$Value) %>%
         tidyr::pivot_longer(cols = -c(.data$Measure,.data$IDStation,.data$NameStation),
                             names_to = "Date", values_to = "Value") %>%
-        tidyr::pivot_wider(names_from = .data$Measure, values_from = .data$Value) %>%
-        dplyr::arrange(.data$IDStation,.data$Date)
+        tidyr::pivot_wider(names_from = .data$Measure, values_from = .data$Value)
+
+      if (Frequency %notin% c("10mins","hourly")) {
+        Meteo <- Meteo %>%
+          dplyr::mutate(Date = ymd(.data$Date)) %>%
+          dplyr::arrange(.data$IDStation,.data$Date)
+      } else {
+        Meteo <- Meteo %>%
+          dplyr::mutate(Date = ymd_hms(.data$Date)) %>%
+          dplyr::arrange(.data$IDStation,.data$Date)
+      }
 
       freq_unit <- dplyr::case_when(Frequency == "10mins" ~ "10 min",
                                     Frequency == "hourly" ~ "hours",

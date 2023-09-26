@@ -1,22 +1,25 @@
-#' Aggregate ARPALdf data to hourly, daily, weekly, mothly and yearly aggregations
+#' Aggregate any ARPALdf object (with higher temporal frequency) to hourly, daily, weekly, monthly and yearly
+#' temporal frequencies.
 #'
-#' @description 'Time_aggregate' returns an ARPALdf object aggregating observations by hourly,
-#' daily, weekly and mothly periods. The function can be applied only to ARPALdf objects.
+#' @description Starting from an ARPALdf object with high frequency (e.g., 10mins or hourly), 'Time_aggregate'
+#' aggregates the dataset to lower temporal frequencies (e.g., hourly, daily, weekly, monthly and yearly) by station.
+#' The output is an ARPALdf object with observations having hourly, daily, weekly, monthly or yearly frequency.
+#' The function can be applied only to ARPALdf objects.
 #' User can indicate specific variables to aggregate and an aggregation function among
-#' mean,median,sum (cumulated),min,max and quantile for each variable.
+#' mean, median, sum (cumulated), min, max, quantiles, and variability metrics for each variable.
 #' It is possible to specify different aggregation functions on the same variable
-#' by repeating the name of the variable in Var_vec and specifying the functions in Fns_vec.
+#' by repeating the name of the variable in 'Var_vec' and specifying the functions in 'Fns_vec'.
 #'
 #' @param Dataset ARPALdf dataframe to aggregate.
 #' @param Frequency Temporal aggregation frequency. It can be "hourly", "daily", "weekly",
 #' "monthly" or "yearly.
 #' @param Var_vec Vector of variables to aggregate. If NULL (default) all the variables are averaged,
 #' expect for 'Temperature' and 'Snow_height' which are summed.
-#' @param Fns_vec Vector of aggregation function to apply to the selected variables. Available functions
-#'  are mean, median, min, max, sum, qPP (PP-th percentile), sd, var, vc (variability coefficient),
-#'  skew (skewness) and kurt (kurtosis). Attention: for Wind Speed and Wind Speed Gust only mean, min
-#'  and max are available; for Wind Direction and Wind Direction Gust only mean is available.
-#' @param verbose Logic value (T or F). Toggle warnings and messages. If 'verbose=T' (default) the function
+#' @param Fns_vec Vector of aggregation functions to apply to the selected variables. Available functions
+#' are 'mean', 'median', 'min', 'max', 'sum', 'qPP' (PP-th percentile), 'sd', 'var', 'vc' (variability coefficient),
+#' 'skew' (skewness) and 'kurt' (kurtosis). Attention: for Wind Speed and Wind Speed Gust only mean, min
+#' and max are available; for Wind Direction and Wind Direction Gust only mean is available.
+#' @param verbose Logic value (TRUE or FALSE). Toggle warnings and messages. If 'verbose=T' (default) the function
 #' prints on the screen some messages describing the progress of the tasks. If 'verbose=F' any message about
 #' the progression is suppressed.
 #'
@@ -158,13 +161,13 @@ Time_aggregate <- function(Dataset, Frequency, Var_vec = NULL, Fns_vec = NULL, v
   attr(data_aggr, "units") <- freq_unit
 
   structure(list(data_aggr = data_aggr))
-  if (is_ARPALdf_AQ(Dataset)==T) {
+  if (is_ARPALdf_AQ(Dataset)==TRUE) {
     attr(data_aggr, "class") <- c("ARPALdf","ARPALdf_AQ","tbl_df","tbl","data.frame")
   }
-  if (is_ARPALdf_AQ_mun(Dataset)==T) {
+  if (is_ARPALdf_AQ_mun(Dataset)==TRUE) {
     attr(data_aggr, "class") <- c("ARPALdf","ARPALdf_AQ_mun","tbl_df","tbl","data.frame")
   }
-  if (is_ARPALdf_W(Dataset)==T) {
+  if (is_ARPALdf_W(Dataset)==TRUE) {
     attr(data_aggr, "class") <- c("ARPALdf","ARPALdf_W","tbl_df","tbl","data.frame")
   }
 

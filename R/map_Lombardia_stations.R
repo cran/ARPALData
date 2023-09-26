@@ -1,6 +1,6 @@
 #' Generate a map of the selected stations
 #'
-#' @description 'get_ARPA_Lombardia_AQ_data' represents on a map (polygon of Lombardy) the location of
+#' @description 'get_ARPA_Lombardia_AQ_data' represents on a map (geometries/polygon of Lombardy) the location of
 #' the stations contained in a data frame of class 'ARPALdf'. Data can be either a ARPALdf of observed data
 #' (from 'get_ARPA_Lombardia_xxx' commands) and an ARPALdf obtained as registry
 #' (from 'get_ARPA_Lombardia_xxx_registry' command).
@@ -52,7 +52,10 @@ map_Lombardia_stations <-
       ggplot2::ggplot() +
       ggplot2::geom_sf(linetype = prov_line_type, size = prov_line_size) +
       ggplot2::geom_sf(data = d, col=col_points) +
-      ggplot2::labs(title = title)
+      ggplot2::labs(title = title) +
+      ggplot2::theme_bw() +
+      ggplot2::scale_x_continuous(labels = function(x) paste0(x, '\u00B0', "E")) +
+      ggplot2::scale_y_continuous(labels = function(x) paste0(x, '\u00B0', "N"))
 
     print(geo_plot)
   }

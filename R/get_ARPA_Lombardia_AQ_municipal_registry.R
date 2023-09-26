@@ -4,7 +4,7 @@
 #' owned by ARPA Lombardia for each municipality of Lombardy. The information reported are: ID of each sensor and
 #' station, starting date and ending date. The column 'NameStation' identifies the name of each municipality.
 #' The column 'IDStation' is an ID code (assigned from ARPA) uniquely identifying each municipality.
-#' For more information about the municipal data visit the section 'Stime comunali dell'aria' at the webpage:
+#' For more information about the municipal data visit the section 'Stime comunali sull'aria' at the webpage:
 #' https://www.dati.lombardia.it/stories/s/auv9-c2sj
 #'
 #' @return A data frame of class 'data.frame' and 'ARPALdf'. The object is fully compatible with Tidyverse.

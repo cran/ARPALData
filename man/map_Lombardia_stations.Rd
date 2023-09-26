@@ -35,7 +35,7 @@ ARPALdf of observed data (from 'get_ARPA_Lombardia_xxx' commands) and an ARPALdf
 A map of selected stations across the Lombardy region
 }
 \description{
-'get_ARPA_Lombardia_AQ_data' represents on a map (polygon of Lombardy) the location of
+'get_ARPA_Lombardia_AQ_data' represents on a map (geometries/polygon of Lombardy) the location of
 the stations contained in a data frame of class 'ARPALdf'. Data can be either a ARPALdf of observed data
 (from 'get_ARPA_Lombardia_xxx' commands) and an ARPALdf obtained as registry
 (from 'get_ARPA_Lombardia_xxx_registry' command).

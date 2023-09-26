@@ -15,8 +15,9 @@ A data frame of class 'data.frame', "sf" and 'ARPALdf'.
 }
 \description{
 'get_Lombardia_geospatial' returns the polygonal (shape file) object containing the geometries
-of Lombardy. Shapefile are available at different NUTS levels: 'LAU' for the shapefile of municipalities of
-Lombardy, 'NUTS3' for the shapefile of provinces of Lombardy and 'NUTS2' for the shapefile of Lombardy.
+of Lombardy. Shapefile are available at different NUTS levels (https://ec.europa.eu/eurostat/web/nuts/background):
+'LAU' for the shapefile of municipalities of Lombardy, 'NUTS3' for the shapefile of provinces of Lombardy
+and 'NUTS2' for the shapefile of Lombardy.
 }
 \examples{
 \donttest{

@@ -2,10 +2,11 @@
 #'
 #' @description 'get_ARPA_Lombardia_zoning' returns the geometries (polygonal shape file) and a map of
 #' the ARPA zoning of Lombardy. The zoning reflects the main orographic characteristics of the territory.
-#' Lombardy region is classified into seven type of areas: large urbanised areas, urbanized areas in rural
+#' Lombardy region is classified into seven type of areas: large urbanized areas, urbanized areas in rural
 #' contexts, rural areas, mountainous areas and valley bottom.
-#' For more information about the municipal data visit the section 'Zonizzazione ARPA Lombardia' at the webpage:
-#' https://www.arpalombardia.it/Pages/Aria/Rete-di-rilevamento/Zonizzazione.aspx
+#' For more information about the municipal data visit the section 'Zonizzazione ARPA Lombardia' at the webpages
+#' https://www.arpalombardia.it/temi-ambientali/aria/rete-di-rilevamento/classificazione-zone/ and
+#' https://www.arpalombardia.it/temi-ambientali/aria/mappa-della-zonizzazione/
 #'
 #' @param plot_map Logic value (0 or 1). If plot_map = 1, the ARPA Lombardia zoning is represented
 #' on a map, if plot_mat = 0 only the geometry (polygon shapefile) is stored in the output.
@@ -62,8 +63,11 @@ get_ARPA_Lombardia_zoning <-
         ggplot2::ggplot() +
         ggplot2::geom_sf(aes(fill = .data$Zone),linetype = line_type, size = line_size) +
         ggplot2::labs(title = title, x = xlab, y = ylab) +
+        ggplot2::theme_bw() +
         ggplot2::theme(legend.position="bottom") +
-        ggplot2::guides(fill=guide_legend(nrow=2,byrow=TRUE))
+        ggplot2::guides(fill=guide_legend(nrow=2,byrow=TRUE)) +
+        ggplot2::scale_x_continuous(labels = function(x) paste0(x, '\u00B0', "E")) +
+        ggplot2::scale_y_continuous(labels = function(x) paste0(x, '\u00B0', "N"))
       print(geo_plot)
     }
 
