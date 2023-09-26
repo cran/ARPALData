@@ -42,8 +42,7 @@ AQ_municipal_metadata_reshape <-
 
     ### Name stations (municipalities)
     Metadata <- Metadata %>%
-      dplyr::mutate(dplyr::across(c(.data$NameStation), ~ stringi::stri_trans_general(str = .x, id="Latin-ASCII")),
-                    dplyr::across(c(.data$NameStation), toupper),
+      dplyr::mutate(dplyr::across(c(.data$NameStation), toupper),
                     dplyr::across(c(.data$NameStation), ~ gsub("\\-", " ", .x)),
                     dplyr::across(c(.data$NameStation), ~ stringr::str_replace_all(.x, c("S\\."="San ","s\\."="San ",
                                                                                          "V\\."="Via ","v\\."="Via ",
@@ -60,7 +59,9 @@ AQ_municipal_metadata_reshape <-
                                                 "FELONICA" = "SERMIDE E FELONICA",
                                                 "GERRE DE CAPRIOLI" = "GERRE DECAPRIOLI")) %>%
       dplyr::mutate(dplyr::across(c(.data$NameStation), stringr::str_to_title),
-                    dplyr::across(c(.data$NameStation), ~ stringr::str_replace_all(.x, c(" D " = " D\\'"))))
+                    dplyr::across(c(.data$NameStation), ~ stringr::str_replace_all(.x,
+                                                                                   c(" D " = " D\\'",
+                                                                                     "Sermide E Felonica" = "Sermide e Felonica"))))
 
     structure(list(Metadata = Metadata))
     attr(Metadata, "class") <- c("ARPALdf","tbl_df","tbl","data.frame")

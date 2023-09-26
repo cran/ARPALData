@@ -35,10 +35,11 @@ ARPA Lombardia to classify the regional territory. If plot_map = 1, it also retu
 \description{
 'get_ARPA_Lombardia_zoning' returns the geometries (polygonal shape file) and a map of
 the ARPA zoning of Lombardy. The zoning reflects the main orographic characteristics of the territory.
-Lombardy region is classified into seven type of areas: large urbanised areas, urbanized areas in rural
+Lombardy region is classified into seven type of areas: large urbanized areas, urbanized areas in rural
 contexts, rural areas, mountainous areas and valley bottom.
-For more information about the municipal data visit the section 'Zonizzazione ARPA Lombardia' at the webpage:
-https://www.arpalombardia.it/Pages/Aria/Rete-di-rilevamento/Zonizzazione.aspx
+For more information about the municipal data visit the section 'Zonizzazione ARPA Lombardia' at the webpages
+https://www.arpalombardia.it/temi-ambientali/aria/rete-di-rilevamento/classificazione-zone/ and
+https://www.arpalombardia.it/temi-ambientali/aria/mappa-della-zonizzazione/
 }
 \examples{
 zones <- get_ARPA_Lombardia_zoning(plot_map = 1)

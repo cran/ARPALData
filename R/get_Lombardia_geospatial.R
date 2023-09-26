@@ -1,8 +1,9 @@
 #' Download geospatial data of Lombardy from Eurostat
 #'
 #' @description 'get_Lombardia_geospatial' returns the polygonal (shape file) object containing the geometries
-#' of Lombardy. Shapefile are available at different NUTS levels: 'LAU' for the shapefile of municipalities of
-#' Lombardy, 'NUTS3' for the shapefile of provinces of Lombardy and 'NUTS2' for the shapefile of Lombardy.
+#' of Lombardy. Shapefile are available at different NUTS levels (https://ec.europa.eu/eurostat/web/nuts/background):
+#' 'LAU' for the shapefile of municipalities of Lombardy, 'NUTS3' for the shapefile of provinces of Lombardy
+#' and 'NUTS2' for the shapefile of Lombardy.
 #'
 #' @param NUTS_level NUTS level required: use "NUTS2" for regional geometries, "NUTS3" for provincial geometries,
 #' or "LAU" for municipal geometries. Default NUTS_level = "LAU".
@@ -58,8 +59,7 @@ get_Lombardia_geospatial <- function(NUTS_level = "LAU") {
                                         .data$Prov_name == "MILANO" ~ "Milano",
                                         .data$Prov_name == "MONZA E DELLA BRIANZA" ~ "Monza e della Brianza")) %>%
     dplyr::select(.data$Prov_name, .data$City, .data$City_code_ISTAT, .data$geometry) %>%
-    dplyr::mutate(dplyr::across(c(.data$City), ~ stringi::stri_trans_general(str = .x, id="Latin-ASCII")),
-                  dplyr::across(c(.data$City), toupper),
+    dplyr::mutate(dplyr::across(c(.data$City), toupper),
                   dplyr::across(c(.data$City), ~ gsub("\\-", " ", .x)),
                   dplyr::across(c(.data$City), ~ stringr::str_replace_all(.x, c("S\\."="San ","s\\."="San ",
                                                                                 "V\\."="Via ","v\\."="Via ",
@@ -76,7 +76,9 @@ get_Lombardia_geospatial <- function(NUTS_level = "LAU") {
                                        "FELONICA" = "SERMIDE E FELONICA",
                                        "GERRE DE CAPRIOLI" = "GERRE DECAPRIOLI")) %>%
     dplyr::mutate(dplyr::across(c(.data$City), stringr::str_to_title),
-                  dplyr::across(c(.data$City), ~ stringr::str_replace_all(.x, c(" D " = " D\\'"))))
+                  dplyr::across(c(.data$City), ~ stringr::str_replace_all(.x,
+                                                                          c(" D " = " D\\'",
+                                                                            "Sermide E Felonica" = "Sermide e Felonica"))))
 
   # Associating NUTS codes (from Eurostat) to each observation
   Eurostat <- eurostat::get_eurostat_geospatial(output_class = "sf",resolution = 60, nuts_level = 3, year = 2016)

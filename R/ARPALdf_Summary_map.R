@@ -81,7 +81,10 @@ ARPALdf_Summary_map <- function(Data, Title_main, Title_legend = "Variable", Var
                                     midpoint = val_midpoint,
                                     high = col_scale[3]) +
       ggplot2::guides(size = FALSE) +
-      ggplot2::labs(title = Title_main)
+      ggplot2::labs(title = Title_main) +
+      ggplot2::theme_bw() +
+      ggplot2::scale_x_continuous(labels = function(x) paste0(x, '\u00B0', "E")) +
+      ggplot2::scale_y_continuous(labels = function(x) paste0(x, '\u00B0', "N"))
 
   } else {
     Stats <- Stats %>%
@@ -106,7 +109,10 @@ ARPALdf_Summary_map <- function(Data, Title_main, Title_legend = "Variable", Var
                                     midpoint = val_midpoint,
                                     high = col_scale[3]) +
       ggplot2::guides(size = FALSE) +
-      ggplot2::labs(title = Title_main)
+      ggplot2::labs(title = Title_main) +
+      ggplot2::theme_bw() +
+      ggplot2::scale_x_continuous(labels = function(x) paste0(x, '\u00B0', "E")) +
+      ggplot2::scale_y_continuous(labels = function(x) paste0(x, '\u00B0', "N"))
   }
 
   print(geo_plot)

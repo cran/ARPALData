@@ -1,8 +1,8 @@
-#' Identifies the K-nearest-neighbours (stations) to all the monitoring sites included in a given ARPALdf
-#' registry data.frame. The neighbours are identified computing the Euclidean distance among the sites'
+#' Identifies the K-nearest-neighbors (stations) to all the monitoring sites included in a given ARPALdf
+#' registry data.frame. The neighbors are identified computing the Euclidean distance among the sites'
 #' coordinates.
 #'
-#' @description # For each element included in reg_X, it dentifies the k-nearest neighbours locations
+#' @description For each element included in reg_X, it identifies the k-nearest neighbors locations
 #' (among those included in reg_Y) according to an Euclidean distance metric. reg_X and reg_Y
 #' must be two 'ARPALdf' objects obtained using get_ARPA_Lombardia_xxx_registry'.
 #'
@@ -12,10 +12,10 @@
 #' @param reg_Y Dataset of class 'ARPALdf' containing the stations list obtained as registry
 #' (from 'get_ARPA_Lombardia_xxx_registry' command). The object must contain the following
 #' colums: 'IDStation','NameStation','Longitude' and 'Latitude'.
-#' @param k Integer value. Represents the number of neighbours the user wants to identify.
+#' @param k Integer value. Represents the number of neighbors the user wants to identify.
 #'
 #' @return A data.frame object having the same length of reg_X. For each row (stations in reg_X)
-#' it contains the name and the IDStation code for the k-nearest neighbours.
+#' it contains the name and the IDStation code for the k-nearest neighbors.
 #'
 #' @examples
 #' library(tidyverse)

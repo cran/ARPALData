@@ -434,6 +434,9 @@ get_ARPA_Lombardia_AQ_municipal_data <-
       colnames(grid) <- c("Date","IDStation")
       grid <- dplyr::left_join(grid,st_n,by="IDStation")
       Aria <- dplyr::left_join(grid,Aria, by=c("Date","IDStation","NameStation"))
+      Aria <- Aria %>%
+        dplyr::mutate(Date = ymd(.data$Date)) %>%
+        dplyr::arrange(.data$IDStation,.data$Date)
 
       structure(list(Aria = Aria))
       attr(Aria, "class") <- c("ARPALdf","ARPALdf_AQ_mun","tbl_df","tbl","data.frame")

@@ -3,10 +3,11 @@
 #' @description 'ARPALdf_Summary' returns many descriptive statistics summaring the data contained in a data frame
 #' of class ARPALdf. Statistics are calculated at overall level (full sample), by station ID and by year.
 #' For each variable are reported the basic positioning indices (min, max, mean, median, quantile) and
-#' variability indices (range, standard deviation). Other reported statistics are the linear correlation (Pearson)
-#' by station and some graphical representation of the distribution (kernel density plot, histogram,
-#' Hampel filter and boxplot). In addition, the function returns useful data-quality information: gap length
-#' (i.e. number of missing observations for each variable by station and by year).
+#' variability indices (range, standard deviation). Other reported statistics are the Pearson's linear correlation
+#' by station and some graphical representation of the distribution (kernel density plot, histogram, boxplot).
+#' In addition, the function returns useful data-quality information, such as gap length statistics (i.e. number of
+#' missing observations for each variable by station and by year) and outlier detection tools
+#' (e.g., Hampel filter and boxplot rule)
 #'
 #' @param Data Dataset of class 'ARPALdf' containing the data to be summarised.
 #' @param by_IDStat Logic value (TRUE or FALSE). Use TRUE (default) to compute summary statistics by Station ID.

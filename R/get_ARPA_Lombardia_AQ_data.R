@@ -58,7 +58,7 @@
 
 get_ARPA_Lombardia_AQ_data <-
   function(ID_station = NULL, Date_begin = "2022-01-01", Date_end = "2022-12-31",
-           Frequency = "hourly", Var_vec = NULL, Fns_vec = NULL, by_sensor = FALSE, verbose = TRUE,
+           Frequency = "weekly", Var_vec = NULL, Fns_vec = NULL, by_sensor = FALSE, verbose = TRUE,
            parallel = FALSE, parworkers = NULL, parfuturetype = "multisession") {
 
     ### Welcome message
@@ -344,6 +344,16 @@ get_ARPA_Lombardia_AQ_data <-
         tidyr::pivot_longer(cols = -c(.data$Measure,.data$IDStation,.data$NameStation),
                             names_to = "Date", values_to = "Value") %>%
         tidyr::pivot_wider(names_from = .data$Measure, values_from = .data$Value)
+
+      if (Frequency != "hourly") {
+        Aria <- Aria %>%
+          dplyr::mutate(Date = ymd(.data$Date)) %>%
+          dplyr::arrange(.data$IDStation,.data$Date)
+      } else {
+        Aria <- Aria %>%
+          dplyr::mutate(Date = ymd_hms(.data$Date)) %>%
+          dplyr::arrange(.data$IDStation,.data$Date)
+      }
 
       structure(list(Aria = Aria))
       attr(Aria, "class") <- c("ARPALdf","ARPALdf_AQ","tbl_df","tbl","data.frame")
