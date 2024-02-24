@@ -58,7 +58,7 @@
 
 get_ARPA_Lombardia_AQ_data <-
   function(ID_station = NULL, Date_begin = "2022-01-01", Date_end = "2022-12-31",
-           Frequency = "weekly", Var_vec = NULL, Fns_vec = NULL, by_sensor = FALSE, verbose = TRUE,
+           Frequency = "hourly", Var_vec = NULL, Fns_vec = NULL, by_sensor = FALSE, verbose = TRUE,
            parallel = FALSE, parworkers = NULL, parfuturetype = "multisession") {
 
     ### Welcome message
@@ -142,17 +142,23 @@ get_ARPA_Lombardia_AQ_data <-
     ##### Splitting strategy for improving download speed
     n_blocks <- 12
     # Check dates format
+    if (is.null(lubridate::guess_formats(x = Date_begin, orders = c("ymd HMS","ymd")))) {
+      stop("Wrong format for 'Date_begin'. Use 'YYYY-MM-DD' or 'YYYY-MM-DD hh:mm:ss'", call. = FALSE)
+    }
+    if (is.null(lubridate::guess_formats(x = Date_end, orders = c("ymd HMS","ymd")))) {
+      stop("Wrong format for 'Date_end'. Use 'YYYY-MM-DD' or 'YYYY-MM-DD hh:mm:ss'", call. = FALSE)
+    }
     if (is.na(lubridate::ymd_hms(Date_begin, quiet = TRUE))) {
-      Date_begin <- lubridate::ymd_hms(paste0(Date_begin," 00:00:00"))
+      Date_begin <- lubridate::ymd_hms(paste0(Date_begin," 00:00:00"), tz = "CET")
     }
     if (is.na(lubridate::ymd_hms(Date_end, quiet = TRUE))) {
-      Date_end <- lubridate::ymd_hms(paste0(Date_end," 23:00:00"))
+      Date_end <- lubridate::ymd_hms(paste0(Date_end," 23:00:00"), tz = "CET")
     }
     ### Check for the presence of breaking dates (URLs change in several years)
     if (lubridate::year(Date_begin) == lubridate::year(Date_end)) {
       break_years <- lubridate::year(Date_begin)
     } else {
-      break_years <- lubridate::year(Date_begin):1:(lubridate::year(Date_end))
+      break_years <- seq(from = lubridate::year(Date_begin), to = lubridate::year(Date_end), by = 1)
     }
 
     ##### Check online availability of the resources for the specified years
@@ -195,7 +201,6 @@ get_ARPA_Lombardia_AQ_data <-
       seq_temp <- seq(lubridate::as_datetime(dates_seq_begin[b]),
                       lubridate::as_datetime(dates_seq_end[b]),
                       length.out = n_blocks + 1)
-      #####errore caso 3
 
       seq_begin_temp <- seq_temp[-length(seq_temp)]
       seq_begin_temp <- lubridate::round_date(seq_begin_temp, unit = "hour")
@@ -217,8 +222,7 @@ get_ARPA_Lombardia_AQ_data <-
     }
     URL_blocks <- dplyr::bind_rows(URL_blocks)
 
-
-    ##### Download using Socrata API
+    ### Preparing parallel computation: explicitly open multisession/multicore workers by switching plan
     if (parallel == TRUE) {
       # Explicitly open multisession/multicore workers by switching plan
       future::plan(future::multisession, workers = 12)
@@ -230,12 +234,16 @@ get_ARPA_Lombardia_AQ_data <-
         message("Start parallel computing: number of parallel workers = ", future::nbrOfWorkers())
       }
     }
+
+    ### Download using Socrata API
     Aria <- do.call(
       rbind,
       future.apply::future_apply(X = as.matrix(URL_blocks), MARGIN = 1, FUN = function(x) {
         RSocrata::read.socrata(url = x, app_token = "Fk8hvoitqvADHECh3wEB26XbO")
       })
     )
+
+    ### Ending parallel computation: explicitly close multisession/multicore workers by switching plan
     if (parallel == TRUE) {
       # Explicitly close multisession/multicore workers by switching plan
       future::plan(future::sequential)
@@ -252,6 +260,7 @@ get_ARPA_Lombardia_AQ_data <-
     if (verbose == TRUE) {
       cat("Processing data: started at", as.character(Sys.time()), "\n")
     }
+
     ### Change variable names
     Aria <- Aria %>%
       dplyr::select(IDSensor = .data$idsensore,
@@ -261,8 +270,10 @@ get_ARPA_Lombardia_AQ_data <-
                     Value = as.numeric(.data$Value))
     # clean RAM
     invisible(gc())
+
     ### Add metadata
     Aria <- dplyr::right_join(Aria,Metadata, by = "IDSensor")
+
     ### Cleaning
     if (by_sensor %in% c(1,TRUE)) {
       Aria <- Aria %>%
@@ -336,10 +347,12 @@ get_ARPA_Lombardia_AQ_data <-
 
       Aria <- Aria %>%
         dplyr::arrange(.data$Date) %>%
-        dplyr::filter(.data$Date >= lubridate::as_datetime(Date_begin),
-                      .data$Date <= lubridate::as_datetime(Date_end)) %>%
+        dplyr::filter(.data$Date >= Date_begin,
+                      .data$Date <= Date_end) %>%
         tidyr::pivot_longer(cols = -c(.data$Date,.data$IDStation,.data$NameStation),
                             names_to = "Measure", values_to = "Value") %>%
+        dplyr::mutate(Date = case_when(Frequency %in% c("hourly") ~ as.character(format(x = .data$Date, format = "%Y-%m-%d %H:%M:%S")),
+                                       TRUE ~ as.character(format(x = .data$Date, format = "%Y-%m-%d")))) %>%
         tidyr::pivot_wider(names_from = .data$Date, values_from = .data$Value) %>%
         tidyr::pivot_longer(cols = -c(.data$Measure,.data$IDStation,.data$NameStation),
                             names_to = "Date", values_to = "Value") %>%
@@ -362,8 +375,8 @@ get_ARPA_Lombardia_AQ_data <-
     } else if (by_sensor %in% c(1,TRUE)) {
       Aria <- Aria %>%
         dplyr::arrange(.data$Date) %>%
-        dplyr::filter(.data$Date >= lubridate::as_datetime(Date_begin),
-                      .data$Date <= lubridate::as_datetime(Date_end))
+        dplyr::filter(.data$Date >= Date_begin,
+                      .data$Date <= Date_end)
       structure(list(Aria = Aria))
       attr(Aria, "class") <- c("ARPALdf","ARPALdf_AQ","tbl_df","tbl","data.frame")
       attr(Aria, "frequency") <- "hourly"

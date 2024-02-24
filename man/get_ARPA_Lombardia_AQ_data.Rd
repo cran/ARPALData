@@ -8,7 +8,7 @@ get_ARPA_Lombardia_AQ_data(
   ID_station = NULL,
   Date_begin = "2022-01-01",
   Date_end = "2022-12-31",
-  Frequency = "weekly",
+  Frequency = "hourly",
   Var_vec = NULL,
   Fns_vec = NULL,
   by_sensor = FALSE,
