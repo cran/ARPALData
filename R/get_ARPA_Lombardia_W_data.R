@@ -161,8 +161,14 @@ get_ARPA_Lombardia_W_data <-
     }
 
     ##### Splitting strategy for improving download speed
-    n_blocks <- 1
+    n_blocks <- 12
     # Check dates format
+    if (is.null(lubridate::guess_formats(x = Date_begin, orders = c("ymd HMS","ymd")))) {
+      stop("Wrong format for 'Date_begin'. Use 'YYYY-MM-DD' or 'YYYY-MM-DD hh:mm:ss'", call. = FALSE)
+    }
+    if (is.null(lubridate::guess_formats(x = Date_end, orders = c("ymd HMS","ymd")))) {
+      stop("Wrong format for 'Date_end'. Use 'YYYY-MM-DD' or 'YYYY-MM-DD hh:mm:ss'", call. = FALSE)
+    }
     if (is.na(lubridate::ymd_hms(Date_begin, quiet = TRUE))) {
       Date_begin <- lubridate::ymd_hms(paste0(Date_begin," 00:00:00"))
     }
@@ -173,7 +179,7 @@ get_ARPA_Lombardia_W_data <-
     if (lubridate::year(Date_begin) == lubridate::year(Date_end)) {
       break_years <- lubridate::year(Date_begin)
     } else {
-      break_years <- lubridate::year(Date_begin):1:(lubridate::year(Date_end))
+      break_years <- seq(from = lubridate::year(Date_begin), to = lubridate::year(Date_end), by = 1)
     }
 
     ##### Check online availability of the resources for the specified years
@@ -200,73 +206,30 @@ get_ARPA_Lombardia_W_data <-
     }
 
 
-    ### Building URLs/links in Socrata format using sequences of dates
-    if (length(break_years) == 1) {
-      break_dates <- paste0(break_years,"-12-31 23:00:00")
-    } else {
-      break_dates <- paste0(break_years[-length(break_years)],"-12-31 23:00:00")
-    }
-    dates_seq_end <- c(Date_begin,lubridate::ymd_hms(break_dates),Date_end)
-    dates_seq_end <- unique(dates_seq_end)
-    dates_seq_end <- dates_seq_end[-1]
-    dates_seq_end <- dates_seq_end[dates_seq_end <= Date_end & dates_seq_end >= Date_begin]
-    dates_seq_begin <- c(Date_begin,lubridate::ymd_hms(break_dates) + lubridate::hours(1))
-    dates_seq_begin <- unique(dates_seq_begin)
-    dates_seq_begin <- dates_seq_begin[dates_seq_begin <= Date_end & dates_seq_begin >= Date_begin]
-    # URL_blocks <- vector(mode = "list", length = length(dates_seq_begin))
-    # for (b in 1:length(dates_seq_begin)) {
-    #   seq_temp <- seq(dates_seq_begin[b],
-    #                   dates_seq_end[b],
-    #                   length.out = n_blocks + 1)
-    #
-    #   seq_begin_temp <- seq_temp[-length(seq_temp)]
-    #   seq_begin_temp <- lubridate::round_date(seq_begin_temp, unit = "hour")
-    #   seq_begin_temp <- stringr::str_replace(string = seq_begin_temp, pattern = " ", replacement = "T")
-    #
-    #   seq_end_temp <- c(seq_temp[-c(1,length(seq_temp))] - lubridate::hours(1),seq_temp[length(seq_temp)])
-    #   seq_end_temp <- lubridate::round_date(seq_end_temp, unit = "hour")
-    #   seq_end_temp <- stringr::str_replace(string = seq_end_temp, pattern = " ", replacement = "T")
-    #
-    #   if (is.null(ID_station)) {
-    #     str_sensor <- NULL
-    #   } else {
-    #     str_sensor <- paste0("AND idsensore in(",paste0(sapply(X = Metadata$IDSensor, function(x) paste0("'",x,"'")),collapse = ","),")")
-    #   }
-    #
-    #   URL_blocks[[b]] <- data.frame(seq_begin_temp,seq_end_temp) %>%
-    #     dplyr::mutate(link = paste0(URLs[b],"?$where=data between '", seq_begin_temp, "' and '", seq_end_temp,"'", str_sensor)) %>%
-    #     dplyr::select(link)
-    # }
-    # URL_blocks <- dplyr::bind_rows(URL_blocks)
-
-    ### Files names (from ARPA database)
-    file_name <- dplyr::case_when(break_years >= 2013 ~ paste0(break_years,".csv"),
-                                  break_years %in% 2011:2012 ~ "2012.csv",
-                                  break_years %in% 2009:2010 ~ "2010.csv",
-                                  break_years %in% 2006:2008 ~ "2008.csv",
-                                  break_years %in% 2001:2005 ~ "2005.csv",
-                                  break_years %in% 1989:2000 ~ "2000.csv")
-    URL_blocks <- as.matrix(paste(URLs,file_name))
 
 
-    ##### Downloading data
-    ### Preparing parallel computation: explicitly open multisession/multicore workers by switching plan
-    if (parallel == TRUE) {
-      future::plan(future::multisession, workers = 12)
-      if (is.null(parworkers)) {
-        parworkers <- future::availableCores()/2
-      }
-      eval(parse(text = paste0("future::plan(future::",parfuturetype,", workers = ",parworkers,")")))
-      if (verbose == TRUE) {
-        message("Start parallel computing: number of parallel workers = ", future::nbrOfWorkers())
-      }
-    }
 
-    ##### Years up to current 2023
-    if (any(break_years != 2023)) {
+
+
+
+
+
+
+    ##### Years up to 2022 #####
+    if (any(break_years %notin% c(2023,2024))) {
+      ### Files names (from ARPA database)
+      file_name <- dplyr::case_when(break_years >= 2013 ~ paste0(break_years,".csv"),
+                                    break_years %in% 2011:2012 ~ "2012.csv",
+                                    break_years %in% 2009:2010 ~ "2010.csv",
+                                    break_years %in% 2006:2008 ~ "2008.csv",
+                                    break_years %in% 2001:2005 ~ "2005.csv",
+                                    break_years %in% 1989:2000 ~ "2000.csv")
+      URL_blocks <- as.matrix(paste(URLs,file_name))
+
+      ### Download
       Meteo1 <- do.call(
         rbind,
-        future.apply::future_apply(X = as.matrix(URL_blocks[break_years!=2023,]), MARGIN = 1, FUN = function(x) {
+        future.apply::future_apply(X = as.matrix(URL_blocks[break_years %notin% c(2023,2024),]), MARGIN = 1, FUN = function(x) {
 
           ######################################
           ########## Downloading data ##########
@@ -341,39 +304,101 @@ get_ARPA_Lombardia_W_data <-
     # clean RAM
     invisible(gc())
 
-    ##### Current year 2023
-    if (any(break_years == 2023)) {
 
-      ######################################
-      ########## Downloading data ##########
-      ######################################
-      Meteo_last_month <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/i95f-5avh.csv",
-                                                 app_token = "Fk8hvoitqvADHECh3wEB26XbO")
-      Meteo_last_month <- Meteo_last_month %>%
-        dplyr::rename(IdSensore = .data$idsensore, Data = .data$data, Valore = .data$valore,
-               Stato = .data$stato, IdOperatore = .data$idoperatore) %>%
-        dplyr::mutate(Data = lubridate::ymd_hms(.data$Data))
-      link_str <- stringr::str_split(string = URL_blocks[break_years==2023,], pattern = " ")[[1]][1]
-      file_str <- stringr::str_split(string = URL_blocks[break_years==2023,], pattern = " ")[[1]][2]
-      Meteo2 <- readr::read_csv(archive::archive_read(link_str, file = file_str), col_types = readr::cols())
-      Meteo2 <- Meteo2 %>%
-        dplyr::mutate(Data = lubridate::dmy_hms(.data$Data))
-      ### Append last month observations
-      Meteo2 <- dplyr::bind_rows(Meteo2,Meteo_last_month)
+    #####  Data from 2023 to current (2024) are provided via Socrata API #####
+    if (any(break_years %in% c(2023,2024))) {
 
-      #####################################
-      ########## Processing data ##########
-      #####################################
+      ### Filter valid URLs and dates
+      URLs_23on <- URLs[break_years %in% c(2023,2024)]
+      break_years_23on <- break_years[break_years %in% c(2023,2024)]
+      if (lubridate::ymd("2023-01-01") > Date_begin) {
+        Date_begin_23on <- lubridate::ymd("2023-01-01")
+      } else {
+        Date_begin_23on <- Date_begin
+      }
+
+      ### Building URLs/links in Socrata format using sequences of dates
+      if (length(break_years_23on) == 1) {
+        break_dates <- paste0(break_years_23on,"-12-31 23:00:00")
+      } else {
+        break_dates <- paste0(break_years_23on[-length(break_years_23on)],"-12-31 23:00:00")
+      }
+      dates_seq_end <- c(Date_begin_23on,lubridate::ymd_hms(break_dates),Date_end)
+      dates_seq_end <- unique(dates_seq_end)
+      dates_seq_end <- dates_seq_end[-1]
+      dates_seq_end <- dates_seq_end[dates_seq_end <= Date_end & dates_seq_end >= Date_begin_23on]
+      dates_seq_begin <- c(Date_begin_23on,lubridate::ymd_hms(break_dates) + lubridate::hours(1))
+      dates_seq_begin <- unique(dates_seq_begin)
+      dates_seq_begin <- dates_seq_begin[dates_seq_begin <= Date_end & dates_seq_begin >= Date_begin_23on]
+
+      URL_blocks <- vector(mode = "list", length = length(dates_seq_begin))
+      for (b in 1:length(dates_seq_begin)) {
+        seq_temp <- seq(dates_seq_begin[b],
+                        dates_seq_end[b],
+                        length.out = n_blocks + 1)
+
+        seq_begin_temp <- seq_temp[-length(seq_temp)]
+        seq_begin_temp <- lubridate::round_date(seq_begin_temp, unit = "hour")
+        seq_begin_temp <- stringr::str_replace(string = seq_begin_temp, pattern = " ", replacement = "T")
+
+        seq_end_temp <- c(seq_temp[-c(1,length(seq_temp))] - lubridate::hours(1),seq_temp[length(seq_temp)])
+        seq_end_temp <- lubridate::round_date(seq_end_temp, unit = "hour")
+        seq_end_temp <- stringr::str_replace(string = seq_end_temp, pattern = " ", replacement = "T")
+
+        if (is.null(ID_station)) {
+          str_sensor <- NULL
+        } else {
+          str_sensor <- paste0("AND idsensore in(",paste0(sapply(X = Metadata$IDSensor, function(x) paste0("'",x,"'")),collapse = ","),")")
+        }
+
+        URL_blocks[[b]] <- data.frame(seq_begin_temp,seq_end_temp) %>%
+          dplyr::mutate(link = paste0(URLs_23on[b],"?$where=data between '", seq_begin_temp, "' and '", seq_end_temp,"'", str_sensor)) %>%
+          dplyr::select(.data$link)
+      }
+      URL_blocks <- dplyr::bind_rows(URL_blocks)
+
+      ### Preparing parallel computation: explicitly open multisession/multicore workers by switching plan
+      if (parallel == TRUE) {
+        future::plan(future::multisession, workers = 12)
+        if (is.null(parworkers)) {
+          parworkers <- future::availableCores()/2
+        }
+        eval(parse(text = paste0("future::plan(future::",parfuturetype,", workers = ",parworkers,")")))
+        if (verbose == TRUE) {
+          message("Start parallel computing: number of parallel workers = ", future::nbrOfWorkers())
+        }
+      }
+
+      ### Download
+      Meteo2 <- do.call(
+        rbind,
+        future.apply::future_apply(X = as.matrix(URL_blocks), MARGIN = 1, FUN = function(x) {
+          RSocrata::read.socrata(url = x, app_token = "Fk8hvoitqvADHECh3wEB26XbO")
+        })
+      )
+
+      ### Ending parallel computation: explicitly close multisession/multicore workers by switching plan
+      if (parallel == TRUE) {
+        future::plan(future::sequential)
+        if (verbose == TRUE) {
+          message("Stop parallel computing: number of parallel workers = ", future::nbrOfWorkers())
+        }
+      }
+
+      ### Processing data
       if (verbose == TRUE) {
         cat("Processing data: started at", as.character(Sys.time()), "\n")
       }
+
       ### Change variable names
       Meteo2 <- Meteo2 %>%
-        dplyr::select(IDSensor = .data$IdSensore, Date = .data$Data, Value = .data$Valore,
-                      Operator = .data$idOperatore) %>%
+        dplyr::select(IDSensor = .data$idsensore, Date = .data$data, Value = .data$valore,
+                      Operator = .data$idoperatore) %>%
         dplyr::mutate(IDSensor = as.numeric(.data$IDSensor))
+
       ### Add metadata
       Meteo2 <- dplyr::right_join(Meteo2,Metadata, by = "IDSensor")
+
       ### Cleaning
       if (by_sensor %in% c(1,TRUE)) {
         Meteo2 <- Meteo2 %>%
@@ -396,7 +421,8 @@ get_ARPA_Lombardia_W_data <-
       } else if (by_sensor %in% c(0,FALSE)) {
         Meteo2 <- Meteo2 %>%
           dplyr::filter(!is.na(.data$Date)) %>%
-          dplyr::mutate(Operator = dplyr::case_when(.data$Measure == "Relative_humidity" & .data$Operator == 3 ~ 1,
+          dplyr::mutate(Value = as.numeric(.data$Value),
+                        Operator = dplyr::case_when(.data$Measure == "Relative_humidity" & .data$Operator == 3 ~ 1,
                                                     .data$Measure == "Relative_humidity" & .data$Operator == 2 ~ 1,
                                                     .data$Measure == "Temperature" & .data$Operator == 3 ~ 1,
                                                     .data$Measure == "Temperature" & .data$Operator == 2 ~ 1,
@@ -415,18 +441,15 @@ get_ARPA_Lombardia_W_data <-
       }
       Meteo2[is.na(Meteo2)] <- NA
       Meteo2[is.nan_df(Meteo2)] <- NA
-      Meteo2
     } else {
       Meteo2 <- NULL
     }
 
-    ### Ending parallel computation: explicitly close multisession/multicore workers by switching plan
-    if (parallel == TRUE) {
-      future::plan(future::sequential)
-      if (verbose == TRUE) {
-        message("Stop parallel computing: number of parallel workers = ", future::nbrOfWorkers())
-      }
-    }
+
+
+    #####################################
+    ########## Processing data ##########
+    #####################################
 
     ### Append datasets
     Meteo <- dplyr::bind_rows(Meteo1,Meteo2)
@@ -437,7 +460,7 @@ get_ARPA_Lombardia_W_data <-
     ### Add dataset attributes
     attr(Meteo, "class") <- c("ARPALdf","ARPALdf_W","tbl_df","tbl","data.frame")
 
-    ###
+    ### Cleaning
     if (is.null(Var_vec) & is.null(Fns_vec)) {
       vv <- c("Rainfall","Temperature","Relative_humidity","Global_radiation","Water_height",
               "Snow_height","Wind_speed","Wind_speed_max","Wind_direction","Wind_direction_max")
@@ -475,10 +498,12 @@ get_ARPA_Lombardia_W_data <-
       }
       Meteo <- Meteo %>%
         dplyr::arrange(.data$Date) %>%
-        dplyr::filter(.data$Date >= lubridate::as_datetime(Date_begin),
-                      .data$Date <= lubridate::as_datetime(Date_end)) %>%
+        dplyr::filter(.data$Date >= Date_begin,
+                      .data$Date <= Date_end) %>%
         tidyr::pivot_longer(cols = -c(.data$Date,.data$IDStation,.data$NameStation),
                             names_to = "Measure", values_to = "Value") %>%
+        dplyr::mutate(Date = case_when(Frequency %in% c("10mins","hourly") ~ as.character(format(x = .data$Date, format = "%Y-%m-%d %H:%M:%S")),
+                                       TRUE ~ as.character(format(x = .data$Date, format = "%Y-%m-%d")))) %>%
         tidyr::pivot_wider(names_from = .data$Date, values_from = .data$Value) %>%
         tidyr::pivot_longer(cols = -c(.data$Measure,.data$IDStation,.data$NameStation),
                             names_to = "Date", values_to = "Value") %>%
@@ -507,8 +532,8 @@ get_ARPA_Lombardia_W_data <-
     } else if (by_sensor %in% c(1,TRUE)) {
       Meteo <- Meteo %>%
         dplyr::arrange(.data$Date) %>%
-        dplyr::filter(.data$Date >= lubridate::as_datetime(Date_begin),
-                      .data$Date <= lubridate::as_datetime(Date_end))
+        dplyr::filter(.data$Date >= Date_begin,
+                      .data$Date <= Date_end)
 
       structure(list(Meteo = Meteo))
       attr(Meteo, "class") <- c("ARPALdf","ARPALdf_W","tbl_df","tbl","data.frame")

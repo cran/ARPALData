@@ -2,6 +2,7 @@
 % Please edit documentation in R/ARPALData.R
 \docType{package}
 \name{ARPALData}
+\alias{ARPALData-package}
 \alias{ARPALData}
 \title{ARPALData Package}
 \description{

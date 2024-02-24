@@ -141,8 +141,14 @@ get_ARPA_Lombardia_AQ_municipal_data <-
     }
 
     ##### Splitting strategy for improving download speed
-    n_blocks <- 1
+    n_blocks <- 12
     # Check dates format
+    if (is.null(lubridate::guess_formats(x = Date_begin, orders = c("ymd HMS","ymd")))) {
+      stop("Wrong format for 'Date_begin'. Use 'YYYY-MM-DD' or 'YYYY-MM-DD hh:mm:ss'", call. = FALSE)
+    }
+    if (is.null(lubridate::guess_formats(x = Date_end, orders = c("ymd HMS","ymd")))) {
+      stop("Wrong format for 'Date_end'. Use 'YYYY-MM-DD' or 'YYYY-MM-DD hh:mm:ss'", call. = FALSE)
+    }
     if (is.na(lubridate::ymd_hms(Date_begin, quiet = TRUE))) {
       Date_begin <- lubridate::ymd_hms(paste0(Date_begin," 00:00:00"))
     }
@@ -153,7 +159,7 @@ get_ARPA_Lombardia_AQ_municipal_data <-
     if (lubridate::year(Date_begin) == lubridate::year(Date_end)) {
       break_years <- lubridate::year(Date_begin)
     } else {
-      break_years <- lubridate::year(Date_begin):1:(lubridate::year(Date_end))
+      break_years <- seq(from = lubridate::year(Date_begin), to = lubridate::year(Date_end), by = 1)
     }
 
     ##### Check online availability of the resources for the specified years
@@ -180,112 +186,43 @@ get_ARPA_Lombardia_AQ_municipal_data <-
     }
 
 
-    ### Building URLs/links in Socrata format using sequences of dates
-    if (length(break_years) == 1) {
-      break_dates <- paste0(break_years,"-12-31 23:00:00")
-    } else {
-      break_dates <- paste0(break_years[-length(break_years)],"-12-31 23:00:00")
-    }
-    dates_seq_end <- c(Date_begin,lubridate::ymd_hms(break_dates),Date_end)
-    dates_seq_end <- unique(dates_seq_end)
-    dates_seq_end <- dates_seq_end[-1]
-    dates_seq_end <- dates_seq_end[dates_seq_end <= Date_end & dates_seq_end >= Date_begin]
-    dates_seq_begin <- c(Date_begin,lubridate::ymd_hms(break_dates) + lubridate::hours(1))
-    dates_seq_begin <- unique(dates_seq_begin)
-    dates_seq_begin <- dates_seq_begin[dates_seq_begin <= Date_end & dates_seq_begin >= Date_begin]
-    # URL_blocks <- vector(mode = "list", length = length(dates_seq_begin))
-    # for (b in 1:length(dates_seq_begin)) {
-    #   seq_temp <- seq(dates_seq_begin[b],
-    #                   dates_seq_end[b],
-    #                   length.out = n_blocks + 1)
-    #
-    #   seq_begin_temp <- seq_temp[-length(seq_temp)]
-    #   seq_begin_temp <- lubridate::round_date(seq_begin_temp, unit = "hour")
-    #   seq_begin_temp <- stringr::str_replace(string = seq_begin_temp, pattern = " ", replacement = "T")
-    #
-    #   seq_end_temp <- c(seq_temp[-c(1,length(seq_temp))] - lubridate::hours(1),seq_temp[length(seq_temp)])
-    #   seq_end_temp <- lubridate::round_date(seq_end_temp, unit = "hour")
-    #   seq_end_temp <- stringr::str_replace(string = seq_end_temp, pattern = " ", replacement = "T")
-    #
-    #   if (is.null(ID_station)) {
-    #     str_sensor <- NULL
-    #   } else {
-    #     str_sensor <- paste0("AND idsensore in(",paste0(sapply(X = Metadata$IDSensor, function(x) paste0("'",x,"'")),collapse = ","),")")
-    #   }
-    #
-    #   URL_blocks[[b]] <- data.frame(seq_begin_temp,seq_end_temp) %>%
-    #     dplyr::mutate(link = paste0(URLs[b],"?$where=data between '", seq_begin_temp, "' and '", seq_end_temp,"'", str_sensor)) %>%
-    #     dplyr::select(link)
-    # }
-    # URL_blocks <- dplyr::bind_rows(URL_blocks)
+    ##### Years up to 2021 #####
+    if (any(break_years %notin% c(2022,2023,2024))) {
+      ### Files names (from ARPA database)
+      file_name <- dplyr::case_when(break_years %in% c(2021) ~ paste0("dati_stime_comunali_2021.csv"),
+                                    break_years %in% c(2020) ~ paste0("dati_stime_comunali_2020.csv"),
+                                    break_years %in% c(2019) ~ paste0("dati_stime_comunali_2019.csv"),
+                                    break_years %in% c(2018) ~ paste0("dati_stime_comunali_2018.csv"),
+                                    break_years %in% c(2017) ~ paste0("dati_stime_comunali_2017.csv"),
+                                    break_years %in% 2011:2016 ~ "dati_stime_comunali_2011-2016.csv")
+      URL_blocks <- as.matrix(paste(URLs,file_name))
 
-    ### Files names (from ARPA database)
-    file_name <- dplyr::case_when(break_years %in% c(2022,2023) ~ paste0("Stime_2022.txt"),
-                                  break_years %in% c(2021) ~ paste0("dati_stime_comunali_2021.csv"),
-                                  break_years %in% c(2020) ~ paste0("dati_stime_comunali_2020.csv"),
-                                  break_years %in% c(2019) ~ paste0("dati_stime_comunali_2019.csv"),
-                                  break_years %in% c(2018) ~ paste0("dati_stime_comunali_2018.csv"),
-                                  break_years %in% c(2017) ~ paste0("dati_stime_comunali_2017.csv"),
-                                  break_years %in% 2011:2016 ~ "dati_stime_comunali_2011-2016.csv")
-    URL_blocks <- as.matrix(paste(URLs,file_name))
-
-    ##### Downloading data
-    ### Preparing parallel computation: explicitly open multisession/multicore workers by switching plan
-    if (parallel == TRUE) {
-      future::plan(future::multisession, workers = 12)
-      if (is.null(parworkers)) {
-        parworkers <- future::availableCores()/2
-      }
-      eval(parse(text = paste0("future::plan(future::",parfuturetype,", workers = ",parworkers,")")))
-      if (verbose == TRUE) {
-        message("Start parallel computing: number of parallel workers = ", future::nbrOfWorkers())
-      }
-    }
-
-    ##### Years up to current 2023
-    if (any(break_years %notin% c(2023))) {
+      ### Download
       Aria1 <- do.call(
         rbind,
-        future.apply::future_apply(X = as.matrix(URL_blocks[break_years %notin% c(2023),]), MARGIN = 1, FUN = function(x) {
+        future.apply::future_apply(X = as.matrix(URL_blocks[break_years %notin% c(2022,2023,2024),]), MARGIN = 1, FUN = function(x) {
 
-          ######################################
-          ########## Downloading data ##########
-          ######################################
+          ##### Download
           link_str <- stringr::str_split(string = x, pattern = " ")[[1]][1]
           file_str <- stringr::str_split(string = x, pattern = " ")[[1]][2]
           options(timeout = 10000)
           Aria_temp <- readr::read_csv(archive::archive_read(link_str, file = file_str), col_types = readr::cols())
           options(timeout = 100)
 
-          #####################################
-          ########## Processing data ##########
-          #####################################
+          ##### Processing data
           if (verbose == TRUE) {
             cat("Processing data: started at", as.character(Sys.time()), "\n")
           }
 
           ### Change variable names
-          if (grepl("2022",x)) {
-            # File for 2022 is .txt format with different Date format (ymd) and include also 2023 data
-            Aria_temp <- Aria_temp %>%
-              dplyr::select(IDSensor = .data$IdSensore, Date = .data$Data, Value = .data$Valore,
-                            Operator = .data$idOperatore) %>%
-              dplyr::mutate(Date =lubridate::ymd(.data$Date),
-                            Operator = dplyr::case_when(.data$Operator == 1 ~ "mean",
-                                                        .data$Operator == 3 ~ "max",
-                                                        .data$Operator == 11 ~ "max_8h",
-                                                        .data$Operator == 12 ~ "max_day")) %>%
-              dplyr::filter(.data$Date >= "2022-01-01",.data$Date <= "2022-12-31")
-          } else {
-            Aria_temp <- Aria_temp %>%
-              dplyr::select(IDSensor = .data$IdSensore, Date = .data$Data, Value = .data$Valore,
-                            Operator = .data$idOperatore) %>%
-              dplyr::mutate(Date =lubridate::dmy_hms(.data$Date),
-                            Operator = dplyr::case_when(.data$Operator == 1 ~ "mean",
-                                                        .data$Operator == 3 ~ "max",
-                                                        .data$Operator == 11 ~ "max_8h",
-                                                        .data$Operator == 12 ~ "max_day"))
-          }
+          Aria_temp <- Aria_temp %>%
+            dplyr::select(IDSensor = .data$IdSensore, Date = .data$Data, Value = .data$Valore,
+                          Operator = .data$idOperatore) %>%
+            dplyr::mutate(Date =lubridate::dmy_hms(.data$Date),
+                          Operator = dplyr::case_when(.data$Operator == 1 ~ "mean",
+                                                      .data$Operator == 3 ~ "max",
+                                                      .data$Operator == 11 ~ "max_8h",
+                                                      .data$Operator == 12 ~ "max_day"))
         })
       )
     } else {
@@ -295,49 +232,116 @@ get_ARPA_Lombardia_AQ_municipal_data <-
     invisible(gc())
 
 
-    ##### Current year 2023
-    if (any(break_years == 2023)) {
+    #####  Data from 2022 to current (2024) are provided via Socrata API #####
+    if (any(break_years %in% c(2022,2023,2024))) {
 
-      ######################################
-      ########## Downloading data ##########
-      ######################################
+      ### Filter valid URLs and dates
+      URLs_22on <- URLs[break_years %in% c(2022,2023,2024)]
+      break_years_22on <- break_years[break_years %in% c(2022,2023,2024)]
+      if (lubridate::ymd("2022-01-01") > Date_begin) {
+        Date_begin_22on <- lubridate::ymd("2022-01-01")
+      } else {
+        Date_begin_22on <- Date_begin
+      }
 
-      ## Current month
-      Aria_curr_month <- RSocrata::read.socrata("https://www.dati.lombardia.it/api/odata/v4/ysm5-jwrn",
-                                                app_token = "Fk8hvoitqvADHECh3wEB26XbO")
-      Aria_curr_month <- Aria_curr_month %>%
-        dplyr::select(IDSensor = .data$idsensore, Date = .data$data, Value = .data$valore,
+      ### Building URLs/links in Socrata format using sequences of dates
+      if (length(break_years_22on) == 1) {
+        break_dates <- paste0(break_years_22on,"-12-31 23:00:00")
+      } else {
+        break_dates <- paste0(break_years_22on[-length(break_years_22on)],"-12-31 23:00:00")
+      }
+      dates_seq_end <- c(Date_begin_22on,lubridate::ymd_hms(break_dates),Date_end)
+      dates_seq_end <- unique(dates_seq_end)
+      dates_seq_end <- dates_seq_end[-1]
+      dates_seq_end <- dates_seq_end[dates_seq_end <= Date_end & dates_seq_end >= Date_begin_22on]
+      dates_seq_begin <- c(Date_begin_22on,lubridate::ymd_hms(break_dates) + lubridate::hours(1))
+      dates_seq_begin <- unique(dates_seq_begin)
+      dates_seq_begin <- dates_seq_begin[dates_seq_begin <= Date_end & dates_seq_begin >= Date_begin_22on]
+
+      URL_blocks <- vector(mode = "list", length = length(dates_seq_begin))
+      for (b in 1:length(dates_seq_begin)) {
+        seq_temp <- seq(dates_seq_begin[b],
+                        dates_seq_end[b],
+                        length.out = n_blocks + 1)
+
+        seq_begin_temp <- seq_temp[-length(seq_temp)]
+        seq_begin_temp <- lubridate::round_date(seq_begin_temp, unit = "hour")
+        seq_begin_temp <- stringr::str_replace(string = seq_begin_temp, pattern = " ", replacement = "T")
+
+        seq_end_temp <- c(seq_temp[-c(1,length(seq_temp))] - lubridate::hours(1),seq_temp[length(seq_temp)])
+        seq_end_temp <- lubridate::round_date(seq_end_temp, unit = "hour")
+        seq_end_temp <- stringr::str_replace(string = seq_end_temp, pattern = " ", replacement = "T")
+
+        if (is.null(ID_station)) {
+          str_sensor <- NULL
+        } else {
+          str_sensor <- paste0("AND idsensore in(",paste0(sapply(X = Metadata$IDSensor, function(x) paste0("'",x,"'")),collapse = ","),")")
+        }
+
+        URL_blocks[[b]] <- data.frame(seq_begin_temp,seq_end_temp) %>%
+          dplyr::mutate(link = paste0(URLs_22on[b],"?$where=data between '", seq_begin_temp, "' and '", seq_end_temp,"'", str_sensor)) %>%
+          dplyr::select(.data$link)
+      }
+      URL_blocks <- dplyr::bind_rows(URL_blocks)
+
+      ### Preparing parallel computation: explicitly open multisession/multicore workers by switching plan
+      if (parallel == TRUE) {
+        future::plan(future::multisession, workers = 12)
+        if (is.null(parworkers)) {
+          parworkers <- future::availableCores()/2
+        }
+        eval(parse(text = paste0("future::plan(future::",parfuturetype,", workers = ",parworkers,")")))
+        if (verbose == TRUE) {
+          message("Start parallel computing: number of parallel workers = ", future::nbrOfWorkers())
+        }
+      }
+
+      Aria2 <- do.call(
+        rbind,
+        future.apply::future_apply(X = as.matrix(URL_blocks), MARGIN = 1, FUN = function(x) {
+          RSocrata::read.socrata(url = x, app_token = "Fk8hvoitqvADHECh3wEB26XbO")
+        })
+      )
+
+      ### Preparing parallel computation: explicitly open multisession/multicore workers by switching plan
+      if (parallel == TRUE) {
+        # Explicitly close multisession/multicore workers by switching plan
+        future::plan(future::sequential)
+        if (verbose == TRUE) {
+          message("Stop parallel computing: number of parallel workers = ", future::nbrOfWorkers())
+        }
+      }
+
+      ### Processing data
+      Aria2 <- Aria2 %>%
+        dplyr::select(IDSensor = .data$idsensore,
+                      Date = .data$data,
+                      Value = .data$valore,
                       Operator = .data$idoperatore) %>%
-        dplyr::mutate(Date = lubridate::ymd(.data$Date),
-                      Date = lubridate::dmy_hms(paste(lubridate::day(.data$Date),lubridate::month(.data$Date),
-                                                      lubridate::year(.data$Date), "00", "00", "00", sep="-")),
+        dplyr::mutate(IDSensor = as.numeric(.data$IDSensor),
+                      Value = as.numeric(.data$Value),
+                      Date = lubridate::ymd(.data$Date),
                       Operator = dplyr::case_when(.data$Operator == 1 ~ "mean",
                                                   .data$Operator == 3 ~ "max",
                                                   .data$Operator == 11 ~ "max_8h",
                                                   .data$Operator == 12 ~ "max_day"))
-      link_str <- stringr::str_split(string = URL_blocks[break_years==2023,], pattern = " ")[[1]][1]
-      file_str <- stringr::str_split(string = URL_blocks[break_years==2023,], pattern = " ")[[1]][2]
-      Aria2 <- read_csv(archive::archive_read(link_str, file = file_str), col_types = cols())
-      Aria2 <- Aria2 %>%
-        dplyr::select(IDSensor = .data$IdSensore, Date = .data$Data, Value = .data$Valore,
-                      Operator = .data$idOperatore) %>%
-        dplyr::mutate(Operator = dplyr::case_when(.data$Operator == 1 ~ "mean",
-                                                  .data$Operator == 3 ~ "max",
-                                                  .data$Operator == 11 ~ "max_8h",
-                                                  .data$Operator == 12 ~ "max_day"))
-      ### Append last month observations
-      Aria2 <- dplyr::bind_rows(Aria2,Aria_curr_month)
+
+      ### Ending parallel computation: explicitly close multisession/multicore workers by switching plan
+      if (parallel == TRUE) {
+        future::plan(future::sequential)
+        if (verbose == TRUE) {
+          message("Stop parallel computing: number of parallel workers = ", future::nbrOfWorkers())
+        }
+      }
     } else {
       Aria2 <- NULL
     }
 
-    ### Ending parallel computation: explicitly close multisession/multicore workers by switching plan
-    if (parallel == TRUE) {
-      future::plan(future::sequential)
-      if (verbose == TRUE) {
-        message("Stop parallel computing: number of parallel workers = ", future::nbrOfWorkers())
-      }
-    }
+
+
+    #####################################
+    ########## Processing data ##########
+    #####################################
 
     ### Append datasets
     Aria <- dplyr::bind_rows(Aria1,Aria2)
@@ -347,10 +351,6 @@ get_ARPA_Lombardia_AQ_municipal_data <-
 
     ### Add metadata
     Aria <- dplyr::right_join(Aria,Metadata, by = "IDSensor")
-
-    #####################################
-    ########## Processing data ##########
-    #####################################
 
     ### Cleaning
     if (by_sensor %in% c(1,TRUE)) {
@@ -421,20 +421,17 @@ get_ARPA_Lombardia_AQ_municipal_data <-
                                     Frequency == "weekly" ~ "weeks",
                                     Frequency == "monthly" ~ "months",
                                     Frequency == "yearly" ~ "years")
+
       Aria <- Aria %>%
         dplyr::arrange(.data$Date) %>%
-        dplyr::filter(.data$Date >= lubridate::as_datetime(Date_begin),
-                      .data$Date <= lubridate::as_datetime(Date_end))
-      dt <- seq(min(Aria$Date),max(Aria$Date), by = freq_unit)
-      st <- unique(Aria$IDStation)
-      grid <- data.frame(tidyr::expand_grid(dt,st))
-      st_n <- Aria %>%
-        dplyr::distinct(.data$IDStation,.data$NameStation) %>%
-        dplyr::filter(!is.na(.data$IDStation),!is.na(.data$NameStation))
-      colnames(grid) <- c("Date","IDStation")
-      grid <- dplyr::left_join(grid,st_n,by="IDStation")
-      Aria <- dplyr::left_join(grid,Aria, by=c("Date","IDStation","NameStation"))
-      Aria <- Aria %>%
+        dplyr::filter(.data$Date >= Date_begin,
+                      .data$Date <= Date_end) %>%
+        tidyr::pivot_longer(cols = -c(.data$Date,.data$IDStation,.data$NameStation),
+                            names_to = "Measure", values_to = "Value") %>%
+        tidyr::pivot_wider(names_from = .data$Date, values_from = .data$Value) %>%
+        tidyr::pivot_longer(cols = -c(.data$Measure,.data$IDStation,.data$NameStation),
+                            names_to = "Date", values_to = "Value") %>%
+        tidyr::pivot_wider(names_from = .data$Measure, values_from = .data$Value) %>%
         dplyr::mutate(Date = ymd(.data$Date)) %>%
         dplyr::arrange(.data$IDStation,.data$Date)
 
@@ -442,16 +439,17 @@ get_ARPA_Lombardia_AQ_municipal_data <-
       attr(Aria, "class") <- c("ARPALdf","ARPALdf_AQ_mun","tbl_df","tbl","data.frame")
       attr(Aria, "frequency") <- Frequency
       attr(Aria, "units") <- freq_unit
+
     } else if (by_sensor %in% c(1,TRUE)) {
       Aria <- Aria %>%
         dplyr::arrange(.data$Date) %>%
-        dplyr::filter(.data$Date >= lubridate::as_datetime(Date_begin),
-                      .data$Date <= lubridate::as_datetime(Date_end))
+        dplyr::filter(.data$Date >= Date_begin,
+                      .data$Date <= Date_end)
 
       structure(list(Aria = Aria))
       attr(Aria, "class") <- c("ARPALdf","ARPALdf_AQ","tbl_df","tbl","data.frame")
-      attr(Aria, "frequency") <- "hourly"
-      attr(Aria, "units") <- "hours"
+      attr(Aria, "frequency") <- "daily"
+      attr(Aria, "units") <- "days"
     }
 
     if (verbose == TRUE) {
