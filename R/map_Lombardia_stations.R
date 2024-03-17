@@ -19,13 +19,21 @@
 #'
 #' @examples
 #' \donttest{
-#' ## Download daily concentrations observed at all the stations in 2020.
+#' ## Map network from a dataset of measurements
 #' if (require("RSocrata")) {
-#'     d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Date_begin = "2020-01-01",
-#'             Date_end = "2020-12-31", Frequency = "daily")
+#'   # Download daily concentrations observed at all the stations in 2020.
+#'   d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Date_begin = "2020-01-01",
+#'                                   Date_end = "2020-12-31", Frequency = "daily")
+#'   # Map the stations included in 'd'
+#'   map_Lombardia_stations(data = d, title = "Air quality stations in Lombardy")
 #' }
-#' ## Map the stations included in 'd'
-#' map_Lombardia_stations(data = d, title = "Air quality stations in Lombardy")
+#' ## Map network from a registry dataset
+#' if (require("RSocrata")) {
+#'   # Download registry for all the AQ stations in 2020.
+#'   r <- get_ARPA_Lombardia_AQ_registry()
+#'   # Map the stations included in 'r'
+#'   map_Lombardia_stations(data = r, title = "Air quality stations in Lombardy")
+#' }
 #' }
 #'
 #' @export
@@ -35,8 +43,19 @@ map_Lombardia_stations <-
            prov_line_size = 1, col_points = "blue",
            xlab = "Longitude", ylab = "Latitude") {
 
-    Lombardia <- get_Lombardia_geospatial(NUTS_level = "NUTS3")
+    ##### Check for internet connection
+    if(!curl::has_internet()) {
+      message("Internet connection not available at the moment.\nPlease check your internet connection. If the problem persists, please contact the package maintainer.")
+      return(invisible(NULL))
+    }
 
+    ##### Retrieve shapefile from Eurostat
+    Lombardia <- get_Lombardia_geospatial(NUTS_level = "NUTS3")
+    if (is.null(Lombardia)) {
+      message("The map will not include the ground layer with Lombardy's shapefile. Only points/coordinates will be plot.")
+    }
+
+    ##### Data manipulation
     if(is_ARPALdf_AQ(Data = data) == T) {
       Stats <- get_ARPA_Lombardia_AQ_registry()
     } else if (is_ARPALdf_W(Data = data) == T) {
@@ -48,6 +67,7 @@ map_Lombardia_stations <-
     d <- d %>%
       sf::st_as_sf(coords = c("Longitude", "Latitude"),crs = 4326)
 
+    ##### Mapping
     geo_plot <- Lombardia %>%
       ggplot2::ggplot() +
       ggplot2::geom_sf(linetype = prov_line_type, size = prov_line_size) +

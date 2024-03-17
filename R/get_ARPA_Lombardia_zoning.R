@@ -8,9 +8,9 @@
 #' https://www.arpalombardia.it/temi-ambientali/aria/rete-di-rilevamento/classificazione-zone/ and
 #' https://www.arpalombardia.it/temi-ambientali/aria/mappa-della-zonizzazione/
 #'
-#' @param plot_map Logic value (0 or 1). If plot_map = 1, the ARPA Lombardia zoning is represented
-#' on a map, if plot_mat = 0 only the geometry (polygon shapefile) is stored in the output.
-#' Default is plot_map = 1.
+#' @param plot_map Logic value (FALSE or TRUE). If plot_map = TRUE, the ARPA Lombardia zoning is represented
+#' on a map, if plot_mat = FALSE only the geometry (polygon shapefile) is stored in the output.
+#' Default is plot_map = TRUE.
 #' @param title Title of the plot. Deafult is 'ARPA Lombardia zoning'
 #' @param line_type Linetype for the zones' borders. Default is 1.
 #' @param line_size Size of the line for the zones. Default is 1.
@@ -21,21 +21,35 @@
 #' ARPA Lombardia to classify the regional territory. If plot_map = 1, it also returns a map of the zoning.
 #'
 #' @examples
-#' zones <- get_ARPA_Lombardia_zoning(plot_map = 1)
+#' zones <- get_ARPA_Lombardia_zoning(plot_map = TRUE)
 #'
 #' @export
 
 get_ARPA_Lombardia_zoning <-
-  function(plot_map = 1, title = "ARPA Lombardia zoning", line_type = 1,
+  function(plot_map = TRUE, title = "ARPA Lombardia zoning", line_type = 1,
            line_size = 1, xlab = "Longitude", ylab = "Latitude") {
 
+    ##### Define %notin%
+    '%notin%' <- Negate('%in%')
+
+    ##### Checks if by_sensor setup properly
+    if (plot_map %notin% c(FALSE,TRUE)) {
+      stop("Wrong setup for 'plot_map'. Use 1 or 0 or TRUE or FALSE.",
+           call. = FALSE)
+    }
+
+    ##### Check for internet connection
+    if(!curl::has_internet()) {
+      message("Internet connection not available at the moment.\nPlease check your internet connection. If the problem persists, please contact the package maintainer.")
+      return(invisible(NULL))
+    }
 
     ##### Check online availability for zoning metadata from GitHub
     temp <- tempfile()
-    res <- curl::curl_fetch_disk("https://github.com/PaoloMaranzano/ARPALData/raw/main/ARPA_zoning_shape.zip", temp)
+    res <- suppressWarnings(try(curl::curl_fetch_disk("https://github.com/PaoloMaranzano/ARPALData/raw/main/ARPA_zoning_shape.zip", temp), silent = TRUE))
     if(res$status_code != 200) {
-      stop(paste0("The internet resource for ARPA Lombardia zoninig (from GitHub) is not available at the moment, try later.
-                  If the problem persists, please contact the package maintainer."))
+      message(paste0("The internet resource for ARPA Lombardia zoninig (from GitHub) is not available at the moment. Status code: ",res$status_code,".\nPlease, try later. If the problem persists, please contact the package maintainer."))
+      return(invisible(NULL))
     }
 
     # Dowload shape file for Lombardy municipalities

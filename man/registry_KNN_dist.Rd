@@ -29,10 +29,11 @@ For each element included in reg_X, it identifies the k-nearest neighbors locati
 must be two 'ARPALdf' objects obtained using get_ARPA_Lombardia_xxx_registry'.
 }
 \examples{
-library(tidyverse)
-regAQ <- get_ARPA_Lombardia_AQ_registry()
-regAQ <- regAQ \%>\% filter(Pollutant \%in\% c("PM10","Ammonia"))
-regW <- get_ARPA_Lombardia_W_registry()
-registry_KNN_dist(regAQ,regW,k=2)
+if (require("tidyverse")) {
+    regAQ <- get_ARPA_Lombardia_AQ_registry()
+    regAQ <- regAQ \%>\% filter(Pollutant \%in\% c("PM10","Ammonia"))
+    regW <- get_ARPA_Lombardia_W_registry()
+    registry_KNN_dist(regAQ,regW,k=2)
+}
 
 }

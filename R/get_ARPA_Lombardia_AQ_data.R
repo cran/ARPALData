@@ -72,9 +72,8 @@ get_ARPA_Lombardia_AQ_data <-
 
     ##### Check for internet connection
     if(!curl::has_internet()) {
-      stop("Please check your internet connection.
-           If the problem persists, please contact the package maintainer.",
-           call. = FALSE)
+      message("Internet connection not available at the moment.\nPlease check your internet connection. If the problem persists, please contact the package maintainer.")
+      return(invisible(NULL))
     }
 
     ##### Check if package 'RSocrata' is installed
@@ -169,18 +168,30 @@ get_ARPA_Lombardia_AQ_data <-
     for (yr in 1:length(break_years)) {
       URLs[yr] <- url <- url_dataset_year(Stat_type = "AQ", Year = break_years[yr])
       temp <- tempfile()
-      res <- curl::curl_fetch_disk(url, temp)
+      res <- suppressWarnings(try(curl::curl_fetch_disk(url, temp), silent = TRUE))
       if(res$status_code != 200) {
-        stop(paste0("The internet resource for year ", break_years[yr]," is not available at the moment, try later.
-                  If the problem persists, please contact the package maintainer."))
+        message(paste0("The internet resource for year ", break_years[yr]," is not available at the moment. Status code: ",res$status_code,".\nPlease, try later. If the problem persists, please contact the package maintainer."))
       } else {
         res_check[yr] <- 1
       }
     }
     if (verbose == TRUE) {
       if (sum(res_check) == length(break_years)) {
-        cat("All the online resources are available\n")
+        message("All the online resources are available.\n")
       }
+      if (sum(res_check) > 0 & sum(res_check) < length(break_years)) {
+        message("Part of the required online resources are not available. Please, try with a new request.\n")
+        return(invisible(NULL))
+      }
+      if (sum(res_check) == 0) {
+        message("None of the required online resources are available. Please, try with a new request.\n")
+        return(invisible(NULL))
+      }
+    }
+
+    ### Downloading data
+    if (verbose == TRUE) {
+      cat("Downloading data: started at", as.character(Sys.time()), "\n")
     }
 
     ### Building URLs/links in Socrata format using sequences of dates

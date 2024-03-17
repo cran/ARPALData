@@ -42,13 +42,21 @@ the stations contained in a data frame of class 'ARPALdf'. Data can be either a 
 }
 \examples{
 \donttest{
-## Download daily concentrations observed at all the stations in 2020.
+## Map network from a dataset of measurements
 if (require("RSocrata")) {
-    d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Date_begin = "2020-01-01",
-            Date_end = "2020-12-31", Frequency = "daily")
+  # Download daily concentrations observed at all the stations in 2020.
+  d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Date_begin = "2020-01-01",
+                                  Date_end = "2020-12-31", Frequency = "daily")
+  # Map the stations included in 'd'
+  map_Lombardia_stations(data = d, title = "Air quality stations in Lombardy")
 }
-## Map the stations included in 'd'
-map_Lombardia_stations(data = d, title = "Air quality stations in Lombardy")
+## Map network from a registry dataset
+if (require("RSocrata")) {
+  # Download registry for all the AQ stations in 2020.
+  r <- get_ARPA_Lombardia_AQ_registry()
+  # Map the stations included in 'r'
+  map_Lombardia_stations(data = r, title = "Air quality stations in Lombardy")
+}
 }
 
 }
