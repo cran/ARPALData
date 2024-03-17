@@ -1,3 +1,6 @@
+#' @keywords internal
+#' @noRd
+
 AQ_metadata_reshape <-
   function() {
 
@@ -5,10 +8,10 @@ AQ_metadata_reshape <-
 
     ##### Check online availability for AQ metadata
     temp <- tempfile()
-    res <- curl::curl_fetch_disk("https://www.dati.lombardia.it/resource/ib47-atvt.csv", temp)
+    res <- suppressWarnings(try(curl::curl_fetch_disk("https://www.dati.lombardia.it/resource/ib47-atvt.csv", temp), silent = TRUE))
     if(res$status_code != 200) {
-      stop(paste0("The internet resource for air quality stations metadata is not available at the moment, try later.
-                  If the problem persists, please contact the package maintainer."))
+      message(paste0("The internet resource for air quality stations metadata is not available at the moment. Status code: ",res$status_code,".\nPlease, try later. If the problem persists, please contact the package maintainer."))
+      return(invisible(NULL))
     } else {
       Metadata <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/ib47-atvt.csv")
     }
@@ -19,9 +22,12 @@ AQ_metadata_reshape <-
                     Altitude = .data$quota, Province = .data$provincia, City = .data$comune,
                     DateStart = .data$datastart, DateStop = .data$datastop,
                     Latitude = .data$lat, Longitude = .data$lng) %>%
-      dplyr::mutate(Altitude = readr::parse_number(.data$Altitude, na = c("NA", "NULL")),
-                    DateStart = lubridate::ymd(.data$DateStart),
-                    DateStop = lubridate::ymd(.data$DateStop)) %>%
+      dplyr::mutate(DateStart = lubridate::make_date(year = lubridate::year(.data$DateStart),
+                                                     month = lubridate::month(.data$DateStart),
+                                                     day = lubridate::day(.data$DateStart)),
+                    DateStop = lubridate::make_date(year = lubridate::year(.data$DateStop),
+                                                    month = lubridate::month(.data$DateStop),
+                                                    day = lubridate::day(.data$DateStop))) %>%
       dplyr::select(.data$IDSensor, .data$IDStation, .data$Pollutant, .data$NameStation, .data$Altitude,
                     .data$Province, .data$City, .data$DateStart, .data$DateStop, .data$Latitude, .data$Longitude) %>%
       dplyr::mutate(Pollutant = dplyr::recode(.data$Pollutant,

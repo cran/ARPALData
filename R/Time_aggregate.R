@@ -27,10 +27,10 @@
 #'
 #' @examples
 #' \donttest{
-#' ## Download hourly observed concentrations from all the stations in the network during 2020.
+#' ## Download hourly observed concentrations during 2020 for station 501 (Milano - Via Marche).
 #' if (require("RSocrata")) {
-#'     data <- get_ARPA_Lombardia_AQ_data(ID_station=NULL, Date_begin = "2020-01-01",
-#'                 Date_end = "2020-12-31", Frequency="hourly")
+#'     data <- get_ARPA_Lombardia_AQ_data(ID_station=501, Date_begin = "2020-01-01",
+#'                                        Date_end = "2020-12-31", Frequency="hourly")
 #' }
 #' ## Aggregate all the data to daily frequency
 #' Time_aggregate(Dataset=data,Frequency="daily",Var_vec=NULL,Fns_vec=NULL)

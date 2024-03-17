@@ -5,7 +5,7 @@
 \title{Download ARPA Lombardia zoning geometries}
 \usage{
 get_ARPA_Lombardia_zoning(
-  plot_map = 1,
+  plot_map = TRUE,
   title = "ARPA Lombardia zoning",
   line_type = 1,
   line_size = 1,
@@ -14,9 +14,9 @@ get_ARPA_Lombardia_zoning(
 )
 }
 \arguments{
-\item{plot_map}{Logic value (0 or 1). If plot_map = 1, the ARPA Lombardia zoning is represented
-on a map, if plot_mat = 0 only the geometry (polygon shapefile) is stored in the output.
-Default is plot_map = 1.}
+\item{plot_map}{Logic value (FALSE or TRUE). If plot_map = TRUE, the ARPA Lombardia zoning is represented
+on a map, if plot_mat = FALSE only the geometry (polygon shapefile) is stored in the output.
+Default is plot_map = TRUE.}
 
 \item{title}{Title of the plot. Deafult is 'ARPA Lombardia zoning'}
 
@@ -42,6 +42,6 @@ https://www.arpalombardia.it/temi-ambientali/aria/rete-di-rilevamento/classifica
 https://www.arpalombardia.it/temi-ambientali/aria/mappa-della-zonizzazione/
 }
 \examples{
-zones <- get_ARPA_Lombardia_zoning(plot_map = 1)
+zones <- get_ARPA_Lombardia_zoning(plot_map = TRUE)
 
 }

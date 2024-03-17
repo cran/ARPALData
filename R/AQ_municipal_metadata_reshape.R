@@ -3,13 +3,21 @@ AQ_municipal_metadata_reshape <-
 
     ##### Check online availability for AQ municipal metadata
     temp <- tempfile()
-    res <- curl::curl_fetch_disk("https://www.dati.lombardia.it/resource/5rep-i3mj.csv", temp)
+    res <- suppressWarnings(try(curl::curl_fetch_disk("https://www.dati.lombardia.it/resource/5rep-i3mj.csv", temp), silent = TRUE))
     if(res$status_code != 200) {
-      stop(paste0("The internet resource for air quality of municipalities metadata is not available at the moment, try later.
-                  If the problem persists, please contact the package maintainer."))
+      message(paste0("The internet resource for municipal air quality stations metadata is not available at the moment. Status code: ",res$status_code,".\nPlease, try later. If the problem persists, please contact the package maintainer."))
+      return(invisible(NULL))
     } else {
       Metadata <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/5rep-i3mj.csv")
     }
+
+
+    # if(res$status_code != 200) {
+    #   message(paste0("The internet resource for air quality of municipalities metadata is not available at the moment, try later.\nIf the problem persists, please contact the package maintainer."))
+    #   return(invisible(NULL))
+    # } else {
+    #   Metadata <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/5rep-i3mj.csv")
+    # }
 
     Metadata <- Metadata %>%
       dplyr::rename(IDSensor = .data$idsensore, IDStation = .data$idstazione,

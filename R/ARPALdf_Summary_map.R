@@ -54,6 +54,9 @@ ARPALdf_Summary_map <- function(Data, Title_main, Title_legend = "Variable", Var
     NUTS_level <- "NUTS3"
   }
   Lombardia <- get_Lombardia_geospatial(NUTS_level)
+  if (is.null(Lombardia)) {
+    message("The map will not include the ground layer with Lombardy's shapefile. Only points/coordinates will be plot.")
+  }
 
   if (is_ARPALdf_AQ(Data = Data) == T) {
     Stats <- get_ARPA_Lombardia_AQ_registry()
@@ -80,7 +83,7 @@ ARPALdf_Summary_map <- function(Data, Title_main, Title_legend = "Variable", Var
                                     mid = col_scale[2],
                                     midpoint = val_midpoint,
                                     high = col_scale[3]) +
-      ggplot2::guides(size = FALSE) +
+      ggplot2::guides(size = FALSE, scale = "none") +
       ggplot2::labs(title = Title_main) +
       ggplot2::theme_bw() +
       ggplot2::scale_x_continuous(labels = function(x) paste0(x, '\u00B0', "E")) +
@@ -108,7 +111,7 @@ ARPALdf_Summary_map <- function(Data, Title_main, Title_legend = "Variable", Var
                                     mid = col_scale[2],
                                     midpoint = val_midpoint,
                                     high = col_scale[3]) +
-      ggplot2::guides(size = FALSE) +
+      ggplot2::guides(size = FALSE, scale = "none") +
       ggplot2::labs(title = Title_main) +
       ggplot2::theme_bw() +
       ggplot2::scale_x_continuous(labels = function(x) paste0(x, '\u00B0', "E")) +

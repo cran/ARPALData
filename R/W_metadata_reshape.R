@@ -8,10 +8,10 @@ W_metadata_reshape <-
 
     ##### Check online availability for weather metadata
     temp <- tempfile()
-    res <- curl::curl_fetch_disk("https://www.dati.lombardia.it/resource/nf78-nj6b.csv", temp)
+    res <- suppressWarnings(try(curl::curl_fetch_disk("https://www.dati.lombardia.it/resource/nf78-nj6b.csv", temp), silent = TRUE))
     if(res$status_code != 200) {
-      stop(paste0("The internet resource for weather stations metadata is not available at the moment, try later.
-                  If the problem persists, please contact the package maintainer."))
+      message(paste0("The internet resource for weather stations metadata is not available at the moment. Status code: ",res$status_code,".\nPlease, try later. If the problem persists, please contact the package maintainer."))
+      return(invisible(NULL))
     } else {
       Metadata <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/nf78-nj6b.csv")
     }

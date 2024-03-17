@@ -18,11 +18,12 @@
 #' it contains the name and the IDStation code for the k-nearest neighbors.
 #'
 #' @examples
-#' library(tidyverse)
-#' regAQ <- get_ARPA_Lombardia_AQ_registry()
-#' regAQ <- regAQ %>% filter(Pollutant %in% c("PM10","Ammonia"))
-#' regW <- get_ARPA_Lombardia_W_registry()
-#' registry_KNN_dist(regAQ,regW,k=2)
+#' if (require("tidyverse")) {
+#'     regAQ <- get_ARPA_Lombardia_AQ_registry()
+#'     regAQ <- regAQ %>% filter(Pollutant %in% c("PM10","Ammonia"))
+#'     regW <- get_ARPA_Lombardia_W_registry()
+#'     registry_KNN_dist(regAQ,regW,k=2)
+#' }
 #'
 #' @export
 

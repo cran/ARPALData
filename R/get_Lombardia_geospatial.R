@@ -21,17 +21,23 @@ get_Lombardia_geospatial <- function(NUTS_level = "LAU") {
 
   '%notin%' <- Negate('%in%')
 
-  ### Checks
+  ##### Checks
   if (NUTS_level %notin% c("NUTS2","NUTS3","LAU")) {
     stop("Selected NUTS not available: use one of 'NUTS2', 'NUTS3' and 'LAU'",call. = FALSE)
   }
 
-  ##### Check online availability for zoning metadata from GitHub
+  ##### Check for internet connection
+  if(!curl::has_internet()) {
+    message("Internet connection not available at the moment.\nPlease check your internet connection. If the problem persists, please contact the package maintainer.")
+    return(invisible(NULL))
+  }
+
+  ##### Check online availability for L'ombardy's shapefile from GitHub
   temp <- tempfile()
-  res <- curl::curl_fetch_disk("https://github.com/PaoloMaranzano/ARPALData/raw/main/Shape_Comuni_Lombardia.zip", temp)
+  res <- suppressWarnings(try(curl::curl_fetch_disk("https://github.com/PaoloMaranzano/ARPALData/raw/main/Shape_Comuni_Lombardia.zip", temp), silent = TRUE))
   if(res$status_code != 200) {
-    stop(paste0("The internet resource for shapefile of Lombardy's municipalities (from GitHub) is not available at the moment, try later.
-                  If the problem persists, please contact the package maintainer."))
+    message(paste0("The internet resource for shapefile of Lombardy (from GitHub) is not available at the moment. Status code: ",res$status_code,".\nPlease, try later. If the problem persists, please contact the package maintainer."))
+    return(invisible(NULL))
   }
 
   # Dowload shape file for Lombardy municipalities
