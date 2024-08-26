@@ -13,19 +13,19 @@ W_metadata_reshape <-
       message(paste0("The internet resource for weather stations metadata is not available at the moment. Status code: ",res$status_code,".\nPlease, try later. If the problem persists, please contact the package maintainer."))
       return(invisible(NULL))
     } else {
-      Metadata <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/nf78-nj6b.csv")
+      Metadata <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/nf78-nj6b.json")
     }
 
     Metadata <- Metadata %>%
-      dplyr::rename(IDSensor = .data$idsensore, IDStation = .data$idstazione,
-                    Measure = .data$tipologia, NameStation = .data$nomestazione,
+      dplyr::rename(IDSensor = .data$idsensore, IDStation = .data$idstazione, NameStation = .data$nomestazione,
+                    Measure = .data$tipologia, Unit_meas = .data$unit_dimisura,
                     Altitude = .data$quota, Province = .data$provincia,
                     DateStart = .data$datastart, DateStop = .data$datastop,
                     Latitude = .data$lat, Longitude = .data$lng) %>%
       dplyr::mutate(Altitude = as.numeric(.data$Altitude),
                     DateStart = lubridate::ymd(.data$DateStart),
                     DateStop = lubridate::ymd(.data$DateStop)) %>%
-      dplyr::select(.data$IDSensor, .data$IDStation, .data$Measure, .data$NameStation, .data$Altitude,
+      dplyr::select(.data$IDSensor, .data$IDStation, .data$Measure, .data$Unit_meas, .data$NameStation, .data$Altitude,
                     .data$Province, .data$DateStart, .data$DateStop, .data$Latitude, .data$Longitude) %>%
       dplyr::mutate(Measure = dplyr::recode(.data$Measure,
                                             "Altezza Neve" = "Snow_height",
