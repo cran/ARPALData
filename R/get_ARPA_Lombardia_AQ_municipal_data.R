@@ -42,21 +42,21 @@
 #' ## Download daily concentrations at municipal levels observed in 2020
 #' ## for all the municipalities in Lombardy
 #' if (require("RSocrata")) {
-#'     get_ARPA_Lombardia_AQ_municipal_data(ID_station=NULL,Date_begin = "2020-01-01",
-#'           Date_end = "2020-12-31", Frequency="daily")
+#'     get_ARPA_Lombardia_AQ_municipal_data(ID_station=NULL,Date_begin = "2022-01-01",
+#'           Date_end = "2023-12-31", Frequency="daily")
 #' }
 #' ## Download monthly concentrations of NO2 (average and maximum) observed in 2021
 #' ## at city number 100451.
 #' if (require("RSocrata")) {
-#'     get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451,Date_begin = "2021-01-01",
-#'           Date_end = "2021-12-31", Frequency="monthly",Var_vec=c("NO2_mean","NO2_mean"),
+#'     get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451,Date_begin = "2023-01-01",
+#'           Date_end = "2023-12-31", Frequency="monthly",Var_vec=c("NO2_mean","NO2_mean"),
 #'           Fns_vec=c("mean","max"))
 #' }
 #' ## Download daily concentrations observed in March and April 2022 at city number 100451.
 #' ## Data are reported by sensor.
 #' if (require("RSocrata")) {
-#'     get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451, Date_begin = "2022-03-01",
-#'           Date_end = "2022-04-30", by_sensor = TRUE)
+#'     get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451, Date_begin = "2024-03-01",
+#'           Date_end = "2024-04-30", by_sensor = TRUE)
 #' }
 #' }
 #'
@@ -167,10 +167,10 @@ get_ARPA_Lombardia_AQ_municipal_data <-
     }
     URLs <- res_check <- numeric(length = length(break_years))
     for (yr in 1:length(break_years)) {
-      URLs[yr] <- url <- url_dataset_year(Stat_type = "AQ_municipal_check", Year = break_years[yr])
+      URLs[yr] <- url <- url_AQ_year_dataset(Stat_type = "AQ_municipal_check", Year = break_years[yr])
       temp <- tempfile()
       res <- suppressWarnings(try(curl::curl_fetch_disk(url, temp), silent = TRUE))
-      URLs[yr] <- url <- url_dataset_year(Stat_type = "AQ_municipal", Year = break_years[yr])
+      URLs[yr] <- url <- url_AQ_year_dataset(Stat_type = "AQ_municipal", Year = break_years[yr])
       if(res$status_code != 200) {
         message(paste0("The internet resource for year ", break_years[yr]," is not available at the moment. Status code: ",res$status_code,".\nPlease, try later. If the problem persists, please contact the package maintainer."))
       } else {

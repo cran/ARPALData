@@ -43,8 +43,8 @@
 #' ## August 2021 for all the stations active on the network. For NOx is computed
 #' ## the 25th percentile, while for NO2 is computed the maximum concentration observed.
 #' if (require("RSocrata")) {
-#'     get_ARPA_Lombardia_AQ_data(ID_station=NULL,Date_begin = "2022-05-01",
-#'         Date_end = "2022-08-31", Frequency="monthly",Var_vec=c("NOx","NO2"),
+#'     get_ARPA_Lombardia_AQ_data(ID_station=NULL,Date_begin = "2024-05-01",
+#'         Date_end = "2024-08-01", Frequency="monthly",Var_vec=c("NOx","NO2"),
 #'         Fns_vec=c("q25","max"), parallel = TRUE)
 #' }
 #' ## Download hourly air quality data by sensor for January 2023 at station 501.
@@ -166,7 +166,7 @@ get_ARPA_Lombardia_AQ_data <-
     }
     URLs <- res_check <- numeric(length = length(break_years))
     for (yr in 1:length(break_years)) {
-      URLs[yr] <- url <- url_dataset_year(Stat_type = "AQ", Year = break_years[yr])
+      URLs[yr] <- url <- url_AQ_year_dataset(Stat_type = "AQ", Year = break_years[yr])
       temp <- tempfile()
       res <- suppressWarnings(try(curl::curl_fetch_disk(url, temp), silent = TRUE))
       if(res$status_code != 200) {

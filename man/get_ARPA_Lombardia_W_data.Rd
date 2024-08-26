@@ -79,8 +79,8 @@ if (require("RSocrata")) {
 }
 ## Download all the (daily frequency) weather measurements at station 1974 during 2022
 if (require("RSocrata")) {
-    get_ARPA_Lombardia_W_data(ID_station = 1974, Date_begin = "2022-01-01",
-          Date_end = "2022-12-31", Frequency = "daily")
+    get_ARPA_Lombardia_W_data(ID_station = 1974, Date_begin = "2023-01-01",
+          Date_end = "2023-12-31", Frequency = "daily")
 }
 }
 
