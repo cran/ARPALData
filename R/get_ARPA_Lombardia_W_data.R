@@ -7,7 +7,7 @@
 #' Available meteorological variables are: temperature (Celsius degrees), rainfall (mm), wind speed (m/s),
 #' wind direction (degrees), relative humidity (%), global solar radiation (W/m2), and snow height (cm).
 #' Data are available from 1989 and are updated up to the current date.
-#' For more information about the municipal data visit the section 'Monitoraggio aria' at the webpage:
+#' For more information about the municipal data visit the section 'Idro-Nivo-Meteo' at the webpage:
 #' https://www.dati.lombardia.it/stories/s/auv9-c2sj
 #'
 #' @param ID_station Numeric value. ID of the station to consider. Using ID_station = NULL, all the available
@@ -36,18 +36,17 @@
 #' @param parfuturetype Character vector. If 'parallel = TRUE' (parallel mode active), the user can declare the parallel strategy to be used according to the Futureverse syntax through 'parfuturetype'. By default, the 'multisession' (background R sessions on local machine) is used. In alternative, the 'multicore' (forked R processes on local machine. Not supported by Windows and RStudio) setting can be used.
 #'
 #'
-#'
 #' @return A data frame of class 'data.frame' and 'ARPALdf'. The object is fully compatible with Tidyverse.
 #'
 #' @examples
 #' \donttest{
 #' ## Download all the (10 minutes frequency) weather measurements at station 100
-#' ## between August 2021 and December 2022.
+#' ## between August 2022 and April 2024.
 #' if (require("RSocrata")) {
-#'     get_ARPA_Lombardia_W_data(ID_station = 100, Date_begin = "2021-08-01",
-#'           Date_end = "2022-12-31", Frequency = "10mins")
+#'     get_ARPA_Lombardia_W_data(ID_station = 100, Date_begin = "2022-08-01",
+#'           Date_end = "2024-04-30", Frequency = "10mins")
 #' }
-#' ## Download all the (daily frequency) weather measurements at station 1974 during 2022
+#' ## Download all the (daily frequency) weather measurements at station 1974 during 2023
 #' if (require("RSocrata")) {
 #'     get_ARPA_Lombardia_W_data(ID_station = 1974, Date_begin = "2023-01-01",
 #'           Date_end = "2023-12-31", Frequency = "daily")
@@ -166,11 +165,23 @@ get_ARPA_Lombardia_W_data <-
     # Attention: this is a correction for issues with adaptive database of ARPA Lombardia
     begin <- Sys.time()
     Today <- Sys.time()
-    Past <- Today - lubridate::days(sum(lubridate::days_in_month(1:(lubridate::month(Today)-1))))
-    Break_date_current <- lubridate::round_date(Past, "month") # - lubridate::minutes(5)
+    Past <- Today - lubridate::dmonths(7) - lubridate::ddays(1)
+    Past <- lubridate::round_date(Past, "day")
+    # Checked on 01/05/2025: weather data from 02/02/2024 to Today - 7 months are unavailable
+    Break_date_current <- min(c(Past,"2024-02-01"))
     if (Date_end >= Break_date_current & Date_begin <= Break_date_current) {
       Meteo1 <- W_download_past(Metadata,Date_begin,Break_date_current)
-      Meteo2 <- W_download_current(Metadata,Break_date_current + lubridate::minutes(5),Date_end)
+      Meteo2 <- try(
+        expr = {
+          W_download_current(Metadata,Break_date_current + lubridate::minutes(5),Date_end)
+        },silent = TRUE
+      )
+      if (is.element("try-error", attr(Meteo2,"class"))) {
+        Meteo2 <- NULL
+      }
+      if (verbose==T) {
+        cat(paste0("Attention: it is possible that part of the weather data from 2024-02-01 to ", Date_end," were made unavailable from ARPA Lombardia or the regional administration: please, contact the package maintainer for details or report a bug, thank you.\n"))
+      }
       Meteo <- bind_rows(Meteo1,Meteo2)
     }
     if (Date_end < Break_date_current & Date_begin < Break_date_current) {
