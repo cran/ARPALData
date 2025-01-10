@@ -102,7 +102,7 @@ W_download_current <- function(Metadata,Date_begin,Date_end,verbose = TRUE,
         dplyr::pull(.data$IDSensor)
     }
 
-    url_combs$str_sensor[i] <- paste0("AND idsensore in(",paste0(sapply(X = IDSensor_link, function(x) paste0("'",x,"'")),collapse = ","),")")
+    url_combs$str_sensor[i] <- paste0(" AND idsensore in(",paste0(sapply(X = IDSensor_link, function(x) paste0("'",x,"'")),collapse = ","),")")
 
     dates_blocks <- vector(mode = "list", length = length(dates_seq_begin))
     for (b in 1:length(dates_seq_begin)) {

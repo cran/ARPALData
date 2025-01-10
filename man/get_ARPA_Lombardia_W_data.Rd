@@ -63,7 +63,7 @@ ARPA Lombardia ground detection system for Lombardy region in Northern Italy.
 Available meteorological variables are: temperature (Celsius degrees), rainfall (mm), wind speed (m/s),
 wind direction (degrees), relative humidity (%), global solar radiation (W/m2), and snow height (cm).
 Data are available from 1989 and are updated up to the current date.
-For more information about the municipal data visit the section 'Monitoraggio aria' at the webpage:
+For more information about the municipal data visit the section 'Idro-Nivo-Meteo' at the webpage:
 https://www.dati.lombardia.it/stories/s/auv9-c2sj
 }
 \details{
@@ -72,12 +72,12 @@ More detailed description.
 \examples{
 \donttest{
 ## Download all the (10 minutes frequency) weather measurements at station 100
-## between August 2021 and December 2022.
+## between August 2022 and April 2024.
 if (require("RSocrata")) {
-    get_ARPA_Lombardia_W_data(ID_station = 100, Date_begin = "2021-08-01",
-          Date_end = "2022-12-31", Frequency = "10mins")
+    get_ARPA_Lombardia_W_data(ID_station = 100, Date_begin = "2022-08-01",
+          Date_end = "2024-04-30", Frequency = "10mins")
 }
-## Download all the (daily frequency) weather measurements at station 1974 during 2022
+## Download all the (daily frequency) weather measurements at station 1974 during 2023
 if (require("RSocrata")) {
     get_ARPA_Lombardia_W_data(ID_station = 1974, Date_begin = "2023-01-01",
           Date_end = "2023-12-31", Frequency = "daily")
