@@ -1,8 +1,8 @@
-#' Identifies the K-nearest-neighbors (stations) to all the monitoring sites included in a given ARPALdf
+#' Identifies the K-nearest neighbors (stations) to all the monitoring sites included in a given ARPALdf
 #' registry data.frame. The neighbors are identified computing the Euclidean distance among the sites'
 #' coordinates.
 #'
-#' @description For each element included in reg_X, it identifies the k-nearest neighbors locations
+#' @description For each element included in reg_X, it identifies the k-nearest neighboring locations
 #' (among those included in reg_Y) according to an Euclidean distance metric. reg_X and reg_Y
 #' must be two 'ARPALdf' objects obtained using get_ARPA_Lombardia_xxx_registry'.
 #'
@@ -29,7 +29,7 @@
 
 registry_KNN_dist <- function(reg_X,reg_Y,k=1){
 
-  # For each element included in reg_X, it dentifies the k-nearest neighbours (among those included in reg_Y)
+  # For each element included in reg_X, it identifies the k-nearest neighbors (among those included in reg_Y)
   # according to an Euclidean distance metric
 
   reg_X <- reg_X %>%

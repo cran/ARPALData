@@ -7,7 +7,7 @@
 #' Available meteorological variables are: temperature (Celsius degrees), rainfall (mm), wind speed (m/s),
 #' wind direction (degrees), relative humidity (%), global solar radiation (W/m2), and snow height (cm).
 #' Data are available from 1989 and are updated up to the current date.
-#' For more information about the municipal data visit the section 'Idro-Nivo-Meteo' at the webpage:
+#' For more information, visit the section 'Idro-Nivo-Meteo' at the website:
 #' https://www.dati.lombardia.it/stories/s/auv9-c2sj
 #'
 #' @param ID_station Numeric value. ID of the station to consider. Using ID_station = NULL, all the available
@@ -23,14 +23,14 @@
 #' vc (variability coefficient), skew (skewness) and kurt (kurtosis). Attention: for Wind Speed and
 #' Wind Speed Gust only mean, min and max are available; for Wind Direction and Wind Direction Gust
 #' only mean is available.
-#' @param by_sensor Logic value (TRUE or FALSE). If 'by_sensor = TRUE', the function returns the observed concentrations
+#' @param by_sensor Logical value (TRUE or FALSE). If 'by_sensor = TRUE', the function returns the observed concentrations
 #' by sensor code, while if 'by_sensor = FALSE' (default) it returns the observed concentrations by station.
-#' @param verbose Logic value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
+#' @param verbose Logical value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
 #' prints on the screen some messages describing the progress of the tasks. If 'verbose = FALSE' any message about
 #' the progression is suppressed.
-#' @param parallel Logic value (TRUE or FALSE). If 'parallel = FALSE' (default), data downloading is performed using a sequential/serial approach and additional parameters 'parworkers' and 'parfuturetype' are ignored.
+#' @param parallel Logical value (TRUE or FALSE). If 'parallel = FALSE' (default), data downloading is performed using a sequential/serial approach and additional parameters 'parworkers' and 'parfuturetype' are ignored.
 #' When 'parallel = TRUE', data downloading is performed using parallel computing through the Futureverse setting.
-#' More detailed information about parallel computing in the Futureverse can be found at the following webpages:
+#' More detailed information about parallel computing in the Futureverse is available at the following websites:
 #' https://future.futureverse.org/ and https://cran.r-project.org/web/packages/future.apply/vignettes/future.apply-1-overview.html
 #' @param parworkers Numeric integer value. If 'parallel = TRUE' (parallel mode active), the user can declare the number of parallel workers to be activated using 'parworkers = integer number'. By default ('parworkers = NULL'), the number of active workers is half of the available local cores.
 #' @param parfuturetype Character vector. If 'parallel = TRUE' (parallel mode active), the user can declare the parallel strategy to be used according to the Futureverse syntax through 'parfuturetype'. By default, the 'multisession' (background R sessions on local machine) is used. In alternative, the 'multicore' (forked R processes on local machine. Not supported by Windows and RStudio) setting can be used.
@@ -42,15 +42,11 @@
 #' \donttest{
 #' ## Download all the (10 minutes frequency) weather measurements at station 100
 #' ## between August 2022 and April 2024.
-#' if (require("RSocrata")) {
-#'     get_ARPA_Lombardia_W_data(ID_station = 100, Date_begin = "2022-08-01",
-#'           Date_end = "2024-04-30", Frequency = "10mins")
-#' }
-#' ## Download all the (daily frequency) weather measurements at station 1974 during 2023
-#' if (require("RSocrata")) {
-#'     get_ARPA_Lombardia_W_data(ID_station = 1974, Date_begin = "2023-01-01",
-#'           Date_end = "2023-12-31", Frequency = "daily")
-#' }
+#' get_ARPA_Lombardia_W_data(ID_station = 100, Date_begin = "2022-08-01",
+#'                           Date_end = "2024-04-30", Frequency = "10mins")
+#' ## Download all the (daily frequency) weather measurements at station 1974 during 2025 and 2026
+#' get_ARPA_Lombardia_W_data(ID_station = 1974, Date_begin = "2025-01-01",
+#'                           Date_end = "2026-12-31", Frequency = "daily")
 #' }
 #'
 #' @export
@@ -75,10 +71,12 @@ get_ARPA_Lombardia_W_data <-
       return(invisible(NULL))
     }
 
-    ##### Check if package 'RSocrata' is installed
-    # See: https://r-pkgs.org/dependencies-in-practice.html#sec-dependencies-in-suggests-r-code
-    rlang::check_installed("RSocrata",
-                           reason = "Package \"RSocrata\" must be installed to download data from ARPA Lombardia Open Database.")
+    ##### Check if packages for JSON/SODA download are installed
+    ### Modified on 2026-06-15: replace the socratadata dependency check with httr2/jsonlite checks.
+    rlang::check_installed("httr2",
+                           reason = "Package \"httr2\" must be installed to download data from ARPA Lombardia Open Database.")
+    rlang::check_installed("jsonlite",
+                           reason = "Package \"jsonlite\" must be installed to parse JSON data from ARPA Lombardia Open Database.")
 
     ##### Check if Futureverse is installed
     rlang::check_installed("future",
@@ -88,10 +86,6 @@ get_ARPA_Lombardia_W_data <-
 
     ##### Define %notin%
     '%notin%' <- Negate('%in%')
-
-    ##### Check if package 'RSocrata' is installed
-    # See: https://r-pkgs.org/dependencies-in-practice.html#sec-dependencies-in-suggests-r-code
-    rlang::check_installed("RSocrata", reason = "Package \"RSocrata\" must be installed to download data from ARPA Lombardia Open Database.")
 
     ##### Checks if by_sensor setup properly
     if (by_sensor %notin% c(0,1,FALSE,TRUE)) {
@@ -167,8 +161,11 @@ get_ARPA_Lombardia_W_data <-
     Today <- Sys.time()
     Past <- Today - lubridate::dmonths(7) - lubridate::ddays(1)
     Past <- lubridate::round_date(Past, "day")
-    # Checked on 01/05/2025: weather data from 02/02/2024 to Today - 7 months are unavailable
-    Break_date_current <- min(c(Past,"2024-02-01"))
+    ### Modified on 2026-06-15: according to the Open Data Lombardia Idro-Nivo-Meteo page,
+    ### the current tabular dataset contains the last seven months of weather data.
+    ### Earlier requests are therefore routed to the historical parameter-specific datasets,
+    ### while only the last-seven-month window is routed to the current unified dataset.
+    Break_date_current <- Past
     if (Date_end >= Break_date_current & Date_begin <= Break_date_current) {
       Meteo1 <- W_download_past(Metadata,Date_begin,Break_date_current)
       Meteo2 <- try(
@@ -179,9 +176,12 @@ get_ARPA_Lombardia_W_data <-
       if (is.element("try-error", attr(Meteo2,"class"))) {
         Meteo2 <- NULL
       }
-      if (verbose==T) {
-        cat(paste0("Attention: it is possible that part of the weather data from 2024-02-01 to ", Date_end," were made unavailable from ARPA Lombardia or the regional administration: please, contact the package maintainer for details or report a bug, thank you.\n"))
-      }
+      ### Modified on 2026-06-15: removed the obsolete warning about the temporary
+      ### unavailability of weather data after 2024-02-01. The download logic now
+      ### follows the Open Data Lombardia Idro-Nivo-Meteo structure: historical
+      ### parameter-specific datasets are used before the current seven-month
+      ### tabular dataset window, while recent data are queried from the current
+      ### unified endpoint.
       Meteo <- bind_rows(Meteo1,Meteo2)
     }
     if (Date_end < Break_date_current & Date_begin < Break_date_current) {
@@ -261,7 +261,7 @@ get_ARPA_Lombardia_W_data <-
 
     # Checks if all the variables are available for the selected stations
     if (all(dplyr::all_of(vv) %in% names(Meteo)) == F) {
-      stop("One ore more variables are not avaiable for the selected stations! Change the values of 'Var_vec'",
+      stop("One or more variables are not available for the selected stations! Change the values of 'Var_vec'",
            call. = FALSE)
     }
 
@@ -269,7 +269,7 @@ get_ARPA_Lombardia_W_data <-
       ### Aggregating dataset
       if (Frequency != "10mins") {
         if (verbose==T) {
-          cat("Aggregating ARPA Lombardia data: started started at", as.character(Sys.time()), "\n")
+          cat("Aggregating ARPA Lombardia data: started at", as.character(Sys.time()), "\n")
         }
         Meteo <- Meteo %>%
           Time_aggregate(Frequency = Frequency, Var_vec = Var_vec, Fns_vec = Fns_vec, verbose = verbose) %>%
@@ -282,7 +282,7 @@ get_ARPA_Lombardia_W_data <-
 
       ### Regularizing dataset: same number of timestamps for each station and variable
       if (verbose == TRUE) {
-        cat("Regularizing ARPA data: started started at", as.character(Sys.time()), "\n")
+        cat("Regularizing ARPA data: started at", as.character(Sys.time()), "\n")
       }
 
       Meteo <- Meteo %>%
@@ -300,11 +300,11 @@ get_ARPA_Lombardia_W_data <-
 
       if (Frequency %notin% c("10mins","hourly")) {
         Meteo <- Meteo %>%
-          dplyr::mutate(Date = ymd(.data$Date)) %>%
+          dplyr::mutate(Date = lubridate::ymd(.data$Date)) %>%
           dplyr::arrange(.data$IDStation,.data$Date)
       } else {
         Meteo <- Meteo %>%
-          dplyr::mutate(Date = ymd_hms(.data$Date)) %>%
+          dplyr::mutate(Date = lubridate::ymd_hms(.data$Date)) %>%
           dplyr::arrange(.data$IDStation,.data$Date)
       }
 

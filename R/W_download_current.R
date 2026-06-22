@@ -5,6 +5,19 @@ W_download_current <- function(Metadata,Date_begin,Date_end,verbose = TRUE,
                                parallel = FALSE, parworkers = NULL, parfuturetype = "multisession") {
   ##### Splitting strategy for improving download speed
   n_blocks <- 12
+  ### Modified on 2026-06-15: helper returning the raw weather columns
+  ### expected downstream when no current weather rows are available.
+  W_empty_raw <- function() {
+    tibble::tibble(
+      idsensore = character(),
+      data = character(),
+      valore = character(),
+      stato = character(),
+      operatore = character(),
+      idoperatore = character()
+    )
+  }
+
   # Check dates format
   if (is.null(lubridate::guess_formats(x = Date_begin, orders = c("ymd HMS","ymd")))) {
     stop("Wrong format for 'Date_begin'. Use 'YYYY-MM-DD' or 'YYYY-MM-DD hh:mm:ss'", call. = FALSE)
@@ -31,10 +44,17 @@ W_download_current <- function(Metadata,Date_begin,Date_end,verbose = TRUE,
   }
 
   ##### Check for wind gust (same ID codes of wind speed but different link)
-  if (any(unique(Metadata$Measure) == "Wind_speed")) {
-    measures <- c(unique(Metadata$Measure),"Wind_speed_gust")
-  } else {
-    measures <- unique(Metadata$Measure)
+  ### Modified on 2026-06-15: drop empty/NA weather measures before
+  ### building parameter-year URL combinations.
+  measures <- unique(as.character(Metadata$Measure))
+  measures <- measures[!is.na(measures) & nzchar(measures)]
+  if (any(measures == "Wind_speed")) {
+    measures <- unique(c(measures, "Wind_speed_gust"))
+  }
+
+  if (length(measures) == 0 || length(break_years) == 0) {
+    message("No valid ARPA Lombardia current weather parameter-year combination was found.")
+    return(W_empty_raw())
   }
 
   ##### Create combinations of weather parameters and years
@@ -55,16 +75,16 @@ W_download_current <- function(Metadata,Date_begin,Date_end,verbose = TRUE,
     }
   }
   if (verbose == TRUE) {
-    if (sum(res_check) == length(break_years)) {
+    if (sum(res_check) == length(res_check)) {
       message("All the online resources are available.\n")
     }
-    if (sum(res_check) > 0 & sum(res_check) < length(break_years)) {
+    if (sum(res_check) > 0 & sum(res_check) < length(res_check)) {
       message("Part of the required online resources are not available. Please, try with a new request.\n")
-      return(invisible(NULL))
+      return(W_empty_raw())
     }
     if (sum(res_check) == 0) {
       message("None of the required online resources is available. Please, try with a new request.\n")
-      return(invisible(NULL))
+      return(W_empty_raw())
     }
   }
 
@@ -142,16 +162,24 @@ W_download_current <- function(Metadata,Date_begin,Date_end,verbose = TRUE,
   }
 
   ##### Download using Socrata API
-  Meteo <- do.call(
-    rbind,
+  ### Modified on 2026-06-15: replace socratadata::soc_read with the internal JSON/SODA reader.
+  Meteo <- dplyr::bind_rows(
     future.apply::future_apply(X = as.matrix(URL_blocks), MARGIN = 1, FUN = function(x) {
-      RSocrata::read.socrata(url = x, app_token = "Fk8hvoitqvADHECh3wEB26XbO")
+      ARPAL_read_socrata_json(url = as.character(x))
     })
   )
+  ### Modified on 2026-06-15: avoid duplicate operatore columns when the
+  ### current weather endpoint already returns both operatore and idoperatore.
+  if ("idoperatore" %in% names(Meteo)) {
+    Meteo <- Meteo %>%
+      dplyr::mutate(operatore = dplyr::coalesce(as.character(.data$idoperatore),
+                                                as.character(.data$operatore))) %>%
+      dplyr::select(-.data$idoperatore)
+  }
   Meteo <- Meteo %>%
-    dplyr::rename(operatore = .data$idoperatore) %>%
-    dplyr::mutate(operatore = case_when(.data$operatore == 1 ~ "Average",
-                                        .data$operatore == 3 ~ "Max"))
+    dplyr::mutate(operatore = dplyr::case_when(.data$operatore == "1" ~ "Average",
+                                               .data$operatore == "3" ~ "Max",
+                                               TRUE ~ as.character(.data$operatore)))
 
   return(Meteo)
 }

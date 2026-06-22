@@ -8,15 +8,15 @@ AQ_municipal_metadata_reshape <-
       message(paste0("The internet resource for municipal air quality stations metadata is not available at the moment. Status code: ",res$status_code,".\nPlease, try later. If the problem persists, please contact the package maintainer."))
       return(invisible(NULL))
     } else {
-      Metadata <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/5rep-i3mj.csv")
+      ### Modified on 2026-06-15: replace RSocrata::read.socrata with the internal JSON/SODA reader.
+      Metadata <- ARPAL_read_socrata_json(url = "https://www.dati.lombardia.it/resource/5rep-i3mj.json")
     }
-
 
     # if(res$status_code != 200) {
     #   message(paste0("The internet resource for air quality of municipalities metadata is not available at the moment, try later.\nIf the problem persists, please contact the package maintainer."))
     #   return(invisible(NULL))
     # } else {
-    #   Metadata <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/5rep-i3mj.csv")
+    #   ### Modified on 2026-06-15: registry download now uses ARPAL_read_socrata_json().
     # }
 
     Metadata <- Metadata %>%
@@ -24,8 +24,11 @@ AQ_municipal_metadata_reshape <-
                     Pollutant = .data$nometiposensore,
                     Province = .data$provincia, NameStation = .data$comune,
                     DateStart = .data$datastart, DateStop = .data$datastop) %>%
-      dplyr::mutate(DateStart = lubridate::ymd(.data$DateStart),
-                    DateStop = lubridate::ymd(.data$DateStop)) %>%
+      dplyr::mutate(
+        ### Modified on 2026-06-15: parse Socrata JSON date/datetime strings robustly.
+        DateStart = ARPAL_parse_socrata_date(.data$DateStart),
+        DateStop = ARPAL_parse_socrata_date(.data$DateStop)
+      ) %>%
       dplyr::select(.data$IDSensor, .data$IDStation, .data$Pollutant,
                     .data$Province, .data$NameStation, .data$DateStart, .data$DateStop) %>%
       dplyr::mutate(Pollutant = dplyr::recode(.data$Pollutant,

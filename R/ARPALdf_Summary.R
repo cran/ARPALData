@@ -10,15 +10,15 @@
 #' (e.g., Hampel filter and boxplot rule)
 #'
 #' @param Data Dataset of class 'ARPALdf' containing the data to be summarised.
-#' @param by_IDStat Logic value (TRUE or FALSE). Use TRUE (default) to compute summary statistics by Station ID.
-#' @param by_Year Logic value (TRUE or FALSE). Use TRUE (default) to compute summary statistics by year.
-#' @param gap_length Logic value (TRUE or FALSE). Use TRUE (default) to compute summary statistics for the gap length of each variable.
-#' @param correlation Logic value (TRUE or FALSE). Use TRUE (default) to compute linear correlation of available variables.
-#' @param histogram Logic value (TRUE or FALSE). Use TRUE to plot the histogram of each variable. Default is FALSE.
-#' @param density Logic value (TRUE or FALSE). Use TRUE to plot the kernel density plot of each variable. Default is FALSE.
-#' @param outlier Logic value (TRUE or FALSE). Use TRUE to analyse extreme values of each variable
+#' @param by_IDStat Logical value (TRUE or FALSE). Use TRUE (default) to compute summary statistics by Station ID.
+#' @param by_Year Logical value (TRUE or FALSE). Use TRUE (default) to compute summary statistics by year.
+#' @param gap_length Logical value (TRUE or FALSE). Use TRUE (default) to compute summary statistics for the gap length of each variable.
+#' @param correlation Logical value (TRUE or FALSE). Use TRUE (default) to compute linear correlation of available variables.
+#' @param histogram Logical value (TRUE or FALSE). Use TRUE to plot the histogram of each variable. Default is FALSE.
+#' @param density Logical value (TRUE or FALSE). Use TRUE to plot the kernel density plot of each variable. Default is FALSE.
+#' @param outlier Logical value (TRUE or FALSE). Use TRUE to analyze extreme values of each variable
 #' (boxplot and Hampel filter). Default is FALSE.
-#' @param verbose Logic value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
+#' @param verbose Logical value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
 #' prints on the screen some messages describing the progress of the tasks. If 'verbose = FALSE' any message about
 #' the progression is suppressed.
 #'
@@ -29,11 +29,9 @@
 #'
 #' @examples
 #' \donttest{
-#' ## Download daily air quality data from all the stations for year 2020
-#' if (require("RSocrata")) {
-#'   d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Date_begin = "2020-01-01",
-#'             Date_end = "2020-12-31", Frequency = "daily")
-#'  }
+#' ## Download daily air quality data from all the stations for January 2020
+#' d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Date_begin = "2020-01-01",
+#'         Date_end = "2020-01-31", Frequency = "daily")
 #' ## Summarising observed data
 #' sum_stats <- ARPALdf_Summary(Data = d)
 #' }
@@ -75,7 +73,6 @@ ARPALdf_Summary <- function(Data, by_IDStat = TRUE, by_Year = TRUE, gap_length =
   ### Fix IDStation to integer
   Data <- Data %>%
     dplyr::mutate(IDStation = as.integer(.data$IDStation))
-
 
   ### Overall statistics
   NA_count <- Data %>%
@@ -241,11 +238,14 @@ ARPALdf_Summary <- function(Data, by_IDStat = TRUE, by_Year = TRUE, gap_length =
       gl <- Data %>%
         dplyr::select(.data$Date,.data$IDStation,.data$NameStation,var = var) %>%
         dplyr::filter(!is.na(.data$var)) %>%
+        dplyr::arrange(.data$IDStation, .data$NameStation, .data$Date) %>%
         dplyr::group_by(.data$IDStation,.data$NameStation) %>%
-        dplyr::summarise(.groups = "keep",
-                         gap = lubridate::interval(.data$Date,.data$Date[-1])) %>%
+        ### Modified on 2026-06-15: replace a multi-row dplyr::summarise() call with
+        ### group-wise dplyr::mutate() + dplyr::lag(), which is compatible with recent
+        ### dplyr versions and computes consecutive time gaps within each station.
+        dplyr::mutate(gap = lubridate::interval(dplyr::lag(.data$Date), .data$Date)) %>%
         dplyr::mutate(gap = lubridate::time_length(.data$gap,unit = attributes(Data)$units)) %>%
-        dplyr::filter(.data$gap > 0) %>%
+        dplyr::filter(!is.na(.data$gap), .data$gap > 0) %>%
         dplyr::summarise(.groups = "keep",
                          min_gap = min(.data$gap),
                          q25_gap = quantile(.data$gap,probs = 0.25),
@@ -254,7 +254,6 @@ ARPALdf_Summary <- function(Data, by_IDStat = TRUE, by_Year = TRUE, gap_length =
                          q75_gap = quantile(.data$gap,probs = 0.75),
                          max_gap = max(.data$gap),
                          sd_gap_length = round(sd(.data$gap),3),
-                         # Va sistemato per versione CRAN
                          Length1 = sum(.data$gap == 1),
                          Length2 = sum(.data$gap == 2),
                          Length24 = sum(.data$gap == 24)) %>%

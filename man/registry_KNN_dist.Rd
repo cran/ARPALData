@@ -2,7 +2,7 @@
 % Please edit documentation in R/registry_KNN_dist.R
 \name{registry_KNN_dist}
 \alias{registry_KNN_dist}
-\title{Identifies the K-nearest-neighbors (stations) to all the monitoring sites included in a given ARPALdf
+\title{Identifies the K-nearest neighbors (stations) to all the monitoring sites included in a given ARPALdf
 registry data.frame. The neighbors are identified computing the Euclidean distance among the sites'
 coordinates.}
 \usage{
@@ -24,7 +24,7 @@ A data.frame object having the same length of reg_X. For each row (stations in r
 it contains the name and the IDStation code for the k-nearest neighbors.
 }
 \description{
-For each element included in reg_X, it identifies the k-nearest neighbors locations
+For each element included in reg_X, it identifies the k-nearest neighboring locations
 (among those included in reg_Y) according to an Euclidean distance metric. reg_X and reg_Y
 must be two 'ARPALdf' objects obtained using get_ARPA_Lombardia_xxx_registry'.
 }

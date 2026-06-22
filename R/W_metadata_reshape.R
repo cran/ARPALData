@@ -13,7 +13,8 @@ W_metadata_reshape <-
       message(paste0("The internet resource for weather stations metadata is not available at the moment. Status code: ",res$status_code,".\nPlease, try later. If the problem persists, please contact the package maintainer."))
       return(invisible(NULL))
     } else {
-      Metadata <- RSocrata::read.socrata("https://www.dati.lombardia.it/resource/nf78-nj6b.json")
+      ### Modified on 2026-06-15: replace socratadata::soc_read with the internal JSON/SODA reader.
+      Metadata <- ARPAL_read_socrata_json(url = "https://www.dati.lombardia.it/resource/nf78-nj6b.json")
     }
 
     Metadata <- Metadata %>%
@@ -22,9 +23,14 @@ W_metadata_reshape <-
                     Altitude = .data$quota, Province = .data$provincia,
                     DateStart = .data$datastart, DateStop = .data$datastop,
                     Latitude = .data$lat, Longitude = .data$lng) %>%
+      ### Modified on 2026-06-15: parse Socrata JSON datetime strings robustly.
+      ### The JSON endpoint may return values such as "YYYY-MM-DDT00:00:00.000",
+      ### which are not handled reliably by lubridate::ymd().
       dplyr::mutate(Altitude = as.numeric(.data$Altitude),
-                    DateStart = lubridate::ymd(.data$DateStart),
-                    DateStop = lubridate::ymd(.data$DateStop)) %>%
+                    DateStart = as.Date(dplyr::coalesce(lubridate::ymd_hms(.data$DateStart, quiet = TRUE),
+                                                        as.POSIXct(lubridate::ymd(.data$DateStart, quiet = TRUE)))),
+                    DateStop = as.Date(dplyr::coalesce(lubridate::ymd_hms(.data$DateStop, quiet = TRUE),
+                                                       as.POSIXct(lubridate::ymd(.data$DateStop, quiet = TRUE))))) %>%
       dplyr::select(.data$IDSensor, .data$IDStation, .data$Measure, .data$Unit_meas, .data$NameStation, .data$Altitude,
                     .data$Province, .data$DateStart, .data$DateStop, .data$Latitude, .data$Longitude) %>%
       dplyr::mutate(Measure = dplyr::recode(.data$Measure,

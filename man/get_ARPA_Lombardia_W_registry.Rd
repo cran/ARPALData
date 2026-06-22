@@ -15,12 +15,11 @@ and stations belonging to the ARPA Lombardia network. The information reported a
 station, geo-location (coordinates in degrees), altitude (mt), starting date and ending date.
 The column 'NameStation' identifies the name of each station, while 'IDStation' is an ID code (assigned
 from ARPA) uniquely identifying each station.
-For more information about the municipal data visit the section 'Meteo' at the webpages:
+For more information, visit the section 'Meteo' at the websites:
 https://www.dati.lombardia.it/stories/s/auv9-c2sj and
 https://www.dati.lombardia.it/Ambiente/Stazioni-Meteorologiche/nf78-nj6b
 }
 \examples{
 get_ARPA_Lombardia_W_registry()
-
 
 }
