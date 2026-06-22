@@ -19,22 +19,22 @@ ARPALdf_Summary(
 \arguments{
 \item{Data}{Dataset of class 'ARPALdf' containing the data to be summarised.}
 
-\item{by_IDStat}{Logic value (TRUE or FALSE). Use TRUE (default) to compute summary statistics by Station ID.}
+\item{by_IDStat}{Logical value (TRUE or FALSE). Use TRUE (default) to compute summary statistics by Station ID.}
 
-\item{by_Year}{Logic value (TRUE or FALSE). Use TRUE (default) to compute summary statistics by year.}
+\item{by_Year}{Logical value (TRUE or FALSE). Use TRUE (default) to compute summary statistics by year.}
 
-\item{gap_length}{Logic value (TRUE or FALSE). Use TRUE (default) to compute summary statistics for the gap length of each variable.}
+\item{gap_length}{Logical value (TRUE or FALSE). Use TRUE (default) to compute summary statistics for the gap length of each variable.}
 
-\item{correlation}{Logic value (TRUE or FALSE). Use TRUE (default) to compute linear correlation of available variables.}
+\item{correlation}{Logical value (TRUE or FALSE). Use TRUE (default) to compute linear correlation of available variables.}
 
-\item{histogram}{Logic value (TRUE or FALSE). Use TRUE to plot the histogram of each variable. Default is FALSE.}
+\item{histogram}{Logical value (TRUE or FALSE). Use TRUE to plot the histogram of each variable. Default is FALSE.}
 
-\item{density}{Logic value (TRUE or FALSE). Use TRUE to plot the kernel density plot of each variable. Default is FALSE.}
+\item{density}{Logical value (TRUE or FALSE). Use TRUE to plot the kernel density plot of each variable. Default is FALSE.}
 
-\item{outlier}{Logic value (TRUE or FALSE). Use TRUE to analyse extreme values of each variable
+\item{outlier}{Logical value (TRUE or FALSE). Use TRUE to analyze extreme values of each variable
 (boxplot and Hampel filter). Default is FALSE.}
 
-\item{verbose}{Logic value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
+\item{verbose}{Logical value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
 prints on the screen some messages describing the progress of the tasks. If 'verbose = FALSE' any message about
 the progression is suppressed.}
 }
@@ -56,11 +56,9 @@ missing observations for each variable by station and by year) and outlier detec
 }
 \examples{
 \donttest{
-## Download daily air quality data from all the stations for year 2020
-if (require("RSocrata")) {
-  d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Date_begin = "2020-01-01",
-            Date_end = "2020-12-31", Frequency = "daily")
- }
+## Download daily air quality data from all the stations for January 2020
+d <- get_ARPA_Lombardia_AQ_data(ID_station = NULL, Date_begin = "2020-01-01",
+        Date_end = "2020-01-31", Frequency = "daily")
 ## Summarising observed data
 sum_stats <- ARPALdf_Summary(Data = d)
 }

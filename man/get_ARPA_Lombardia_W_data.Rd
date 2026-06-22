@@ -38,16 +38,16 @@ vc (variability coefficient), skew (skewness) and kurt (kurtosis). Attention: fo
 Wind Speed Gust only mean, min and max are available; for Wind Direction and Wind Direction Gust
 only mean is available.}
 
-\item{by_sensor}{Logic value (TRUE or FALSE). If 'by_sensor = TRUE', the function returns the observed concentrations
+\item{by_sensor}{Logical value (TRUE or FALSE). If 'by_sensor = TRUE', the function returns the observed concentrations
 by sensor code, while if 'by_sensor = FALSE' (default) it returns the observed concentrations by station.}
 
-\item{verbose}{Logic value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
+\item{verbose}{Logical value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
 prints on the screen some messages describing the progress of the tasks. If 'verbose = FALSE' any message about
 the progression is suppressed.}
 
-\item{parallel}{Logic value (TRUE or FALSE). If 'parallel = FALSE' (default), data downloading is performed using a sequential/serial approach and additional parameters 'parworkers' and 'parfuturetype' are ignored.
+\item{parallel}{Logical value (TRUE or FALSE). If 'parallel = FALSE' (default), data downloading is performed using a sequential/serial approach and additional parameters 'parworkers' and 'parfuturetype' are ignored.
 When 'parallel = TRUE', data downloading is performed using parallel computing through the Futureverse setting.
-More detailed information about parallel computing in the Futureverse can be found at the following webpages:
+More detailed information about parallel computing in the Futureverse is available at the following websites:
 https://future.futureverse.org/ and https://cran.r-project.org/web/packages/future.apply/vignettes/future.apply-1-overview.html}
 
 \item{parworkers}{Numeric integer value. If 'parallel = TRUE' (parallel mode active), the user can declare the number of parallel workers to be activated using 'parworkers = integer number'. By default ('parworkers = NULL'), the number of active workers is half of the available local cores.}
@@ -63,7 +63,7 @@ ARPA Lombardia ground detection system for Lombardy region in Northern Italy.
 Available meteorological variables are: temperature (Celsius degrees), rainfall (mm), wind speed (m/s),
 wind direction (degrees), relative humidity (%), global solar radiation (W/m2), and snow height (cm).
 Data are available from 1989 and are updated up to the current date.
-For more information about the municipal data visit the section 'Idro-Nivo-Meteo' at the webpage:
+For more information, visit the section 'Idro-Nivo-Meteo' at the website:
 https://www.dati.lombardia.it/stories/s/auv9-c2sj
 }
 \details{
@@ -73,15 +73,11 @@ More detailed description.
 \donttest{
 ## Download all the (10 minutes frequency) weather measurements at station 100
 ## between August 2022 and April 2024.
-if (require("RSocrata")) {
-    get_ARPA_Lombardia_W_data(ID_station = 100, Date_begin = "2022-08-01",
-          Date_end = "2024-04-30", Frequency = "10mins")
-}
-## Download all the (daily frequency) weather measurements at station 1974 during 2023
-if (require("RSocrata")) {
-    get_ARPA_Lombardia_W_data(ID_station = 1974, Date_begin = "2023-01-01",
-          Date_end = "2023-12-31", Frequency = "daily")
-}
+get_ARPA_Lombardia_W_data(ID_station = 100, Date_begin = "2022-08-01",
+                          Date_end = "2024-04-30", Frequency = "10mins")
+## Download all the (daily frequency) weather measurements at station 1974 during 2025 and 2026
+get_ARPA_Lombardia_W_data(ID_station = 1974, Date_begin = "2025-01-01",
+                          Date_end = "2026-12-31", Frequency = "daily")
 }
 
 }

@@ -21,7 +21,7 @@ are 'mean', 'median', 'min', 'max', 'sum', 'qPP' (PP-th percentile), 'sd', 'var'
 'skew' (skewness) and 'kurt' (kurtosis). Attention: for Wind Speed and Wind Speed Gust only mean, min
 and max are available; for Wind Direction and Wind Direction Gust only mean is available.}
 
-\item{verbose}{Logic value (TRUE or FALSE). Toggle warnings and messages. If 'verbose=T' (default) the function
+\item{verbose}{Logical value (TRUE or FALSE). Toggle warnings and messages. If 'verbose=T' (default) the function
 prints on the screen some messages describing the progress of the tasks. If 'verbose=F' any message about
 the progression is suppressed.}
 }
@@ -40,11 +40,11 @@ by repeating the name of the variable in 'Var_vec' and specifying the functions 
 }
 \examples{
 \donttest{
-## Download hourly observed concentrations during 2020 for station 501 (Milano - Via Marche).
-if (require("RSocrata")) {
-    data <- get_ARPA_Lombardia_AQ_data(ID_station=501, Date_begin = "2020-01-01",
-                                       Date_end = "2020-12-31", Frequency="hourly")
-}
+### Modified on 2026-06-15: reduce Time_aggregate examples to January 2020
+### to keep CRAN checks lightweight while preserving the same workflow.
+## Download hourly observed concentrations during January 2020 for station 501
+data <- get_ARPA_Lombardia_AQ_data(ID_station=501, Date_begin = "2020-01-01",
+                                   Date_end = "2020-01-31", Frequency="hourly")
 ## Aggregate all the data to daily frequency
 Time_aggregate(Dataset=data,Frequency="daily",Var_vec=NULL,Fns_vec=NULL)
 ## Aggregate NO2 to weekly maximum concentrations and NOx to weekly minimum concentrations.

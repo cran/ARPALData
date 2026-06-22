@@ -5,7 +5,7 @@
 #' station, geo-location (coordinates in degrees), altitude (mt), starting date and ending date.
 #' The column 'NameStation' identifies the name of each station, while 'IDStation' is an ID code (assigned
 #' from ARPA) uniquely identifying each station.
-#' For more information about the municipal data visit the section 'Monitoraggio aria' at the webpage:
+#' For more information, visit the section 'Monitoraggio aria' at the website:
 #' https://www.dati.lombardia.it/stories/s/auv9-c2sj
 #'
 #' @return A data frame of class 'data.frame' and 'ARPALdf'. The object is fully compatible with Tidyverse.

@@ -4,8 +4,8 @@
 #' ARPA Lombardia ground detection system for Lombardy region in Northern Italy.
 #' Available airborne pollutant concentrations are: NO2, NOx, PM10, PM2.5, Ozone, Arsenic, Benzene,
 #' Benzo-a-pirene, Ammonia, Sulfur Dioxide, Black Carbon, CO, Nikel, Cadmium and Lead.
-#' Data are available from 1968 and are updated up to the current date (2023).
-#' For more information about the municipal data visit the section 'Monitoraggio aria' at the webpage:
+#' Data are available from 1968 and are updated up to the current date.
+#' For more information, visit the section 'Monitoraggio aria' at the website:
 #' https://www.dati.lombardia.it/stories/s/auv9-c2sj
 #'
 #' @param ID_station Numeric value. ID of the station to consider. Using ID_station = NULL, all the available
@@ -18,14 +18,14 @@
 #' @param Fns_vec Character vector of aggregation function to apply to the selected variables.
 #' Available functions are mean, median, min, max, sum, qPP (PP-th percentile), sd, var,
 #' vc (variability coefficient), skew (skewness) and kurt (kurtosis).
-#' @param by_sensor Logic value (TRUE or FALSE). If 'by_sensor = TRUE', the function returns the observed concentrations
+#' @param by_sensor Logical value (TRUE or FALSE). If 'by_sensor = TRUE', the function returns the observed concentrations
 #' by sensor code, while if 'by_sensor = FALSE' (default) it returns the observed concentrations by station.
-#' @param verbose Logic value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
+#' @param verbose Logical value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
 #' prints on the screen some messages describing the progress of the tasks. If 'verbose = FALSE' any message about
 #' the progression is suppressed.
-#' @param parallel Logic value (TRUE or FALSE). If 'parallel = FALSE' (default), data downloading is performed using a sequential/serial approach and additional parameters 'parworkers' and 'parfuturetype' are ignored.
+#' @param parallel Logical value (TRUE or FALSE). If 'parallel = FALSE' (default), data downloading is performed using a sequential/serial approach and additional parameters 'parworkers' and 'parfuturetype' are ignored.
 #' When 'parallel = TRUE', data downloading is performed using parallel computing through the Futureverse setting.
-#' More detailed information about parallel computing in the Futureverse can be found at the following webpages:
+#' More detailed information about parallel computing in the Futureverse is available at the following websites:
 #' https://future.futureverse.org/ and https://cran.r-project.org/web/packages/future.apply/vignettes/future.apply-1-overview.html
 #' @param parworkers Numeric integer value. If 'parallel = TRUE' (parallel mode active), the user can declare the number of parallel workers to be activated using 'parworkers = integer number'. By default ('parworkers = NULL'), the number of active workers is half of the available local cores.
 #' @param parfuturetype Character vector. If 'parallel = TRUE' (parallel mode active), the user can declare the parallel strategy to be used according to the Futureverse syntax through 'parfuturetype'. By default, the 'multisession' (background R sessions on local machine) is used. In alternative, the 'multicore' (forked R processes on local machine. Not supported by Windows and RStudio) setting can be used.
@@ -34,24 +34,18 @@
 #'
 #' @examples
 #' \donttest{
-#' ## Download hourly air quality data for 2022 at station 501.
-#' if (require("RSocrata")) {
-#'     get_ARPA_Lombardia_AQ_data(ID_station=501, Date_begin = "2022-01-01",
-#'         Date_end = "2022-12-31", Frequency="hourly", parallel = TRUE)
-#' }
+#' ## Download hourly air quality data for 2024 at station 501.
+#' get_ARPA_Lombardia_AQ_data(ID_station=501, Date_begin = "2024-01-01",
+#'                            Date_end = "2024-12-31", Frequency="hourly", parallel = TRUE)
 #' ## Download (parallel) monthly data for NOx and NO2 observed between May and
 #' ## August 2021 for all the stations active on the network. For NOx is computed
 #' ## the 25th percentile, while for NO2 is computed the maximum concentration observed.
-#' if (require("RSocrata")) {
-#'     get_ARPA_Lombardia_AQ_data(ID_station=NULL,Date_begin = "2024-05-01",
-#'         Date_end = "2024-08-01", Frequency="monthly",Var_vec=c("NOx","NO2"),
-#'         Fns_vec=c("q25","max"), parallel = TRUE)
-#' }
-#' ## Download hourly air quality data by sensor for January 2023 at station 501.
-#' if (require("RSocrata")) {
-#'     get_ARPA_Lombardia_AQ_data(ID_station=501,Date_begin = "2023-01-01 00:00:00",
-#'         Date_end = "2023-01-31 23:00:00", by_sensor = TRUE)
-#' }
+#' get_ARPA_Lombardia_AQ_data(ID_station=NULL,Date_begin = "2021-05-01",
+#'                            Date_end = "2021-08-01", Frequency="monthly",Var_vec=c("NOx","NO2"),
+#'                            Fns_vec=c("q25","max"), parallel = TRUE)
+#' ## Download hourly air quality data by sensor from February to June 2026 at station 501.
+#' get_ARPA_Lombardia_AQ_data(ID_station=501,Date_begin = "2026-02-01 00:00:00",
+#'                            Date_end = "2026-06-01 23:00:00", by_sensor = TRUE)
 #' }
 #'
 #' @export
@@ -76,10 +70,12 @@ get_ARPA_Lombardia_AQ_data <-
       return(invisible(NULL))
     }
 
-    ##### Check if package 'RSocrata' is installed
-    # See: https://r-pkgs.org/dependencies-in-practice.html#sec-dependencies-in-suggests-r-code
-    rlang::check_installed("RSocrata",
-                           reason = "Package \"RSocrata\" must be installed to download data from ARPA Lombardia Open Database.")
+    ##### Check if packages for JSON/SODA download are installed
+    ### Modified on 2026-06-15: replace the socratadata dependency check with httr2/jsonlite checks.
+    rlang::check_installed("httr2",
+                           reason = "Package \"httr2\" must be installed to download data from ARPA Lombardia Open Database.")
+    rlang::check_installed("jsonlite",
+                           reason = "Package \"jsonlite\" must be installed to parse JSON data from ARPA Lombardia Open Database.")
 
     ##### Check if Futureverse is installed
     rlang::check_installed("future",
@@ -247,10 +243,10 @@ get_ARPA_Lombardia_AQ_data <-
     }
 
     ### Download using Socrata API
-    Aria <- do.call(
-      rbind,
+    ### Modified on 2026-06-15: replace socratadata::soc_read with the internal JSON/SODA reader.
+    Aria <- dplyr::bind_rows(
       future.apply::future_apply(X = as.matrix(URL_blocks), MARGIN = 1, FUN = function(x) {
-        RSocrata::read.socrata(url = x, app_token = "Fk8hvoitqvADHECh3wEB26XbO")
+        ARPAL_read_socrata_json(url = as.character(x))
       })
     )
 
@@ -278,6 +274,8 @@ get_ARPA_Lombardia_AQ_data <-
                     Date = .data$data,
                     Value = .data$valore) %>%
       dplyr::mutate(IDSensor = as.numeric(.data$IDSensor),
+                    ### Modified on 2026-06-15: parse Socrata JSON datetime strings so AQ by_sensor outputs expose POSIXct dates.
+                    Date = ARPAL_parse_socrata_datetime(.data$Date),
                     Value = as.numeric(.data$Value))
     # clean RAM
     invisible(gc())
@@ -306,8 +304,18 @@ get_ARPA_Lombardia_AQ_data <-
         tidyr::pivot_wider(names_from = .data$Pollutant, values_from = .data$Value,
                            values_fn = function(x) mean(x,na.rm=T)) # Mean (without NA) of a NA vector = NaN
     }
-    Aria[is.na(Aria)] <- NA
-    Aria[is.nan_df(Aria)] <- NA
+
+    ### Modified on 2026-06-15: qualify dplyr functions to avoid R CMD check
+    ### notes on undefined global functions.
+    Aria <- Aria %>%
+      dplyr::mutate(
+        dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
+                      function(x) dplyr::na_if(x = x, y = NaN)),
+        dplyr::across(tidyselect::vars_select_helpers$where(is.numeric),
+                      function(x) dplyr::na_if(x = x, y = NA))
+      )
+    # Aria[is.na(Aria)] <- NA
+    # Aria[is.nan_df(Aria)] <- NA
     # clean RAM
     invisible(gc())
 
@@ -327,7 +335,7 @@ get_ARPA_Lombardia_AQ_data <-
 
     # Checks if all the pollutants are available for the selected stations
     if (all(dplyr::all_of(vv) %in% names(Aria)) == FALSE) {
-      stop("One ore more pollutants are not avaiable for the selected stations! Change the values of 'Var_vec'",
+      stop("One or more pollutants are not available for the selected stations! Change the values of 'Var_vec'",
            call. = FALSE)
     }
 
@@ -335,7 +343,7 @@ get_ARPA_Lombardia_AQ_data <-
       ### Aggregating dataset across time
       if (Frequency != "hourly") {
         if (verbose == TRUE) {
-          cat("Aggregating ARPA Lombardia data: started started at", as.character(Sys.time()), "\n")
+          cat("Aggregating ARPA Lombardia data: started at", as.character(Sys.time()), "\n")
         }
         Aria <- Aria %>%
           Time_aggregate(Frequency = Frequency, Var_vec = Var_vec, Fns_vec = Fns_vec, verbose = verbose) %>%
@@ -348,7 +356,7 @@ get_ARPA_Lombardia_AQ_data <-
 
       ### Regularizing dataset: same number of timestamps for each station and variable
       if (verbose == TRUE) {
-        cat("Regularizing ARPA Lombardia data: started started at", as.character(Sys.time()), "\n")
+        cat("Regularizing ARPA Lombardia data: started at", as.character(Sys.time()), "\n")
       }
       freq_unit <- dplyr::case_when(Frequency == "hourly" ~ "hours",
                                     Frequency == "daily" ~ "days",
@@ -371,11 +379,11 @@ get_ARPA_Lombardia_AQ_data <-
 
       if (Frequency != "hourly") {
         Aria <- Aria %>%
-          dplyr::mutate(Date = ymd(.data$Date)) %>%
+          dplyr::mutate(Date = lubridate::ymd(.data$Date)) %>%
           dplyr::arrange(.data$IDStation,.data$Date)
       } else {
         Aria <- Aria %>%
-          dplyr::mutate(Date = ymd_hms(.data$Date)) %>%
+          dplyr::mutate(Date = lubridate::ymd_hms(.data$Date)) %>%
           dplyr::arrange(.data$IDStation,.data$Date)
       }
 

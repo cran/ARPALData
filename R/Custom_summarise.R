@@ -19,7 +19,7 @@ Custom_summarise <- function(grouped_data,var_vec,fns_vec) {
 
   # Checks if all the selected variables are available for the actual dataset
   if (all(dplyr::all_of(var_vec) %in% names(grouped_data)) == F) {
-    stop("Error: one ore more measures are not avaiable for the selected stations! Change the values of 'Var_vec'",
+    stop("Error: one or more measures are not available for the selected stations! Change the values of 'Var_vec'",
          call. = FALSE)
   }
 

@@ -35,16 +35,16 @@ Default is Frequency = "daily".}
 Available functions are mean, median, min, max, sum, qPP (PP-th percentile), sd, var,
 vc (variability coefficient), skew (skewness) and kurt (kurtosis).}
 
-\item{by_sensor}{Logic value (TRUE or FALSE). If 'by_sensor = TRUE', the function returns the observed concentrations by sensor code, while
+\item{by_sensor}{Logical value (TRUE or FALSE). If 'by_sensor = TRUE', the function returns the observed concentrations by sensor code, while
 if 'by_sensor = FALSE' (default) it returns the observed concentrations by station.}
 
-\item{verbose}{Logic value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
+\item{verbose}{Logical value (TRUE or FALSE). Toggle warnings and messages. If 'verbose = TRUE' (default) the function
 prints on the screen some messages describing the progress of the tasks. If 'verbose = FALSE' any message about
 the progression is suppressed.}
 
-\item{parallel}{Logic value (TRUE or FALSE). If 'parallel = FALSE' (default), data downloading is performed using a sequential/serial approach and additional parameters 'parworkers' and 'parfuturetype' are ignored.
+\item{parallel}{Logical value (TRUE or FALSE). If 'parallel = FALSE' (default), data downloading is performed using a sequential/serial approach and additional parameters 'parworkers' and 'parfuturetype' are ignored.
 When 'parallel = TRUE', data downloading is performed using parallel computing through the Futureverse setting.
-More detailed information about parallel computing in the Futureverse can be found at the following webpages:
+More detailed information about parallel computing in the Futureverse is available at the following websites:
 https://future.futureverse.org/ and https://cran.r-project.org/web/packages/future.apply/vignettes/future.apply-1-overview.html}
 
 \item{parworkers}{Numeric integer value. If 'parallel = TRUE' (parallel mode active), the user can declare the number of parallel workers to be activated using 'parworkers = integer number'. By default ('parworkers = NULL'), the number of active workers is half of the available local cores.}
@@ -63,7 +63,7 @@ variables. For each municipality of Lombardy, ARPA estimates the average (NO2_me
 level of NO2, the daily maximum (Ozone_max_day) and the 8-hours moving window maximum (Ozone_max_8h) of Ozone
 and the average levels of PM10 (PM10_mean) and PM2.5 (PM2.5_mean).
 Data are available from 2011 and are updated up to the current date.
-For more information about the municipal data visit the section 'Stime comunali dell'aria' at the webpage:
+For more information, visit the section 'Stime comunali dell'aria' at the website:
 https://www.dati.lombardia.it/stories/s/auv9-c2sj
 }
 \details{
@@ -71,25 +71,22 @@ More detailed description.
 }
 \examples{
 \donttest{
-## Download daily concentrations at municipal levels observed in 2020
-## for all the municipalities in Lombardy
-if (require("RSocrata")) {
-    get_ARPA_Lombardia_AQ_municipal_data(ID_station=NULL,Date_begin = "2022-01-01",
-          Date_end = "2023-12-31", Frequency="daily")
-}
-## Download monthly concentrations of NO2 (average and maximum) observed in 2021
+### Modified on 2026-06-15: keep examples small to avoid stressing the
+### public Open Data Lombardia API during CRAN checks.
+## Download daily municipal concentrations in January 2025 for city number 100451.
+get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451,Date_begin = "2025-01-01",
+                                     Date_end = "2025-01-07", Frequency="daily")
+## Download monthly concentrations of NO2 (average and maximum) observed in early 2026
 ## at city number 100451.
-if (require("RSocrata")) {
-    get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451,Date_begin = "2023-01-01",
-          Date_end = "2023-12-31", Frequency="monthly",Var_vec=c("NO2_mean","NO2_mean"),
-          Fns_vec=c("mean","max"))
-}
-## Download daily concentrations observed in March and April 2022 at city number 100451.
+get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451,
+                                     Date_begin = "2026-01-01", Date_end = "2026-03-31",
+                                     Frequency="monthly",
+                                     Var_vec=c("NO2_mean","NO2_mean"), Fns_vec=c("mean","max"))
+## Download daily concentrations observed in March 2023 at city number 100451.
 ## Data are reported by sensor.
-if (require("RSocrata")) {
-    get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451, Date_begin = "2024-03-01",
-          Date_end = "2024-04-30", by_sensor = TRUE)
-}
+get_ARPA_Lombardia_AQ_municipal_data(ID_station=100451,
+                                     Date_begin = "2023-03-01", Date_end = "2023-03-07",
+                                     by_sensor = TRUE)
 }
 
 }

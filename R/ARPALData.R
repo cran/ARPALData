@@ -1,6 +1,6 @@
 #' ARPALData Package
 #'
-#' Contains functions for downloading and managing air quality and weather data from Regione Lombardia open database.
+#' Contains functions for downloading and managing air quality and weather data from the Regione Lombardia open database.
 #'     Data are collected by ARPA Lombardia (Lombardia Environmental Protection Agency), Italy.
 #'
 #' @docType package
