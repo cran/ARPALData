@@ -93,16 +93,12 @@ AQ_metadata_reshape <-
     # ARPA_zone = ARPA Lombardia zoning of the region: https://www.arpalombardia.it/Pages/Aria/Rete-di-rilevamento/Zonizzazione.aspx
     # ARPA_stat_type = stations type: https://www.arpalombardia.it/Pages/Aria/Rete-di-rilevamento/Criteri-di-rilevamento/Tipologia-delle-stazioni.aspx?firstlevel=Ieri
 
-    ##### Check online availability for further AQ metadata from GitHub
-    temp <- tempfile()
-    res <- curl::curl_fetch_disk("https://raw.githubusercontent.com/PaoloMaranzano/ARPALData/main/AQ_stations_ARPA_Lombardia.csv", temp)
-    if(res$status_code != 200) {
-      stop(paste0("The internet resource for further air quality stations metadata (from GitHub) is not available at the moment, try later.
-                  If the problem persists, please contact the package maintainer."))
-    } else {
-      Metadata_ARPA_url <- "https://raw.githubusercontent.com/PaoloMaranzano/ARPALData/main/AQ_stations_ARPA_Lombardia.csv"
-    }
-    Metadata_ARPA <- readr::read_csv(Metadata_ARPA_url)
+    ##### Read further AQ metadata bundled with the package
+    ### Modified on 2026-06-26: use the package-bundled AQ stations metadata
+    ### stored in inst/extdata, instead of checking and downloading the same
+    ### file from the ARPALData GitHub repository at runtime.
+    Metadata_ARPA_file <- ARPAL_extdata_path("AQ_stations_ARPA_Lombardia.csv")
+    Metadata_ARPA <- readr::read_csv(Metadata_ARPA_file, show_col_types = FALSE)
     Metadata_ARPA <- Metadata_ARPA %>%
       dplyr::select(.data$IDStation,.data$ARPA_zone,.data$ARPA_stat_type) %>%
       dplyr::distinct()
