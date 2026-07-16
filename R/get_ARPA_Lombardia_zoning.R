@@ -38,25 +38,12 @@ get_ARPA_Lombardia_zoning <-
            call. = FALSE)
     }
 
-    ##### Check for internet connection
-    if(!curl::has_internet()) {
-      message("Internet connection not available at the moment.\nPlease check your internet connection. If the problem persists, please contact the package maintainer.")
-      return(invisible(NULL))
-    }
-
-    ##### Check online availability for zoning metadata from GitHub
-    temp <- tempfile()
-    res <- suppressWarnings(try(curl::curl_fetch_disk("https://github.com/PaoloMaranzano/ARPALData/raw/main/ARPA_zoning_shape.zip", temp), silent = TRUE))
-    if(res$status_code != 200) {
-      message(paste0("The internet resource for ARPA Lombardia zoninig (from GitHub) is not available at the moment. Status code: ",res$status_code,".\nPlease, try later. If the problem persists, please contact the package maintainer."))
-      return(invisible(NULL))
-    }
-
-    # Dowload shape file for Lombardy municipalities
-    temp1 <- tempfile()
+    ##### Read zoning shapefile bundled with the package
+    ### Modified on 2026-06-26: use the package-bundled ARPA zoning shapefile
+    ### stored in inst/extdata, instead of checking and downloading the same
+    ### zip archive from the ARPALData GitHub repository at runtime.
+    temp1 <- ARPAL_extdata_path("ARPA_zoning_shape.zip")
     temp2 <- tempfile()
-    download.file(url = "https://github.com/PaoloMaranzano/ARPALData/raw/main/ARPA_zoning_shape.zip",
-                  destfile = temp1)
     unzip(zipfile = temp1, exdir = temp2)
     your_SHP_file <- list.files(temp2, pattern = ".shp$",full.names=TRUE)
 

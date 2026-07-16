@@ -1,8 +1,9 @@
-701476f379fea2a7b61522576c9ec5e8 *DESCRIPTION
+0a66147fafd3557660a65e2680b876f9 *DESCRIPTION
 6c8c3e6ed8c2c5b41dc4c8abcf70f7f2 *NAMESPACE
-93e1a5aa6cd41c083c6473579c33c8ee *R/AQ_metadata_reshape.R
+649f343b38a786178bab984f40b0e631 *R/AQ_metadata_reshape.R
 e530a74c277f70ace79ddde59a52ac12 *R/AQ_municipal_metadata_reshape.R
 037ce98f348aee1620c3183d2829442f *R/ARPALData.R
+4e32aad9853672156bd3b0fe1d639c02 *R/ARPAL_extdata_path.R
 b443494f7322f5ce56bedcfe32156938 *R/ARPAL_parse_socrata_date.R
 5290d56a2c743b7b8c52f3880b44098d *R/ARPAL_parse_socrata_datetime.R
 d641d06207c5752b500b6ccc1e93d221 *R/ARPAL_read_socrata_json.R
@@ -23,8 +24,8 @@ c8135a093c0f40e066bb2f98ffdb7e88 *R/as_difftime.R
 f3218ec53fa93f4872f6db9c47db1bd0 *R/get_ARPA_Lombardia_AQ_registry.R
 bc0ce2d0903a87c99db5932edc26aa81 *R/get_ARPA_Lombardia_W_data.R
 8b15c66b06b4b1c1423ed2bf8d511d48 *R/get_ARPA_Lombardia_W_registry.R
-80900e734305d28dd10dc894c28f2260 *R/get_ARPA_Lombardia_zoning.R
-3f11cf51ab4f5eb7214fc0a96da0187d *R/get_Lombardia_geospatial.R
+007f18c16ee0f49a089ab6bfaa004bbb *R/get_ARPA_Lombardia_zoning.R
+eadb0a8de963dc50f491f0a0f9e41127 *R/get_Lombardia_geospatial.R
 48bbdacf668d06779eb2623906cb3a1a *R/is.infinite_df.R
 8a246f680c31c1380d7500f289b7ed3c *R/is.nan_df.R
 3de8151538cfc3777973ff94ba34ad0f *R/is.negative.R
@@ -44,7 +45,15 @@ cc95b7b7bd56d778ac0c9d4c16ed6034 *R/map_Lombardia_stations.R
 bc15cbe8384bc58a649fd12e3cdd7a40 *R/registry_KNN_dist.R
 3d9d2cd4dacee25c74f06bdbae529623 *R/url_AQ_year_dataset.R
 307b46cde1068f6815f34daed3561912 *R/url_W_year_par.R
+342db8da41585a160a07e9f8d3678b9e *build/vignette.rds
 720f04c8ccdb78c2864369f988657705 *inst/CITATION
+4b8519d88e1c9315226d42897a209905 *inst/doc/Vignette1.Rnw
+2e45ce8979e90a7965ab7361265c366a *inst/doc/Vignette1.pdf
+643bd94c971904b7752ab05251b54bf0 *inst/doc/Vignette2.Rnw
+8c13f807ffe066442d8016d27d0f4a26 *inst/doc/Vignette2.pdf
+b74ddaf078c6fc6c70746b3122da721e *inst/extdata/AQ_stations_ARPA_Lombardia.csv
+a51e803e0af1f09c3868516aac6ed70e *inst/extdata/ARPA_zoning_shape.zip
+d8fe669d2ce706fc3fbb2fb075c50e90 *inst/extdata/Shape_Comuni_Lombardia.zip
 f860544b592818218d465577ce3daa70 *man/ARPALData.Rd
 42a2b81cb3dd2e7595f54a16f6c348fb *man/ARPALdf_Summary.Rd
 1621fd6d05b7a205bec20e57a0eae943 *man/ARPALdf_Summary_map.Rd
@@ -63,3 +72,7 @@ a20870a2586ba8915a918f8f48e9ea5b *man/is_ARPALdf_AQ_mun.Rd
 85ca46705ea57c1b4ae8c1fa94dae76e *man/is_ARPALdf_W.Rd
 76afce0ae54f65aa41b0f2669341af91 *man/map_Lombardia_stations.Rd
 4c5490685bdf7ae729c912ba2ba0e509 *man/registry_KNN_dist.Rd
+7ab218c7a2cff7d94ee4041fbbc4cddf *vignettes/ARPALData_Vignette1.pdf
+6507832bb1e17c572cdd2cc4060062ab *vignettes/ARPALData_Vignette2.pdf
+4b8519d88e1c9315226d42897a209905 *vignettes/Vignette1.Rnw
+643bd94c971904b7752ab05251b54bf0 *vignettes/Vignette2.Rnw

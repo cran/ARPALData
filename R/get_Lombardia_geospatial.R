@@ -32,19 +32,12 @@ get_Lombardia_geospatial <- function(NUTS_level = "LAU") {
     return(invisible(NULL))
   }
 
-  ##### Check online availability for L'ombardy's shapefile from GitHub
-  temp <- tempfile()
-  res <- suppressWarnings(try(curl::curl_fetch_disk("https://github.com/PaoloMaranzano/ARPALData/raw/main/Shape_Comuni_Lombardia.zip", temp), silent = TRUE))
-  if(res$status_code != 200) {
-    message(paste0("The internet resource for shapefile of Lombardy (from GitHub) is not available at the moment. Status code: ",res$status_code,".\nPlease, try later. If the problem persists, please contact the package maintainer."))
-    return(invisible(NULL))
-  }
-
-  # Dowload shape file for Lombardy municipalities
-  temp1 <- tempfile()
+  ##### Read Lombardy municipality shapefile bundled with the package
+  ### Modified on 2026-06-26: use the package-bundled Lombardy municipality
+  ### shapefile stored in inst/extdata, instead of checking and downloading
+  ### the same zip archive from the ARPALData GitHub repository at runtime.
+  temp1 <- ARPAL_extdata_path("Shape_Comuni_Lombardia.zip")
   temp2 <- tempfile()
-  download.file(url = "https://github.com/PaoloMaranzano/ARPALData/raw/main/Shape_Comuni_Lombardia.zip",
-                destfile = temp1)
   unzip(zipfile = temp1, exdir = temp2)
   your_SHP_file<-list.files(temp2, pattern = ".shp$",full.names=TRUE)
 
